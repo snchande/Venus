@@ -1,0 +1,185 @@
+{
+  "id": "cpp-301",
+  "name": "C++ 301 — Templates, Lambdas & Algorithms",
+  "description": "Generic programming with templates, lambda expressions, STL algorithms, RAII, and smart pointers for modern C++17.",
+  "cells": [
+    {
+      "id": "cpp301-md-0",
+      "type": "MARKDOWN",
+      "source": "# C++ 301 — Templates, Lambdas & Algorithms\n\n**Prerequisites:** [C++ 201](cpp-201) — classes, OOP, STL containers\n\n**What you'll learn:**\n- Function and class templates\n- Lambda expressions and closures\n- STL algorithm library (sort, find, transform, etc.)\n- RAII idiom for resource management\n- `unique_ptr` and `shared_ptr` smart pointers\n- `std::optional` and `std::pair`/`std::tuple`",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-md-1",
+      "type": "MARKDOWN",
+      "source": "## 1. Function Templates\n\nTemplates let you write code that works with **any type**. The compiler generates a concrete function for each type you use.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: basic-function-template\n//@ description: Basic function template\n// Basic function template\ntemplate<typename T>\nT maxOf(T a, T b) { return (a > b) ? a : b; }\n\n// Template with multiple types\ntemplate<typename T, typename U>\nauto add(T a, U b) -> decltype(a + b) { return a + b; }\n\n// Template specialization — custom behaviour for a specific type\ntemplate<>\nstring maxOf<string>(string a, string b) {\n    return (a.length() >= b.length()) ? a : b; // longest string\n}\n\ncout << \"maxOf(3, 5)      = \" << maxOf(3, 5)     << \"\\n\";\ncout << \"maxOf(2.5, 1.8)  = \" << maxOf(2.5, 1.8) << \"\\n\";\ncout << \"maxOf(\\\"hi\\\",\\\"hello\\\")= \" << maxOf(string(\"hi\"), string(\"hello\")) << \"\\n\"; // uses specialization\ncout << \"add(3, 2.5)      = \" << add(3, 2.5)     << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "basic-function-template",
+      "description": "Basic function template"
+    },
+    {
+      "id": "cpp301-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: class-template-generic-container\n//@ description: Class template — generic container\n// Class template — generic container\ntemplate<typename T, size_t N>\nclass CircularBuffer {\n    array<T, N> buf;\n    size_t head = 0, tail = 0, count = 0;\npublic:\n    void push(T val) {\n        if (count == N) head = (head + 1) % N; // overwrite oldest\n        else ++count;\n        buf[tail] = val;\n        tail = (tail + 1) % N;\n    }\n    T pop() {\n        if (count == 0) throw underflow_error(\"Buffer empty\");\n        T val = buf[head];\n        head = (head + 1) % N;\n        --count;\n        return val;\n    }\n    size_t size()  const { return count; }\n    bool   empty() const { return count == 0; }\n    bool   full()  const { return count == N; }\n};\n\nCircularBuffer<int, 4> cbuf;\ncbuf.push(10); cbuf.push(20); cbuf.push(30); cbuf.push(40);\ncout << \"Buffer full: \" << boolalpha << cbuf.full() << \"  size: \" << cbuf.size() << \"\\n\";\ncbuf.push(50); // overwrites 10 (oldest)\ncout << \"After push(50) — pop sequence: \";\nwhile (!cbuf.empty()) cout << cbuf.pop() << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "class-template-generic-container",
+      "description": "Class template — generic container"
+    },
+    {
+      "id": "cpp301-md-2",
+      "type": "MARKDOWN",
+      "source": "## 2. Lambda Expressions\n\nLambdas are anonymous inline functions. They can **capture** variables from the surrounding scope.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: basic-lambda-syntax-capture-params\n//@ description: Basic lambda syntax:  [capture](params) -> return_type { body }\n// Basic lambda syntax:  [capture](params) -> return_type { body }\n\n// No capture, no return type annotation\nauto square = [](int x) { return x * x; };\ncout << \"square(7) = \" << square(7) << \"\\n\";\n\n// Capture by value\nint threshold = 5;\nauto gt5 = [threshold](int x) { return x > threshold; };\ncout << \"gt5(3) = \" << boolalpha << gt5(3) << \"  gt5(8) = \" << gt5(8) << \"\\n\";\n\n// Capture by reference\nint total = 0;\nvector<int> nums = {1,2,3,4,5,6,7,8,9,10};\nfor_each(nums.begin(), nums.end(), [&total](int x){ total += x; });\ncout << \"Sum via lambda capture ref: \" << total << \"\\n\";\n\n// Generic lambda (C++14 auto params)\nauto print = [](const auto& container) {\n    for (const auto& x : container) cout << x << \" \";\n    cout << \"\\n\";\n};\nprint(nums);\n\nvector<string> words = {\"hello\", \"world\", \"lambda\"};\nprint(words);\n\n// Lambda returning lambda (higher-order)\nauto adder = [](int n) { return [n](int x) { return x + n; }; };\nauto add10 = adder(10);\nauto add3  = adder(3);\ncout << \"add10(5) = \" << add10(5) << \"  add3(7) = \" << add3(7) << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "basic-lambda-syntax-capture-params",
+      "description": "Basic lambda syntax:  [capture](params) -> return_type { body }"
+    },
+    {
+      "id": "cpp301-md-3",
+      "type": "MARKDOWN",
+      "source": "## 3. STL Algorithms\n\nThe `<algorithm>` header provides 100+ generic algorithms. They all work on **iterator ranges** `[begin, end)` and accept lambdas as predicates or transformers.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: find-find-if\n//@ description: find / find_if\nvector<int> v = {64, 34, 25, 12, 22, 11, 90, 45, 67, 3};\n\n// find / find_if\nauto it = find(v.begin(), v.end(), 25);\ncout << \"find(25): index \" << distance(v.begin(), it) << \"\\n\";\n\nit = find_if(v.begin(), v.end(), [](int x){ return x > 60; });\ncout << \"first > 60: \" << *it << \"\\n\";\n\n// count / count_if\ncout << \"count(25): \" << count(v.begin(), v.end(), 25) << \"\\n\";\ncout << \"count > 30: \" << count_if(v.begin(), v.end(), [](int x){ return x > 30; }) << \"\\n\";\n\n// all_of / any_of / none_of\ncout << \"all positive: \"  << boolalpha << all_of(v.begin(),  v.end(), [](int x){ return x > 0; }) << \"\\n\";\ncout << \"any > 80: \"      << any_of(v.begin(),   v.end(), [](int x){ return x > 80; }) << \"\\n\";\ncout << \"none negative: \" << none_of(v.begin(), v.end(), [](int x){ return x < 0; }) << \"\\n\";\n\n// sort (in-place)\nsort(v.begin(), v.end());\ncout << \"sorted: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";\n\n// partial_sort — only sort first k elements\nvector<int> w = {64, 34, 25, 12, 22, 11, 90};\npartial_sort(w.begin(), w.begin() + 3, w.end());  // sort smallest 3\ncout << \"partial_sort(3): \";\nfor (int x : w) cout << x << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "find-find-if",
+      "description": "find / find_if"
+    },
+    {
+      "id": "cpp301-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: transform-apply-function-to-each-eleme\n//@ description: transform — apply function to each element\nvector<int> src = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n\n// transform — apply function to each element\nvector<int> squares(src.size());\ntransform(src.begin(), src.end(), squares.begin(), [](int x){ return x*x; });\ncout << \"squares: \";\nfor (int x : squares) cout << x << \" \";\ncout << \"\\n\";\n\n// transform with two ranges (zip-like)\nvector<int> a = {1,2,3,4,5};\nvector<int> b = {5,4,3,2,1};\nvector<int> sums(5);\ntransform(a.begin(), a.end(), b.begin(), sums.begin(), plus<int>());\ncout << \"a+b: \";\nfor (int x : sums) cout << x << \" \";\ncout << \"\\n\";\n\n// copy_if — filter into new vector\nvector<int> evens;\ncopy_if(src.begin(), src.end(), back_inserter(evens), [](int x){ return x%2==0; });\ncout << \"evens: \";\nfor (int x : evens) cout << x << \" \";\ncout << \"\\n\";\n\n// accumulate — reduce\nint total = accumulate(src.begin(), src.end(), 0);\nint product = accumulate(src.begin(), src.end(), 1, multiplies<int>());\ncout << \"sum: \" << total << \"  product: \" << product << \"\\n\";\n\n// remove_if + erase (erase-remove idiom)\nvector<int> data = {1,2,3,4,5,6,7,8,9,10};\ndata.erase(remove_if(data.begin(), data.end(), [](int x){ return x%2!=0; }), data.end());\ncout << \"only evens: \";\nfor (int x : data) cout << x << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "transform-apply-function-to-each-eleme",
+      "description": "transform — apply function to each element"
+    },
+    {
+      "id": "cpp301-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: set-algorithms-require-sorted-input\n//@ description: Set algorithms — require sorted input\n// Set algorithms — require sorted input\nvector<int> s1 = {1,2,3,4,5,6};\nvector<int> s2 = {4,5,6,7,8,9};\nvector<int> result;\n\nset_union(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(result));\ncout << \"union:     \";\nfor (int x : result) cout << x << \" \";\ncout << \"\\n\";\n\nresult.clear();\nset_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(result));\ncout << \"intersect: \";\nfor (int x : result) cout << x << \" \";\ncout << \"\\n\";\n\nresult.clear();\nset_difference(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(result));\ncout << \"s1 - s2:   \";\nfor (int x : result) cout << x << \" \";\ncout << \"\\n\";\n\n// min/max element\nvector<int> v = {3,1,4,1,5,9,2,6};\nauto [minIt, maxIt] = minmax_element(v.begin(), v.end());\ncout << \"min: \" << *minIt << \"  max: \" << *maxIt << \"\\n\";\n\n// nth_element — partial sort so [n] is in the right place\nvector<int> w = {3,1,4,1,5,9,2,6};\nnth_element(w.begin(), w.begin()+3, w.end());  // 4th smallest at index 3\ncout << \"4th smallest (nth_element): \" << w[3] << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "set-algorithms-require-sorted-input",
+      "description": "Set algorithms — require sorted input"
+    },
+    {
+      "id": "cpp301-md-4",
+      "type": "MARKDOWN",
+      "source": "## 4. RAII — Resource Acquisition Is Initialization\n\nThe core C++ resource management idiom: acquire in constructor, release in destructor. This makes code exception-safe automatically.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: raii-file-wrapper\n//@ description: RAII file wrapper\n// RAII file wrapper\nclass FileGuard {\n    string name;\n    bool open;\npublic:\n    FileGuard(const string& filename) : name(filename), open(true) {\n        cout << \"Opened: \" << name << \"\\n\";\n    }\n    ~FileGuard() {\n        if (open) {\n            cout << \"Closed: \" << name << \"\\n\";\n            open = false;\n        }\n    }\n    void write(const string& data) {\n        if (!open) throw runtime_error(\"File not open\");\n        cout << \"  Writing to \" << name << \": \" << data << \"\\n\";\n    }\n    void close() { open = false; cout << \"Manually closed: \" << name << \"\\n\"; }\n};\n\n// RAII timer\nclass ScopeTimer {\n    string label;\n    chrono::steady_clock::time_point start;\npublic:\n    ScopeTimer(string l) : label(l), start(chrono::steady_clock::now()) {}\n    ~ScopeTimer() {\n        auto elapsed = chrono::steady_clock::now() - start;\n        auto us = chrono::duration_cast<chrono::microseconds>(elapsed).count();\n        cout << label << \" took \" << us << \" µs\\n\";\n    }\n};\n\n{\n    ScopeTimer t(\"block\");\n    FileGuard f(\"data.txt\");\n    f.write(\"line 1\");\n    f.write(\"line 2\");\n    // f is destroyed here (end of scope) → file closed automatically\n}\n// Even if an exception is thrown, RAII guarantees cleanup",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "raii-file-wrapper",
+      "description": "RAII file wrapper"
+    },
+    {
+      "id": "cpp301-md-5",
+      "type": "MARKDOWN",
+      "source": "## 5. Smart Pointers\n\nSmart pointers automate memory management. **Prefer smart pointers over raw `new`/`delete`.**\n\n| Pointer | Ownership | Cost |\n|---------|-----------|------|\n| `unique_ptr<T>` | Single owner, non-copyable | Zero overhead |\n| `shared_ptr<T>` | Shared ownership, ref-counted | ~2× atomic |\n| `weak_ptr<T>` | Non-owning reference to `shared_ptr` | Small overhead |",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: unique-ptr-sole-ownership\n//@ description: unique_ptr — sole ownership\n// unique_ptr — sole ownership\nclass Resource {\n    string name;\npublic:\n    Resource(string n) : name(n) { cout << \"Resource(\" << name << \") created\\n\"; }\n    ~Resource()                  { cout << \"Resource(\" << name << \") destroyed\\n\"; }\n    void use() const             { cout << \"Using \" << name << \"\\n\"; }\n    const string& getName() const { return name; }\n};\n\n{\n    auto r1 = make_unique<Resource>(\"alpha\");\n    r1->use();\n\n    // Transfer ownership with move\n    auto r2 = move(r1);\n    if (!r1) cout << \"r1 is now null (ownership transferred)\\n\";\n    r2->use();\n    // r2 is destroyed here → Resource destroyed\n}\n\n// shared_ptr — shared ownership\ncout << \"\\nshared_ptr:\\n\";\nauto s1 = make_shared<Resource>(\"beta\");\n{\n    auto s2 = s1;           // both point to same Resource\n    auto s3 = s1;\n    cout << \"ref count: \" << s1.use_count() << \"\\n\"; // 3\n    s2->use();\n}   // s2 and s3 destroyed, ref count drops to 1\ncout << \"ref count after block: \" << s1.use_count() << \"\\n\"; // 1\n// s1 destroyed here → Resource destroyed",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "unique-ptr-sole-ownership",
+      "description": "unique_ptr — sole ownership"
+    },
+    {
+      "id": "cpp301-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: weak-ptr-break-circular-references\n//@ description: weak_ptr — break circular references\n// weak_ptr — break circular references\nstruct Node {\n    string name;\n    shared_ptr<Node> next;        // strong reference → ownership\n    weak_ptr<Node>   prev;        // weak reference → no ownership\n    Node(string n) : name(n) {}\n    ~Node() { cout << \"Destroyed: \" << name << \"\\n\"; }\n};\n\n{\n    auto a = make_shared<Node>(\"A\");\n    auto b = make_shared<Node>(\"B\");\n    auto c = make_shared<Node>(\"C\");\n\n    a->next = b;  // A → B\n    b->next = c;  // B → C\n    b->prev = a;  // B ← A (weak — no cycle, no memory leak)\n\n    // Access through weak_ptr\n    if (auto locked = b->prev.lock()) {\n        cout << \"B's prev (locked): \" << locked->name << \"\\n\";\n    }\n    cout << \"a use_count: \" << a.use_count() << \"\\n\"; // 1 (weak doesn't count)\n}   // All nodes destroyed in correct order",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "weak-ptr-break-circular-references",
+      "description": "weak_ptr — break circular references"
+    },
+    {
+      "id": "cpp301-md-6",
+      "type": "MARKDOWN",
+      "source": "## 6. std::optional and std::pair/tuple\n\n`optional<T>` is a type-safe nullable value. `pair` and `tuple` bundle multiple values.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: optional-t-safer-than-returning-1-or\n//@ description: optional<T> — safer than returning -1 or null\n// optional<T> — safer than returning -1 or null\noptional<int> parsePositive(const string& s) {\n    try {\n        int v = stoi(s);\n        return (v > 0) ? optional<int>(v) : nullopt;\n    } catch (...) {\n        return nullopt;\n    }\n}\n\nfor (const string& s : {\"42\", \"-5\", \"abc\", \"99\"}) {\n    auto result = parsePositive(s);\n    if (result.has_value())\n        cout << \"\\\"\" << s << \"\\\" → \" << *result << \"\\n\";\n    else\n        cout << \"\\\"\" << s << \"\\\" → not a positive integer\\n\";\n    // value_or provides a default\n    cout << \"  value_or(0) = \" << result.value_or(0) << \"\\n\";\n}\n\n// pair\npair<string, int> p = {\"Alice\", 95};\ncout << \"\\npair: \" << p.first << \" scored \" << p.second << \"\\n\";\n\n// tie for unpacking\nstring name; int score;\ntie(name, score) = p;\ncout << \"unpacked: \" << name << \" \" << score << \"\\n\";\n\n// tuple — bundle any number of values\ntuple<string, int, double> record = {\"Bob\", 42, 3.14};\ncout << \"tuple: \" << get<0>(record) << \" \" << get<1>(record) << \" \" << get<2>(record) << \"\\n\";\n\n// C++17 structured bindings for tuple\nauto [n, age, val] = record;\ncout << \"structured binding: \" << n << \" \" << age << \" \" << val << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "optional-t-safer-than-returning-1-or",
+      "description": "optional<T> — safer than returning -1 or null"
+    },
+    {
+      "id": "cpp301-md-7",
+      "type": "MARKDOWN",
+      "source": "## 7. std::function and Callbacks\n\n`std::function` stores any callable: function pointer, lambda, or functor.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp301-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: std-function-type-erases-any-callable\n//@ description: std::function type-erases any callable\n#include <functional>\n\n// std::function type-erases any callable\nusing IntTransform = function<int(int)>;\n\nvoid applyAndPrint(const string& label, const vector<int>& v, IntTransform fn) {\n    cout << label << \": \";\n    for (int x : v) cout << fn(x) << \" \";\n    cout << \"\\n\";\n}\n\nvector<int> nums = {1,2,3,4,5};\n\n// Lambda\napplyAndPrint(\"square\",  nums, [](int x){ return x*x; });\napplyAndPrint(\"double\",  nums, [](int x){ return x*2; });\napplyAndPrint(\"negate\",  nums, negate<int>());  // built-in functor\n\n// Function pointer\nint triple(int x) { return x * 3; }\napplyAndPrint(\"triple\",  nums, triple);\n\n// Partial application with bind\nauto add5 = bind(plus<int>(), placeholders::_1, 5);\napplyAndPrint(\"+5\",      nums, add5);\n\n// Map of named transforms\nmap<string, IntTransform> transforms = {\n    {\"sq\",  [](int x){ return x*x; }},\n    {\"cube\",[](int x){ return x*x*x; }},\n    {\"+10\", [](int x){ return x+10; }}\n};\n\nfor (const auto& [name, fn] : transforms)\n    applyAndPrint(name, nums, fn);",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "std-function-type-erases-any-callable",
+      "description": "std::function type-erases any callable"
+    },
+    {
+      "id": "cpp301-md-end",
+      "type": "MARKDOWN",
+      "source": "## Summary — C++ 301 Complete!\n\n| Topic | Key Points |\n|-------|------------|\n| Function templates | Write once, compile for any type; specialization for custom behaviour |\n| Class templates | Generic containers; `CircularBuffer<T, N>` pattern |\n| Lambdas | `[capture](params){ body }`; capture by value or reference |\n| STL algorithms | `sort`, `find_if`, `transform`, `copy_if`, `accumulate`, `set_*` |\n| RAII | Acquire in ctor, release in dtor — exception-safe by construction |\n| Smart pointers | `unique_ptr` (exclusive), `shared_ptr` (shared), `weak_ptr` (non-owning) |\n| `optional<T>` | Nullable value without null pointers or sentinel magic numbers |\n| `std::function` | Type-erased callable — store lambdas, function ptrs, functors |\n\n**Next:** [C++ 401](cpp-401) — Move semantics, concurrency, and advanced patterns",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "level": "301",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

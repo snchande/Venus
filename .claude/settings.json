@@ -1,0 +1,28 @@
+{
+  "model": "claude-sonnet-4-6",
+  "permissions": {
+    "allow": [
+      "Bash(mvn:*)",
+      "Bash(java:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(ps:*)",
+      "Bash(touch:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)"
+    ],
+    "deny": []
+  },
+  "env": {
+    "VENUS_HOME": "${PWD}"
+  }
+}

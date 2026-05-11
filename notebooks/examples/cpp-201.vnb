@@ -1,0 +1,195 @@
+{
+  "id": "cpp-201",
+  "name": "C++ 201 — Classes and STL Containers",
+  "description": "Object-oriented programming in C++: classes, constructors, inheritance, polymorphism, and the full STL container toolkit.",
+  "cells": [
+    {
+      "id": "cpp201-md-0",
+      "type": "MARKDOWN",
+      "source": "# C++ 201 — Classes and STL Containers\n\n**Prerequisites:** [C++ 101](cpp-101) — fundamentals, control flow, functions\n\n**What you'll learn:**\n- Classes: constructors, member functions, access control\n- Operator overloading\n- Inheritance and polymorphism\n- STL containers: `vector`, `map`, `set`, `stack`, `queue`\n- Iterators and range-based algorithms",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-md-1",
+      "type": "MARKDOWN",
+      "source": "## 1. Classes — The Basics\n\nA class bundles data (fields) and behaviour (methods). C++ defaults fields to `private` in a `class` (vs `struct` which defaults to `public`).",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: get-balance\n//@ description: Defines the getBalance function\nclass BankAccount {\nprivate:\n    string owner;\n    double balance;\n    int    transactionCount;\n\npublic:\n    // Constructor with member initializer list\n    BankAccount(string name, double initial = 0.0)\n        : owner(name), balance(initial), transactionCount(0) {}\n\n    // Getters (const — don't modify the object)\n    string getName()    const { return owner; }\n    double getBalance() const { return balance; }\n    int    getCount()   const { return transactionCount; }\n\n    // Mutators\n    bool deposit(double amount) {\n        if (amount <= 0) return false;\n        balance += amount;\n        ++transactionCount;\n        return true;\n    }\n\n    bool withdraw(double amount) {\n        if (amount <= 0 || amount > balance) return false;\n        balance -= amount;\n        ++transactionCount;\n        return true;\n    }\n\n    void printStatement() const {\n        cout << fixed << setprecision(2);\n        cout << \"Account: \" << owner << \"\\n\";\n        cout << \"Balance: $\" << balance << \"\\n\";\n        cout << \"Transactions: \" << transactionCount << \"\\n\";\n    }\n};\n\nBankAccount acc(\"Alice\", 1000.0);\nacc.deposit(500.0);\nacc.withdraw(200.0);\nacc.deposit(150.75);\nacc.printStatement();",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "get-balance",
+      "description": "Defines the getBalance function"
+    },
+    {
+      "id": "cpp201-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: operator-overloading\n//@ description: Operator overloading\n// Operator overloading\nclass Vector2D {\npublic:\n    double x, y;\n    Vector2D(double x = 0, double y = 0) : x(x), y(y) {}\n\n    Vector2D operator+(const Vector2D& o) const { return {x+o.x, y+o.y}; }\n    Vector2D operator-(const Vector2D& o) const { return {x-o.x, y-o.y}; }\n    Vector2D operator*(double s)          const { return {x*s, y*s}; }\n    bool     operator==(const Vector2D& o) const { return x==o.x && y==o.y; }\n\n    double   length() const { return sqrt(x*x + y*y); }\n    Vector2D normalize() const {\n        double len = length();\n        return len > 0 ? Vector2D{x/len, y/len} : *this;\n    }\n\n    // Stream output operator\n    friend ostream& operator<<(ostream& os, const Vector2D& v) {\n        return os << \"(\" << fixed << setprecision(2) << v.x << \", \" << v.y << \")\";\n    }\n};\n\nVector2D a(3, 4), b(1, 2);\ncout << \"a       = \" << a << \"\\n\";\ncout << \"b       = \" << b << \"\\n\";\ncout << \"a + b   = \" << (a + b) << \"\\n\";\ncout << \"a - b   = \" << (a - b) << \"\\n\";\ncout << \"a * 2   = \" << (a * 2.0) << \"\\n\";\ncout << \"|a|     = \" << a.length()    << \"\\n\";\ncout << \"norm(a) = \" << a.normalize() << \"\\n\";\ncout << \"a == b  = \" << boolalpha << (a == b) << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "operator-overloading",
+      "description": "Operator overloading"
+    },
+    {
+      "id": "cpp201-md-2",
+      "type": "MARKDOWN",
+      "source": "## 2. Inheritance\n\nC++ supports single and multiple inheritance. Use `virtual` for runtime polymorphism. The destructor of a polymorphic base class **must** be `virtual`.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: speak\n//@ description: Defines the speak function\nclass Animal {\nprotected:\n    string name;\n    int    age;\npublic:\n    Animal(string n, int a) : name(n), age(a) {}\n    virtual ~Animal() = default;\n\n    virtual string sound()   const = 0;    // pure virtual\n    virtual string describe() const {\n        return name + \" (age \" + to_string(age) + \")\";\n    }\n    void speak() const {\n        cout << describe() << \" says: \" << sound() << \"\\n\";\n    }\n    string getName() const { return name; }\n};\n\nclass Dog : public Animal {\n    string breed;\npublic:\n    Dog(string n, int a, string b) : Animal(n, a), breed(b) {}\n    string sound()    const override { return \"Woof!\"; }\n    string describe() const override {\n        return Animal::describe() + \" [\" + breed + \"]\"; // call parent\n    }\n};\n\nclass Cat : public Animal {\n    bool indoor;\npublic:\n    Cat(string n, int a, bool i = true) : Animal(n, a), indoor(i) {}\n    string sound()    const override { return \"Meow!\"; }\n    string describe() const override {\n        return Animal::describe() + (indoor ? \" [indoor]\" : \" [outdoor]\");\n    }\n};\n\n// Polymorphic collection\nvector<unique_ptr<Animal>> animals;\nanimals.push_back(make_unique<Dog>(\"Rex\", 3, \"German Shepherd\"));\nanimals.push_back(make_unique<Cat>(\"Whiskers\", 5, true));\nanimals.push_back(make_unique<Dog>(\"Buddy\", 2, \"Labrador\"));\nanimals.push_back(make_unique<Cat>(\"Shadow\", 7, false));\n\nfor (const auto& a : animals) a->speak();\n\ncout << \"\\nDogs only:\\n\";\nfor (const auto& a : animals)\n    if (dynamic_cast<Dog*>(a.get()))\n        cout << \"  \" << a->getName() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "speak",
+      "description": "Defines the speak function"
+    },
+    {
+      "id": "cpp201-md-3",
+      "type": "MARKDOWN",
+      "source": "## 3. Copy Constructor and Assignment Operator\n\nWhen a class manages a resource (memory, file, socket), you need to define the **Rule of Three/Five**: destructor, copy constructor, copy assignment, move constructor, move assignment.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: int-array\n//@ description: Defines IntArray type\nclass IntArray {\n    int*   data;\n    size_t size_;\npublic:\n    IntArray(size_t n) : data(new int[n]()), size_(n) {\n        cout << \"Constructed size=\" << n << \"\\n\";\n    }\n    ~IntArray() {\n        delete[] data;\n        cout << \"Destroyed\\n\";\n    }\n    // Copy constructor — deep copy\n    IntArray(const IntArray& o) : data(new int[o.size_]()), size_(o.size_) {\n        copy(o.data, o.data + size_, data);\n        cout << \"Copy constructed\\n\";\n    }\n    // Copy assignment — deep copy\n    IntArray& operator=(const IntArray& o) {\n        if (this != &o) {\n            delete[] data;\n            size_ = o.size_;\n            data  = new int[size_];\n            copy(o.data, o.data + size_, data);\n        }\n        cout << \"Copy assigned\\n\";\n        return *this;\n    }\n    int&   operator[](size_t i)       { return data[i]; }\n    int    operator[](size_t i) const { return data[i]; }\n    size_t size() const { return size_; }\n};\n\nIntArray arr1(5);\narr1[0]=10; arr1[1]=20; arr1[2]=30; arr1[3]=40; arr1[4]=50;\n\nIntArray arr2 = arr1;  // copy constructor\narr2[0] = 999;         // modifying arr2 doesn't affect arr1\n\ncout << \"arr1[0] = \" << arr1[0] << \" (unchanged)\\n\";\ncout << \"arr2[0] = \" << arr2[0] << \" (modified copy)\\n\";\ncout << \"Sizes: arr1=\" << arr1.size() << \" arr2=\" << arr2.size() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "int-array",
+      "description": "Defines IntArray type"
+    },
+    {
+      "id": "cpp201-md-4",
+      "type": "MARKDOWN",
+      "source": "## 4. STL Containers\n\nThe Standard Template Library provides generic, efficient containers. Choose based on your access pattern:\n\n| Container | Access | Insert/Remove | Sorted | Unique |\n|-----------|--------|---------------|--------|--------|\n| `vector` | O(1) random | O(1) end / O(n) middle | No | No |\n| `deque` | O(1) random | O(1) front+end | No | No |\n| `list` | O(n) | O(1) anywhere | No | No |\n| `set` | O(log n) | O(log n) | Yes | Yes |\n| `map` | O(log n) key | O(log n) | By key | Keys |\n| `unordered_set` | O(1) avg | O(1) avg | No | Yes |\n| `unordered_map` | O(1) avg key | O(1) avg | No | Keys |\n| `stack` | top only | O(1) push/pop | LIFO | No |\n| `queue` | front/back | O(1) push/pop | FIFO | No |",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: vector-the-workhorse-container\n//@ description: vector — the workhorse container\n// vector — the workhorse container\nvector<int> v;\nfor (int i = 1; i <= 8; i++) v.push_back(i * i);\n\ncout << \"vector: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\nSize: \" << v.size() << \"  Capacity: \" << v.capacity() << \"\\n\";\n\nv.insert(v.begin() + 2, 999);  // insert at position 2\ncout << \"After insert at [2]: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";\n\nv.erase(v.begin() + 2);        // remove position 2\ncout << \"After erase [2]:     \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";\n\n// 2D vector (matrix)\nvector<vector<int>> mat(3, vector<int>(3));\nfor (int r = 0; r < 3; r++)\n    for (int c = 0; c < 3; c++)\n        mat[r][c] = r * 3 + c + 1;\n\ncout << \"\\n3x3 matrix:\\n\";\nfor (const auto& row : mat) {\n    for (int v : row) cout << setw(3) << v;\n    cout << \"\\n\";\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "vector-the-workhorse-container",
+      "description": "vector — the workhorse container"
+    },
+    {
+      "id": "cpp201-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: map-sorted-key-value-store\n//@ description: map — sorted key/value store\n// map — sorted key/value store\nmap<string, double> prices;\nprices[\"apple\"]  = 0.99;\nprices[\"banana\"] = 0.59;\nprices[\"cherry\"] = 3.49;\nprices[\"date\"]   = 5.99;\n\ncout << \"All prices (sorted by key):\\n\";\nfor (const auto& [fruit, price] : prices)  // structured binding (C++17)\n    cout << \"  \" << setw(8) << left << fruit\n         << \" $\" << fixed << setprecision(2) << price << \"\\n\";\n\n// Find\nif (auto it = prices.find(\"cherry\"); it != prices.end())\n    cout << \"Cherry price: $\" << it->second << \"\\n\";\n\n// count — check existence\ncout << \"Has 'grape': \" << boolalpha << (prices.count(\"grape\") > 0) << \"\\n\";\n\n// emplace — more efficient than operator[]\nprices.emplace(\"elderberry\", 8.99);\ncout << \"After add: \" << prices.size() << \" items\\n\";\n\nvenusTable(prices);",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "map-sorted-key-value-store",
+      "description": "map — sorted key/value store"
+    },
+    {
+      "id": "cpp201-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: set-unique-sorted-elements\n//@ description: set — unique sorted elements\n// set — unique sorted elements\nset<int> s = {5, 3, 8, 1, 3, 5, 9, 2, 7}; // duplicates removed\ncout << \"set (unique, sorted): \";\nfor (int x : s) cout << x << \" \";\ncout << \"\\n\";\ncout << \"Size: \" << s.size() << \" (9 input → \" << s.size() << \" unique)\\n\";\n\n// insert and erase\ns.insert(4);\ns.erase(8);\ncout << \"After insert 4, erase 8: \";\nfor (int x : s) cout << x << \" \";\ncout << \"\\n\";\n\n// lower_bound / upper_bound\nauto lb = s.lower_bound(4);  // first element >= 4\nauto ub = s.upper_bound(6);  // first element > 6\ncout << \"lower_bound(4) = \" << *lb << \"\\n\";\ncout << \"upper_bound(6) = \" << *ub << \"\\n\";\n\n// multiset — allows duplicates\nmultiset<string> words = {\"cat\",\"dog\",\"cat\",\"bird\",\"dog\",\"cat\"};\ncout << \"\\nmultiset 'cat' count: \" << words.count(\"cat\") << \"\\n\";\ncout << \"multiset 'dog' count: \" << words.count(\"dog\") << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "set-unique-sorted-elements",
+      "description": "set — unique sorted elements"
+    },
+    {
+      "id": "cpp201-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: stack-lifo-and-queue-fifo\n//@ description: stack (LIFO) and queue (FIFO)\n// stack (LIFO) and queue (FIFO)\nstack<int> stk;\nfor (int i : {1,2,3,4,5}) stk.push(i);\ncout << \"stack (top): \";\nwhile (!stk.empty()) { cout << stk.top() << \" \"; stk.pop(); }\ncout << \"\\n\";\n\nqueue<string> q;\nq.push(\"first\");\nq.push(\"second\");\nq.push(\"third\");\ncout << \"queue (front): \";\nwhile (!q.empty()) { cout << q.front() << \" \"; q.pop(); }\ncout << \"\\n\";\n\n// priority_queue — max-heap by default\npriority_queue<int> pq;\nfor (int i : {3,1,4,1,5,9,2,6}) pq.push(i);\ncout << \"priority_queue (largest first): \";\nwhile (!pq.empty()) { cout << pq.top() << \" \"; pq.pop(); }\ncout << \"\\n\";\n\n// min-heap\npriority_queue<int, vector<int>, greater<int>> minPq;\nfor (int i : {3,1,4,1,5,9,2,6}) minPq.push(i);\ncout << \"min-heap (smallest first): \";\nwhile (!minPq.empty()) { cout << minPq.top() << \" \"; minPq.pop(); }\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "stack-lifo-and-queue-fifo",
+      "description": "stack (LIFO) and queue (FIFO)"
+    },
+    {
+      "id": "cpp201-md-5",
+      "type": "MARKDOWN",
+      "source": "## 5. Iterators\n\nIterators are pointer-like objects that traverse containers. All STL algorithms use iterators.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: forward-iterator\n//@ description: Forward iterator\nvector<int> nums = {10, 20, 30, 40, 50};\n\n// Forward iterator\ncout << \"Forward:  \";\nfor (auto it = nums.begin(); it != nums.end(); ++it)\n    cout << *it << \" \";\ncout << \"\\n\";\n\n// Reverse iterator\ncout << \"Reverse:  \";\nfor (auto it = nums.rbegin(); it != nums.rend(); ++it)\n    cout << *it << \" \";\ncout << \"\\n\";\n\n// Const iterator (read-only)\ncout << \"Const it: \";\nfor (auto it = nums.cbegin(); it != nums.cend(); ++it)\n    cout << *it << \" \";\ncout << \"\\n\";\n\n// Iterator arithmetic\nauto first = nums.begin();\nauto third = first + 2;  // random access (vector supports this)\ncout << \"Third element: \" << *third << \"\\n\";\ncout << \"Distance 1→3: \" << distance(nums.begin(), third) << \"\\n\";\n\n// advance and next\nauto it = nums.begin();\nadvance(it, 3);  // move forward 3\ncout << \"After advance(3): \" << *it << \"\\n\";\ncout << \"next(begin,2):    \" << *next(nums.begin(), 2) << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "forward-iterator",
+      "description": "Forward iterator"
+    },
+    {
+      "id": "cpp201-md-6",
+      "type": "MARKDOWN",
+      "source": "## 6. Exception Handling\n\nC++ exceptions use `try`, `catch`, and `throw`. The standard library exceptions inherit from `std::exception`.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: custom-exception-class\n//@ description: Custom exception class\n// Custom exception class\nclass ValidationError : public exception {\n    string msg;\npublic:\n    ValidationError(const string& m) : msg(m) {}\n    const char* what() const noexcept override { return msg.c_str(); }\n};\n\n// Function that throws\ndouble safeDivide(double a, double b) {\n    if (b == 0.0) throw invalid_argument(\"Division by zero\");\n    return a / b;\n}\n\nvoid validateAge(int age) {\n    if (age < 0 || age > 150)\n        throw ValidationError(\"Age must be 0–150, got \" + to_string(age));\n}\n\n// Basic try/catch\ntry {\n    cout << \"10 / 2 = \" << safeDivide(10, 2) << \"\\n\";\n    cout << \"10 / 0 = \" << safeDivide(10, 0) << \"\\n\"; // throws\n} catch (const invalid_argument& e) {\n    cout << \"Caught invalid_argument: \" << e.what() << \"\\n\";\n}\n\n// Multiple catch clauses\nfor (int age : {25, -1, 200}) {\n    try {\n        validateAge(age);\n        cout << \"Age \" << age << \" is valid\\n\";\n    } catch (const ValidationError& e) {\n        cout << \"ValidationError: \" << e.what() << \"\\n\";\n    } catch (const exception& e) {\n        cout << \"Unexpected error: \" << e.what() << \"\\n\";\n    }\n}\n\n// Vector out-of-range\ntry {\n    vector<int> v = {1, 2, 3};\n    cout << v.at(10) << \"\\n\"; // throws out_of_range\n} catch (const out_of_range& e) {\n    cout << \"out_of_range: \" << e.what() << \"\\n\";\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "custom-exception-class",
+      "description": "Custom exception class"
+    },
+    {
+      "id": "cpp201-md-7",
+      "type": "MARKDOWN",
+      "source": "## 7. Venus Pipeline — Sharing Data Between Cells\n\nUse `//@ anchor:` to name a cell and `//@ depends:` to inject it into another.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp201-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "anchor": "cpp201_student",
+      "source": "//@ anchor: cpp201_student\n//@ description: Defines the print function\nstruct Student {\n    string name;\n    double gpa;\n    string major;\n\n    void print() const {\n        cout << left << setw(12) << name\n             << \"  GPA: \" << fixed << setprecision(2) << gpa\n             << \"  Major: \" << major << \"\\n\";\n    }\n};\n\nvector<Student> students = {\n    {\"Alice\",   3.9, \"CS\"},\n    {\"Bob\",     3.2, \"Math\"},\n    {\"Charlie\", 3.7, \"CS\"},\n    {\"Diana\",   3.5, \"Physics\"},\n    {\"Eve\",     3.8, \"CS\"},\n    {\"Frank\",   2.9, \"Biology\"}\n};\n\ncout << \"All students:\\n\";\nfor (const auto& s : students) s.print();",
+      "output": "",
+      "executionCount": 0,
+      "description": "Defines the print function"
+    },
+    {
+      "id": "cpp201-12",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ depends: cpp201_student\n//@ anchor: student-and-students-are-injected-from-c\n//@ description: Student and students are injected from cpp201_student\n// Student and students are injected from cpp201_student\n\n// Filter CS students\nvector<Student> csStudents;\ncopy_if(students.begin(), students.end(), back_inserter(csStudents),\n        [](const Student& s){ return s.major == \"CS\"; });\n\ncout << \"CS students:\\n\";\nfor (const auto& s : csStudents) s.print();\n\n// Sort by GPA descending\nsort(students.begin(), students.end(),\n     [](const Student& a, const Student& b){ return a.gpa > b.gpa; });\n\ncout << \"\\nBy GPA (desc):\\n\";\nfor (const auto& s : students) s.print();\n\n// Average GPA\ndouble avgGpa = 0;\nfor (const auto& s : students) avgGpa += s.gpa;\nauto mean = avgGpa / students.size();\ncout << \"\\nClass average GPA: \" << fixed << setprecision(2) << mean << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "student-and-students-are-injected-from-c",
+      "description": "Student and students are injected from cpp201_student"
+    },
+    {
+      "id": "cpp201-md-end",
+      "type": "MARKDOWN",
+      "source": "## Summary — C++ 201 Complete!\n\n| Topic | Key Points |\n|-------|------------|\n| Classes | `private`/`protected`/`public`, member initializer list, `const` methods |\n| Operator overloading | `+`, `-`, `<<`, `==` — makes types feel natural |\n| Inheritance | `virtual`, pure virtual (`= 0`), `override`, `virtual` destructor |\n| Rule of Three | Destructor + copy constructor + copy assignment when owning resources |\n| `vector` | Dynamic array; prefer over C-style arrays |\n| `map` | Sorted key/value; O(log n) access |\n| `set` | Sorted unique elements; O(log n) operations |\n| `stack`/`queue` | Adaptor containers for LIFO/FIFO patterns |\n| Exceptions | `try`/`catch`/`throw`; inherit from `std::exception` |\n\n**Next:** [C++ 301](cpp-301) — Templates, lambdas, and STL algorithms",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "level": "201",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venus Notebooks — Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --teal: #39d8c8;
+    --yellow: #d29922; --code-bg: #1e2228;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.7; display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  #sidebar { width: 240px; min-width: 240px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  #sidebar-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); }
+  #sidebar-header h1 { font-size: 15px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 2px; }
+  #sidebar-header p { font-size: 11px; color: var(--muted); }
+  .nav-group { padding: 8px 0; }
+  .nav-group-label { padding: 6px 16px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .nav-item { display: block; padding: 7px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border: none; background: none; text-align: left; width: 100%; transition: color .15s, background .15s; }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); background: rgba(88,166,255,.08); border-right: 2px solid var(--accent); }
+  .nav-back { padding: 12px 16px; border-top: 1px solid var(--border); margin-top: auto; }
+  .nav-back a { font-size: 12px; color: var(--muted); text-decoration: none; }
+  .nav-back a:hover { color: var(--accent); }
+
+  /* Content */
+  #content { flex: 1; overflow-y: auto; padding: 40px 48px; max-width: 860px; }
+  #content h1 { font-size: 1.9rem; margin-bottom: 12px; background: linear-gradient(135deg, var(--accent), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  #content h2 { font-size: 1.3rem; margin: 2em 0 .6em; padding-bottom: .4em; border-bottom: 1px solid var(--border); color: var(--text); }
+  #content h3 { font-size: 1.05rem; margin: 1.5em 0 .5em; color: var(--teal); }
+  #content h4 { font-size: .95rem; margin: 1.2em 0 .4em; color: var(--yellow); }
+  #content p { margin-bottom: .9em; }
+  #content a { color: var(--accent); text-decoration: none; }
+  #content a:hover { text-decoration: underline; }
+  #content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 1em 0; font-size: 13px; line-height: 1.5; }
+  #content code { font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace; font-size: .9em; }
+  #content p code, #content li code, #content td code { background: var(--code-bg); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; }
+  #content table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 13px; }
+  #content th { background: var(--bg3); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  #content td { padding: 7px 12px; border: 1px solid var(--border); vertical-align: top; }
+  #content tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  #content ul, #content ol { padding-left: 1.5em; margin-bottom: .9em; }
+  #content li { margin-bottom: .3em; }
+  #content blockquote { border-left: 3px solid var(--accent); padding: 8px 16px; margin: 1em 0; background: rgba(88,166,255,.06); border-radius: 0 4px 4px 0; color: var(--muted); }
+  #content hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  #content img { max-width: 100%; border-radius: 6px; }
+  #loading { color: var(--muted); font-style: italic; padding: 40px 0; }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>Venus Notebooks</h1>
+    <p>Documentation</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Project</div>
+    <button class="nav-item" data-doc="readme">README</button>
+    <button class="nav-item" data-doc="changelog">Changelog</button>
+    <button class="nav-item" data-doc="contributing">Contributing</button>
+    <button class="nav-item" data-doc="maintainer">Maintainer Guide</button>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Reference</div>
+    <button class="nav-item" data-doc="usage">Usage Guide</button>
+    <button class="nav-item" data-doc="setup">Setup Guide</button>
+    <button class="nav-item" data-doc="api">API Reference</button>
+    <button class="nav-item" data-doc="architecture">Architecture</button>
+  </div>
+
+  <div class="nav-back">
+    <a href="http://localhost:8585">← Back to Venus</a>
+    &nbsp;&nbsp;
+    <a href="../cheatsheet.html">Cheatsheet</a>
+  </div>
+</nav>
+
+<main id="content"><div id="loading">Select a document from the sidebar.</div></main>
+
+<!-- Raw markdown content embedded as plain text -->
+<script type="text/plain" id="src-readme">
+# Venus Notebooks
+
+> **Interactive Java notebooks in your browser — powered by JShell, Spring Boot, and Claude AI**
+
+Venus Notebooks is a **locally-hosted, browser-based notebook environment for Java developers** — like Jupyter, but built for the JVM. Write and run Java, JShell, and JavaScript cells side by side, manage Maven and npm dependencies, chain cells with pipeline orchestration, and get AI assistance from Claude — all without leaving your browser.
+
+No cloud account. No data sent anywhere. Runs entirely on your machine.
+
+---
+
+## Why Venus?
+
+Java developers have always been second-class citizens in the notebook world. Jupyter supports Python natively; everything else is a plugin or a workaround. Venus was built from the ground up for Java:
+
+- **JShell-native** — the official Java REPL, not a workaround
+- **Full class compilation** — switch any cell to full `javac` compile+run mode
+- **Maven built in** — install any Maven Central package in seconds; it's immediately on the classpath
+- **Real JVM** — no sandboxing, no limitations — it's your JDK
+- **JavaScript too** — Node.js cells for when you need it
+- **AI in the loop** — Claude generates, explains, and debugs code inline
+- **Offline by default** — your notebooks and code never leave your machine
+
+---
+
+## Features at a Glance
+
+| Feature | Description |
+|---------|-------------|
+| **Three execution modes** | JShell snippets · Full Java compile/run · Node.js JavaScript |
+| **Real-time output** | Console output streams live via WebSocket |
+| **Maven Package Manager** | Install/uninstall Maven packages; auto-injected into JShell classpath |
+| **npm Package Manager** | Install npm packages for JavaScript cells with one click |
+| **Pipeline Orchestration** | Chain cells with `//@ depends:` annotations and run in dependency order |
+| **AI Assistant** | Generate code, explain snippets, create entire notebooks with Claude |
+| **Built-in Data Science** | XChart · Commons Math · Tablesaw — pre-installed |
+| **Tutorial Library** | 16 built-in tutorials across JShell, Java, and JavaScript |
+| **Interactive Console** | Full REPL console with tab completion for all three runtimes |
+| **Dark theme** | Easy on the eyes by default |
+
+---
+
+## Requirements
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| **Java JDK** | 17+ (21 recommended) | Must be a JDK — not just JRE |
+| **Maven** | 3.8+ | For building from source |
+| **Node.js** | 18+ | Optional — only needed for JavaScript cells |
+| **Claude CLI** | Latest | Required for AI features (`claude auth`) |
+
+---
+
+## Quick Start
+
+### Step 1 — Clone
+
+```bash
+git clone https://github.com/yourusername/venus-notebooks.git
+cd venus-notebooks
+```
+
+### Step 2 — Start
+
+**Windows:** `venus`
+
+**Unix/Mac:** `./scripts/start.sh`
+
+**Maven:** `mvn spring-boot:run`
+
+### Step 3 — Open
+
+Navigate to **http://localhost:8585**
+
+### Step 4 — Enable AI
+
+Install Claude Code from [claude.ai/code](https://claude.ai/code) and run `claude auth` in a terminal. Venus uses the local Claude CLI — no API key needed.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Setup Guide](setup) | Detailed installation and prerequisites |
+| [Usage Guide](usage) | Full feature documentation |
+| [API Reference](api) | REST API reference |
+| [Architecture](architecture) | System design |
+| [Contributing](contributing) | How to contribute |
+| [Changelog](changelog) | Version history |
+</script>
+
+<script type="text/plain" id="src-changelog">
+# Venus Notebooks — Changelog
+
+All notable changes to Venus Notebooks are documented here.
+
+---
+
+## [Unreleased / Edge]
+
+### Open Source Preparation
+- Added `CONTRIBUTING.md` — full contributor guide
+- Added `MAINTAINER.md` — governance model and release process
+- Rewrote `README.md` — expanded GitHub landing page
+- Added `CODE_OF_CONDUCT.md` — Contributor Covenant
+- Added `.github/` — issue templates, PR template, CI workflow
+- Renamed `notebooks/local-sures/` → `notebooks/examples/`
+- Added `docs/screenshots/` placeholder
+- Added `docs/view/` documentation viewer
+
+### Claude Integration
+- All AI requests now route exclusively through the local `claude` CLI
+- Removed direct Anthropic API HTTP path (eliminated content-filter policy errors)
+- Settings tab: API Key field replaced with Claude CLI status info
+- Status endpoint: `claudeApiKeySet` → `claudeCliAvailable`
+
+---
+
+## [1.2.0] — 2026-03-29
+
+### Multi-Runtime Interactive Console
+- Runtime selector: `☕ JShell`, `♨ Java`, `⬡ JavaScript`
+- Tab completion for all three runtimes
+- History buffer expanded to 500 entries
+- `POST /api/shell/complete` — JShell completion endpoint
+
+### Notebook Browser Redesign
+- Two-section browser: My Notebooks + Venus Tutorials
+- Tutorial grouping by language and subcategory
+- Filter search across both sections
+
+### Tutorial System
+- 16 built-in tutorials: JShell (101–501), Java (101–601), JavaScript (101–501)
+- `GET /api/notebooks/tutorials` and `/tutorials/{id}` endpoints
+
+---
+
+## [1.1.0] — 2026-03-14
+
+### Cell Orchestration & Pipeline System
+- `PIPELINE` cell type with `//@ annotation` DSL
+- `OrchestrationService` — Kahn's topological sort, cycle detection
+- New endpoints: `execute-pipeline`, `execute-with-deps`, `run-to-here`, `validate-graph`
+
+### Multi-Mode Cells
+- `mode` field per cell: `jshell`, `java`, `nodejs`
+- `JavaCompilerService` and `NodeJsExecutionService`
+
+### Data Science Stack
+- XChart 3.8.6, Commons Math 3.6.1, Tablesaw 0.43.1, OpenCSV 5.9
+- Auto-imported in every JShell session
+
+### Bug Fixes
+- Packages now applied when JShell session is first created
+- Kernel restart re-applies packages
+- Console CSS class names fixed
+
+---
+
+## [1.0.0] — 2026-03-08
+
+### Initial Release
+- Spring Boot 3.2.3 server on port 8585
+- JShell-powered interactive notebook cells
+- Notebook CRUD — `.vnb` JSON format
+- Maven and npm package installers
+- Claude AI assistant (chat + notebook generation)
+- STOMP WebSocket real-time output
+- Dark/light theme
+- Step Navigator
+</script>
+
+<script type="text/plain" id="src-contributing">
+# Contributing to Venus Notebooks
+
+Thank you for your interest in contributing to Venus Notebooks.
+
+---
+
+## Why Contribute?
+
+Venus Notebooks fills a real gap: **Java developers have never had a first-class notebook environment**. By contributing, you help Java developers learn, explore, and prototype faster.
+
+---
+
+## What You Can Contribute
+
+| Type | Examples |
+|------|---------|
+| **Bug fixes** | Fix a JShell error message, fix a UI layout issue |
+| **New features** | New cell type, new execution engine, new export format |
+| **Tutorials** | New `.vnb` tutorial notebooks for the built-in library |
+| **Documentation** | Improve setup guides, fix typos |
+| **UI/UX** | Improve the dark theme, add keyboard shortcuts |
+| **Testing** | Add unit tests, integration tests |
+
+---
+
+## Development Setup
+
+### Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Git | Any |
+| Java JDK | 17–21 |
+| Maven | 3.8+ |
+| Node.js | 18+ (optional) |
+
+### Build and Run
+
+```bash
+mvn clean package -DskipTests
+mvn spring-boot:run
+# Open http://localhost:8585
+```
+
+---
+
+## Coding Standards
+
+### Java
+
+- **No Lombok** — all models use plain Java getters/setters with a manual static `Builder` inner class
+- Spring Boot conventions: `@RestController`, `@Service`, constructor injection
+- Keep controllers thin — business logic belongs in services
+
+### Frontend
+
+- **No build step** — pure HTML/CSS/JavaScript served statically
+- No npm for frontend, no webpack, no TypeScript — vanilla JS only
+- All frontend code lives in `src/main/resources/static/`
+
+### Commit Messages (Conventional Commits)
+
+```
+feat(cell): add R language cell execution mode
+fix(jshell): handle null output from incomplete snippets
+docs(tutorials): add java-701 concurrency tutorial
+```
+
+---
+
+## Making Changes
+
+### For a Bug Fix
+
+1. Check existing issues — it may already be reported
+2. Create a branch: `git checkout -b fix/describe-the-bug`
+3. Fix it, test it manually
+4. Open a PR referencing the issue
+
+### For a New Feature
+
+1. **Open a Discussion or Issue first** — describe what you want to build
+2. Wait for feedback before writing code
+3. Create a branch: `git checkout -b feature/describe-the-feature`
+4. Open a PR with a clear description
+
+---
+
+## Pull Request Checklist
+
+- [ ] Branch is up to date with `main`
+- [ ] Builds cleanly: `mvn clean package -DskipTests`
+- [ ] Tested manually against a running server
+- [ ] New endpoints documented in `docs/API.md`
+- [ ] `CHANGELOG.md` updated under `[Unreleased]`
+
+---
+
+## Community Guidelines
+
+Be respectful. This project follows the [Contributor Covenant Code of Conduct](../../CODE_OF_CONDUCT.md).
+
+Open a [GitHub Discussion](../../discussions) for ideas and questions. Issues are for actionable bugs and confirmed feature requests.
+</script>
+
+<script type="text/plain" id="src-maintainer">
+# Venus Notebooks — Maintainer Guide
+
+This document covers the maintainer hierarchy, responsibilities, review process, release process, and community management.
+
+---
+
+## Maintainer Hierarchy
+
+### Founding Maintainer
+
+Holds final authority over:
+- What gets merged into `main`
+- Project direction and roadmap
+- Co-maintainer nominations
+- Release versioning and timing
+- Breaking changes to notebook format or API
+
+### Co-Maintainers
+
+Can:
+- Review and approve pull requests
+- Merge non-controversial PRs (docs, bug fixes)
+- Triage issues and close duplicates
+- Help onboard new contributors
+
+Cannot merge unilaterally:
+- Breaking changes
+- New features without Founding Maintainer approval
+- Changes to project governance
+- Changes to `.vnb` format or core execution engines
+
+---
+
+## Current Maintainers
+
+| Role | GitHub | Responsibilities |
+|------|--------|-----------------|
+| **Founding Maintainer** | @yourusername | Final merge authority · Roadmap · Releases |
+
+---
+
+## Becoming a Co-Maintainer
+
+Co-maintainership is **by invitation only**. The Founding Maintainer looks for:
+
+- Quality PRs — focused, well-tested, minimal back-and-forth
+- Good judgment in discussions — constructive, respectful, technically sound
+- Understanding the project philosophy (local-first, no build step, JVM-native)
+- Reliability over time, not a single sprint
+
+Do not ask to be made a maintainer. Contribute consistently and the Founding Maintainer will reach out.
+
+---
+
+## Reviewing Pull Requests
+
+Check:
+1. **Scope** — one focused thing, not mixed changes
+2. **Correctness** — solves the stated problem
+3. **Code quality** — follows conventions (no Lombok, constructor injection)
+4. **Docs** — updated if behavior changed
+5. **Merge safety** — won't break existing notebooks or API contract
+
+**Merge strategy:** Squash merge only. Commit message in Conventional Commits format.
+
+---
+
+## Release Process (Founding Maintainer only)
+
+1. Update `CHANGELOG.md` — move `[Unreleased]` to new versioned section
+2. Bump version in `pom.xml` (remove `-SNAPSHOT`)
+3. `git tag -a v1.x.0 -m "Release v1.x.0"`
+4. `git push origin main --tags`
+5. Create a GitHub Release — attach the JAR
+6. Re-add `-SNAPSHOT` for next development cycle
+
+---
+
+## Community Management
+
+- **Respond to every first-time contributor** — even just "thanks, reviewing now"
+- **Say no kindly** — provide a reason, even a brief one
+- **Celebrate contributions** — mention contributors by name in release notes
+
+### Handling Difficult Interactions
+
+1. First offense — respond calmly, point to Code of Conduct
+2. Second offense — formal warning
+3. Third offense / serious first — block the user (loop in Founding Maintainer first if you're a co-maintainer)
+
+---
+
+## Branch Protection Rules
+
+Require for `main`:
+- Pull request before merging
+- At least 1 approval
+- Dismiss stale reviews on new commits
+- No bypassing (even admins)
+</script>
+
+<script type="text/plain" id="src-usage">
+# Venus Notebooks — Usage Guide
+
+## Starting Venus (Windows CLI)
+
+```cmd
+venus               # start server + open browser
+venus start --bg    # start in background
+venus stop          # stop the server
+venus status        # check if running
+venus help          # full command reference
+```
+
+---
+
+## The Interface
+
+| Tab | Purpose |
+|-----|---------|
+| **Notebook** | Write and execute Java or JavaScript code in cells |
+| **Console** | Multi-runtime REPL — JShell, Java, or JavaScript |
+| **Packages** | Install Maven packages (Java) and npm packages (JavaScript) |
+| **Settings** | Configure preferences |
+| **AI** | Chat with Claude, generate notebooks |
+
+---
+
+## Notebook Tab
+
+### Cell Types
+
+| Type | Border | Badge | Purpose |
+|------|--------|-------|---------|
+| **JShell** | Indigo | `◈ JShell` | Java snippets with shared session state |
+| **Java** | Teal | `◈ Java` | Full class compile-and-run, isolated per cell |
+| **JavaScript** | Green | `◈ JS` | Node.js execution, isolated per cell |
+| **Markdown** | Amber | `✎ Markdown` | Documentation text rendered as HTML |
+| **Pipeline** | Gold | `⬡ Pipeline` | Orchestrate other cells with dependency steps |
+
+### Running Cells
+
+- **Single cell**: Click **Run** or press `Shift+Enter`
+- **All cells**: Click **Run All** in the toolbar
+- **With dependencies**: Click **Run ↓** to run the cell plus its dependency chain
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Shift+Enter` | Run cell |
+| `Ctrl+Enter` | Run cell (alternative) |
+| `Ctrl+S` | Save notebook |
+
+---
+
+## Step Navigator
+
+Click the **Step** button (▶) in the toolbar to walk through cells one by one.
+
+| Button | Action |
+|--------|--------|
+| **◀ Prev** | Previous cell |
+| **▷ Run & Next** | Execute and advance |
+| **✕** | Exit step mode |
+
+---
+
+## Pipeline Cells
+
+```java
+//@ anchor: loadData
+//@ description: Load the raw CSV file
+//@ depends: validateConfig
+
+Table data = VenusDisplay.loadCsv("data/sales.csv");
+```
+
+| Annotation | Purpose |
+|-----------|---------|
+| `anchor:` | Unique name for this cell |
+| `depends:` | Comma-separated list of required anchors |
+| `description:` | Human-readable label |
+| `on-error:` | `stop` (default) or `continue` |
+| `pipeline:` | Name for a pipeline cell |
+| `steps:` | Ordered anchor list |
+
+---
+
+## Data Science Stack
+
+Pre-loaded in every JShell session — no install required.
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **XChart** | 3.8.6 | Charts (XY, bar, pie) |
+| **Commons Math** | 3.6.1 | Statistics, regression, distributions |
+| **Tablesaw** | 0.43.1 | DataFrame (load, filter, groupBy) |
+| **OpenCSV** | 5.9 | CSV parsing |
+
+### Charts
+
+```java
+var chart = VenusDisplay.xyChart("Title", "X", "Y");
+chart.addSeries("sin(x)", xData, yData);
+VenusDisplay.show(chart);
+```
+
+### DataFrames
+
+```java
+Table df = VenusDisplay.loadCsv("data/sales.csv");
+VenusDisplay.show(df);          // full table
+VenusDisplay.describe(df);      // statistics
+```
+
+---
+
+## Console Tab
+
+| Button | Runtime |
+|--------|---------|
+| `☕ JShell` | Java snippets, shared state |
+| `♨ Java` | Full Java class per command |
+| `⬡ JavaScript` | Node.js REPL |
+
+Press **Tab** for auto-complete. Use **↑/↓** for history.
+
+---
+
+## Packages Tab
+
+### Maven (Java)
+
+Enter `groupId:artifactId:version` and click **Install**.
+
+```
+com.google.code.gson:gson:2.10.1
+org.apache.commons:commons-lang3:3.14.0
+```
+
+### npm (JavaScript)
+
+Enter a package name and click **Install**.
+
+```
+simple-statistics
+mathjs
+lodash
+```
+
+---
+
+## AI Assistant Tab
+
+1. Go to the **AI** tab
+2. Type your question
+3. Press **Enter** or click **Send**
+
+Click **Generate Notebook** to have Claude create a complete notebook from a description.
+
+AI requires the Claude CLI to be installed and authenticated (`claude auth`).
+</script>
+
+<script type="text/plain" id="src-setup">
+# Venus Notebooks — Setup Guide
+
+## Prerequisites
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| Java JDK | 17 | 21 (LTS) |
+| Maven | 3.8 | 3.9+ |
+
+> **Important**: You need a full **JDK**, not just a JRE. JShell is a JDK tool.
+> Verify with: `javac -version`
+
+### Optional
+
+| Requirement | Purpose |
+|-------------|---------|
+| Node.js 18 LTS | JavaScript cells |
+| Claude CLI | AI Assistant features |
+
+---
+
+## Installation
+
+### Step 1: Get the code
+
+```bash
+git clone https://github.com/yourusername/venus-notebooks.git
+cd venus-notebooks
+```
+
+### Step 2: Verify Java
+
+```bash
+java -version
+javac -version
+# Both should show 17+ or higher
+```
+
+### Step 3: Build
+
+```bash
+mvn clean package -DskipTests
+```
+
+### Step 4: Run
+
+**Windows (recommended):**
+```cmd
+venus
+```
+
+**Unix/Mac:**
+```bash
+./scripts/start.sh
+```
+
+**Maven dev mode:**
+```bash
+mvn spring-boot:run
+```
+
+**JAR directly:**
+```bash
+java \
+  --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \
+  --add-opens=java.base/java.lang=ALL-UNNAMED \
+  --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \
+  -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+```
+
+### Step 5: Open Browser
+
+Navigate to: **http://localhost:8585**
+
+---
+
+## Claude AI Setup
+
+Venus uses the local **Claude CLI** — no API key required.
+
+1. Install Claude Code: [claude.ai/code](https://claude.ai/code)
+2. Authenticate: run `claude auth` in a terminal
+3. Start Venus — AI features work automatically
+
+---
+
+## Venus CLI (Windows)
+
+| Command | Description |
+|---------|-------------|
+| `venus` | Start server, auto-build if needed, open browser |
+| `venus start --bg` | Start in background |
+| `venus stop` | Stop the server |
+| `venus status` | Show running state |
+| `venus build` | Build JAR |
+| `venus rebuild` | Force clean rebuild |
+| `venus open` | Open browser |
+| `venus logs` | Tail background logs |
+| `venus help` | Show help |
+
+---
+
+## IDE Setup
+
+### IntelliJ IDEA
+
+Add JVM args to run configuration:
+```
+--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED
+```
+
+### VS Code
+
+Add to `.vscode/launch.json`:
+```json
+{
+  "vmArgs": "--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED"
+}
+```
+
+---
+
+## Troubleshooting
+
+### "JShell not found" / InaccessibleObjectException
+- Ensure you're running with a JDK (`javac -version`)
+- Include all three JVM `--add-opens` and `--add-exports` flags
+
+### Port 8585 is already in use
+```bash
+java ... -jar venus-notebooks.jar --server.port=8586
+```
+
+### WebSocket connection failed
+- Check browser console (F12) for STOMP errors
+- Ensure no proxy is intercepting WebSocket connections
+
+### Package download fails
+- Check internet connectivity
+- Verify the coordinate format: `groupId:artifactId:version`
+
+### AI not responding
+- Ensure Claude CLI is installed: [claude.ai/code](https://claude.ai/code)
+- Run `claude auth` in a terminal to sign in
+- Check Settings tab → Server Status: Claude CLI should show ✓ Found
+</script>
+
+<script type="text/plain" id="src-api">
+# Venus Notebooks — REST API Reference
+
+Base URL: `http://localhost:8585/api`
+
+All requests and responses use JSON.
+
+---
+
+## Notebooks
+
+### List Notebooks
+```
+GET /api/notebooks
+```
+Returns metadata for all notebooks.
+
+### Get Notebook
+```
+GET /api/notebooks/{id}
+```
+Returns the full notebook including all cells.
+
+### Create Notebook
+```
+POST /api/notebooks
+```
+Body: `{ "name": "My New Notebook" }`
+
+### Save Notebook
+```
+PUT /api/notebooks/{id}
+```
+Body: Full notebook JSON.
+
+### Delete Notebook
+```
+DELETE /api/notebooks/{id}
+```
+
+---
+
+## Shell Execution
+
+### Execute Code
+```
+POST /api/shell/execute
+```
+```json
+{
+  "sessionId": "nb-welcome",
+  "code": "System.out.println(\"Hello World\");",
+  "cellId": "cell-2",
+  "mode": "jshell"
+}
+```
+
+`mode` is `"jshell"` (default), `"java"`, or `"nodejs"`.
+
+**Status values:** `VALID`, `REJECTED`, `ERROR`, `OVERWRITTEN`
+
+### Execute Pipeline Cell
+```
+POST /api/shell/execute-pipeline
+```
+
+### Execute Cell with Dependencies
+```
+POST /api/shell/execute-with-deps
+```
+
+### Run To Here
+```
+POST /api/shell/run-to-here
+```
+
+### Validate Dependency Graph
+```
+GET /api/shell/validate-graph/{notebookId}
+```
+
+### Restart Session
+```
+POST /api/shell/{sessionId}/restart
+```
+
+### JShell Completion
+```
+POST /api/shell/complete
+```
+Body: `{ "sessionId": "...", "source": "...", "cursor": 10 }`
+
+---
+
+## Package Manager
+
+### List Installed Packages
+```
+GET /api/packages
+```
+
+### Install Package
+```
+POST /api/packages/install
+```
+Body: `{ "coordinate": "com.google.code.gson:gson:2.10.1" }`
+
+### Remove Package
+```
+DELETE /api/packages/{groupId}/{artifactId}/{version}
+```
+
+### Search Maven Central
+```
+GET /api/packages/search?q={query}
+```
+
+---
+
+## AI / Claude
+
+All AI requests go through the local Claude CLI — no API key required.
+
+### Chat
+```
+POST /api/llm/chat
+```
+```json
+{ "message": "Explain Java streams" }
+```
+
+### Generate Notebook
+```
+POST /api/llm/generate
+```
+```json
+{ "prompt": "A notebook about Java streams and collectors" }
+```
+
+### Explain Code
+```
+POST /api/llm/explain
+```
+```json
+{ "code": "list.stream().filter(x -> x > 0).collect(Collectors.toList())" }
+```
+
+### Fix Error
+```
+POST /api/llm/fix
+```
+```json
+{
+  "code": "var x = \"hello\".toLower();",
+  "error": "ERROR: cannot find symbol: method toLower()"
+}
+```
+
+---
+
+## Settings
+
+### Get Settings
+```
+GET /api/settings
+```
+
+### Update Settings
+```
+PUT /api/settings
+```
+
+### Server Status
+```
+GET /api/settings/status
+```
+Returns: `version`, `javaVersion`, `javaHome`, `claudeCliAvailable`, `claudeModel`, `theme`
+
+---
+
+## WebSocket (STOMP)
+
+Connect via SockJS at `/ws`, then use STOMP.
+
+### Subscribe
+```
+SUBSCRIBE /topic/shell/{sessionId}
+```
+
+### Send Code
+```
+SEND /app/shell/{sessionId}
+```
+Body: `{ "code": "System.out.println(\"hello\");", "cellId": "cell-2" }`
+
+---
+
+## MCP Server (Model Context Protocol)
+
+### SSE Stream
+```
+GET /api/mcp/sse?sessionId={optional-id}
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `venus_execute_code` | Execute Java in a JShell session |
+| `venus_list_notebooks` | List all notebooks |
+| `venus_read_notebook` | Read all cells from a notebook |
+| `venus_run_pipeline` | Run a pipeline cell |
+| `venus_search_cells` | Search cells by content or anchor |
+| `venus_load_module` | Load a notebook module into session |
+| `venus_create_notebook` | Create new notebook with optional cells |
+| `venus_append_cell` | Append a cell, optionally execute |
+
+### Connect Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "venus-notebooks": {
+      "url": "http://localhost:8585/api/mcp/sse"
+    }
+  }
+}
+```
+</script>
+
+<script type="text/plain" id="src-architecture">
+# Venus Notebooks — Architecture
+
+## Overview
+
+Venus Notebooks is a **single-server Java application** that serves a web UI and exposes REST/WebSocket APIs for interactive Java code execution. There is no separate frontend build process — the browser loads static HTML/CSS/JS directly from Spring Boot's resource handler.
+
+```
+Browser                          Venus Server (Spring Boot)
+────────                         ─────────────────────────
+  HTTP GET /            ──────▶  Static Resource Handler
+  REST /api/*           ──────▶  Spring MVC Controllers
+  WebSocket /ws         ══════▶  WebSocket (STOMP)
+  AI (Claude CLI)               claude --print (local subprocess)
+```
+
+---
+
+## Component Architecture
+
+### Backend (Java 21 + Spring Boot 3.2)
+
+```
+com.venus/
+├── VenusApplication          # Spring Boot entry point
+├── config/
+│   ├── WebSocketConfig       # STOMP endpoint configuration
+│   └── CorsConfig            # Cross-origin policy
+├── model/
+│   ├── Notebook, Cell, CellType
+│   ├── PackageInfo, VenusSettings, ExecutionResult
+├── shell/
+│   ├── JShellManager         # Manages JShell sessions
+│   └── ShellSession          # Single JShell instance
+├── service/
+│   ├── NotebookService       # CRUD for .vnb files
+│   ├── PackageService        # Maven Central download
+│   ├── JavaCompilerService   # javax.tools compile + run
+│   ├── NodeJsExecutionService# Node.js subprocess
+│   ├── OrchestrationService  # Dependency graph, topological sort
+│   ├── ClaudeService         # Claude CLI integration (local only)
+│   └── SettingsService
+└── controller/
+    ├── NotebookController    # /api/notebooks/*
+    ├── ShellController       # /api/shell/*
+    ├── PackageController     # /api/packages/*
+    ├── LLMController         # /api/llm/*
+    └── SettingsController    # /api/settings/*
+```
+
+### Frontend (Vanilla JS — no build step)
+
+```
+static/
+├── index.html           # Single-page app shell
+├── css/venus.css        # All styles
+└── js/
+    ├── app.js           # Global init, tab nav, WebSocket
+    ├── notebook.js      # Notebook editor, cell management
+    ├── console-tab.js   # Interactive console
+    ├── packages.js      # Package manager UI
+    ├── settings.js      # Settings form
+    ├── ai-assistant.js  # Claude AI panel
+    ├── orchestration.js # Pipeline dep-badge rendering
+    └── docs.js          # In-app documentation overlay
+```
+
+---
+
+## Dual Execution Mode
+
+Each CODE cell has a `mode` field: `"jshell"` (default), `"java"`, or `"nodejs"`.
+
+### JShell Mode
+- Uses `ShellSession.execute()` → `jshell.eval()`
+- State shared across all cells in the same notebook session
+- Variables, methods, imports persist across cell boundaries
+
+### Java Mode
+- `JavaCompilerService.compile(source)` → subprocess run
+- Each cell compiled as standalone `public class Main { ... }`
+- No shared state between cells
+
+### Node.js Mode
+- `NodeJsExecutionService` runs JavaScript via `node` subprocess
+- `venus` helper object available (`venus.table()`, `venus.html()`, etc.)
+
+---
+
+## Claude AI Integration
+
+All AI calls go exclusively through the local `claude` CLI:
+
+```
+LLMController → ClaudeService.chat() → ProcessBuilder(claudeExe, "--print")
+                                        stdin: system prompt + conversation
+                                        stdout: Claude's response
+```
+
+No direct HTTP calls to Anthropic's API. This avoids API rate limits, content-filter policy errors, and API credit consumption. Requires `claude auth` to be run once.
+
+---
+
+## Pipeline / Orchestration
+
+`OrchestrationService` implements a full dependency graph engine:
+
+- **Topological sort**: Kahn's algorithm for execution order
+- **Cycle detection**: DFS with back-edge detection
+- **Transitive closure**: `execute-with-deps` runs all transitive ancestors first
+
+---
+
+## Data Science Stack
+
+| Library | Purpose | Rendering |
+|---------|---------|-----------|
+| **XChart 3.8.6** | Charts (XY, bar, pie) | PNG via `VENUS_IMG:base64` sentinel |
+| **Commons Math 3.6.1** | Statistics, regression | Text output |
+| **Tablesaw 0.43.1** | DataFrame | HTML via `VENUS_HTML:` sentinel |
+| **OpenCSV 5.9** | CSV parsing | Text output |
+
+---
+
+## WebSocket Protocol
+
+| Direction | Destination | Purpose |
+|-----------|-------------|---------|
+| Client → Server | `/app/shell/{sessionId}` | Execute code |
+| Server → Client | `/topic/shell/{sessionId}` | Execution output |
+
+---
+
+## Security Considerations
+
+- **Local only**: No authentication is implemented. Expose only on localhost.
+- **Code execution**: JShell and `JavaCompilerService` run with the same JVM permissions as the server.
+- **CORS**: Allowed from any origin for local development.
+</script>
+
+<script>
+const DOCS = {
+  readme:       document.getElementById('src-readme'),
+  changelog:    document.getElementById('src-changelog'),
+  contributing: document.getElementById('src-contributing'),
+  maintainer:   document.getElementById('src-maintainer'),
+  usage:        document.getElementById('src-usage'),
+  setup:        document.getElementById('src-setup'),
+  api:          document.getElementById('src-api'),
+  architecture: document.getElementById('src-architecture'),
+};
+
+const content = document.getElementById('content');
+let activeBtn = null;
+
+function showDoc(key) {
+  const src = DOCS[key];
+  if (!src) return;
+  const md = src.textContent;
+  content.innerHTML = marked.parse(md);
+  content.scrollTop = 0;
+
+  if (activeBtn) activeBtn.classList.remove('active');
+  activeBtn = document.querySelector(`.nav-item[data-doc="${key}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  // Update page title
+  const h1 = content.querySelector('h1');
+  document.title = 'Venus — ' + (h1 ? h1.textContent : key);
+}
+
+// Wire up nav buttons
+document.querySelectorAll('.nav-item[data-doc]').forEach(btn => {
+  btn.addEventListener('click', () => showDoc(btn.dataset.doc));
+});
+
+// Handle hash-based routing
+function routeFromHash() {
+  const hash = location.hash.replace('#', '');
+  if (hash && DOCS[hash]) showDoc(hash);
+}
+
+window.addEventListener('hashchange', routeFromHash);
+
+// Load on startup
+if (location.hash) {
+  routeFromHash();
+} else {
+  showDoc('readme');
+}
+</script>
+</body>
+</html>

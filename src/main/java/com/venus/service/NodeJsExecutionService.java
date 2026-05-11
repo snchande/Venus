@@ -1,0 +1,214 @@
+package com.venus.service;
+
+import com.venus.model.ExecutionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * JavaScript execution service using Node.js.
+ *
+ * Each cell runs in a fresh Node.js subprocess — no shared state between cells
+ * (same model as JavaCompilerService). Installed npm packages are available via
+ * NODE_PATH so users can call require('package-name') directly.
+ *
+ * Prerequisites: Node.js must be installed and `node` must be on the PATH.
+ *
+ * Venus JS helpers pre-injected into every cell:
+ *   venus.table(data)     — pretty-print an array of objects as a text table
+ *   venus.display(obj)    — JSON.stringify with indent
+ *   venus.stats(arr)      — basic stats summary (count, min, max, mean)
+ */
+@Service
+public class NodeJsExecutionService {
+
+    private static final Logger log = LoggerFactory.getLogger(NodeJsExecutionService.class);
+    private static final int TIMEOUT_SECONDS = 30;
+
+    // Preamble injected at the top of every JS cell
+    private static final String VENUS_PREAMBLE =
+        "const venus = {\n" +
+        "  table(data) {\n" +
+        "    if (!Array.isArray(data) || data.length === 0) { console.log('(empty)'); return; }\n" +
+        "    const keys = Object.keys(data[0]);\n" +
+        "    const widths = keys.map(k => Math.max(k.length, ...data.map(r => String(r[k] ?? '').length)));\n" +
+        "    const sep = '+' + widths.map(w => '-'.repeat(w + 2)).join('+') + '+';\n" +
+        "    const row = r => '|' + keys.map((k,i) => ' ' + String(r[k] ?? '').padEnd(widths[i]) + ' ').join('|') + '|';\n" +
+        "    console.log(sep);\n" +
+        "    console.log('|' + keys.map((k,i) => ' ' + k.padEnd(widths[i]) + ' ').join('|') + '|');\n" +
+        "    console.log(sep);\n" +
+        "    data.forEach(r => console.log(row(r)));\n" +
+        "    console.log(sep);\n" +
+        "    console.log(`${data.length} row(s)`);\n" +
+        "  },\n" +
+        "  display(obj) { console.log(JSON.stringify(obj, null, 2)); },\n" +
+        "  html(content) { console.log('VENUS_HTML:' + String(content).replace(/\\n\\s*/g, ' ')); },\n" +
+        "  stats(arr) {\n" +
+        "    if (!arr || arr.length === 0) { console.log('(empty array)'); return; }\n" +
+        "    const n = arr.length;\n" +
+        "    const sorted = [...arr].sort((a,b) => a-b);\n" +
+        "    const sum = arr.reduce((a,b) => a+b, 0);\n" +
+        "    const mean = sum / n;\n" +
+        "    const variance = arr.reduce((s,x) => s + (x-mean)**2, 0) / n;\n" +
+        "    console.log(`count: ${n}  min: ${sorted[0]}  max: ${sorted[n-1]}  mean: ${mean.toFixed(4)}  std: ${Math.sqrt(variance).toFixed(4)}`);\n" +
+        "  }\n" +
+        "};\n\n";
+
+    private static final int PREAMBLE_LINE_COUNT = VENUS_PREAMBLE.split("\n", -1).length - 1;
+
+    @Value("${venus.data.dir:data}")
+    private String dataDir;
+
+    private final AtomicInteger execCounter = new AtomicInteger(0);
+
+    /**
+     * Execute JavaScript code using Node.js.
+     *
+     * @param sessionId  Notebook session (metadata only)
+     * @param cellId     Cell that triggered this execution
+     * @param code       JavaScript source code
+     */
+    public ExecutionResult execute(String sessionId, String cellId, String code) {
+        long start = System.currentTimeMillis();
+
+        // Check node is available
+        if (!isNodeAvailable()) {
+            return err(sessionId, cellId,
+                "Node.js not found. Install Node.js from https://nodejs.org/ " +
+                "and ensure 'node' is on your PATH.", start);
+        }
+
+        Path tempDir = null;
+        try {
+            tempDir = Files.createTempDirectory("venus-js-");
+            Path scriptFile = tempDir.resolve("script.js");
+
+            // Write preamble + user code
+            Files.writeString(scriptFile, VENUS_PREAMBLE + code);
+
+            // Resolve npm modules path
+            Path npmModules = Paths.get(dataDir, "npm-modules", "node_modules").toAbsolutePath();
+
+            ProcessBuilder pb = new ProcessBuilder("node", "--no-warnings", scriptFile.toString());
+            pb.redirectErrorStream(false);
+
+            // Set NODE_PATH so require('package') finds installed npm modules
+            pb.environment().put("NODE_PATH", npmModules.toString());
+
+            Process process = pb.start();
+
+            StringBuilder stdout = new StringBuilder();
+            StringBuilder stderr = new StringBuilder();
+
+            Thread outT = captureStream(process.getInputStream(), stdout);
+            Thread errT = captureStream(process.getErrorStream(), stderr);
+            outT.start();
+            errT.start();
+
+            boolean finished = process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            outT.join(2000);
+            errT.join(2000);
+
+            if (!finished) {
+                process.destroyForcibly();
+                return err(sessionId, cellId,
+                    "Execution timed out after " + TIMEOUT_SECONDS + " seconds.", start);
+            }
+
+            long elapsed = System.currentTimeMillis() - start;
+            int exitCode  = process.exitValue();
+            String errStr = stderr.toString().trim();
+
+            // Clean up temp file path from Node.js error messages so users see clean errors
+            String cleanErr = errStr.replace(scriptFile.toString(), "script.js")
+                                    .replace(tempDir.toString(), "");
+
+            // Adjust line numbers: subtract VENUS_PREAMBLE line count from error messages
+            cleanErr = shiftLineNumbers(cleanErr, PREAMBLE_LINE_COUNT);
+
+            boolean success = exitCode == 0 && errStr.isEmpty();
+
+            return ExecutionResult.builder()
+                    .sessionId(sessionId).cellId(cellId)
+                    .output(stdout.toString())
+                    .error(cleanErr)
+                    .status(success ? "OK" : "RUNTIME_ERROR")
+                    .success(success)
+                    .executionTimeMs(elapsed)
+                    .executionCount(execCounter.incrementAndGet())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Node.js execution error in cell {}", cellId, e);
+            return err(sessionId, cellId,
+                e.getClass().getSimpleName() + ": " + e.getMessage(), start);
+        } finally {
+            deleteTempDir(tempDir);
+        }
+    }
+
+    /**
+     * Adjust line numbers in Node.js error messages to account for injected preamble lines.
+     * Node errors look like: script.js:25  or  at Object.<anonymous> (script.js:25:5)
+     */
+    private String shiftLineNumbers(String error, int offset) {
+        if (error == null || error.isEmpty()) return error;
+        Pattern pattern = Pattern.compile("script\\.js:(\\d+)");
+        Matcher matcher = pattern.matcher(error);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            int lineNo = Integer.parseInt(matcher.group(1));
+            int adjusted = Math.max(1, lineNo - offset);
+            matcher.appendReplacement(result, "script.js:" + adjusted);
+        }
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    private boolean isNodeAvailable() {
+        try {
+            Process p = new ProcessBuilder("node", "--version").start();
+            return p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private Thread captureStream(InputStream is, StringBuilder target) {
+        return new Thread(() -> {
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    target.append(line).append("\n");
+                }
+            } catch (IOException ignored) {}
+        });
+    }
+
+    private ExecutionResult err(String sessionId, String cellId, String error, long start) {
+        return ExecutionResult.builder()
+                .sessionId(sessionId).cellId(cellId)
+                .output("").error(error)
+                .status("ERROR").success(false)
+                .executionTimeMs(System.currentTimeMillis() - start)
+                .executionCount(0)
+                .build();
+    }
+
+    private void deleteTempDir(Path dir) {
+        if (dir == null) return;
+        try {
+            Files.walk(dir).sorted(java.util.Comparator.reverseOrder())
+                 .forEach(p -> p.toFile().delete());
+        } catch (IOException ignored) {}
+    }
+}

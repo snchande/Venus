@@ -1,0 +1,265 @@
+{
+  "id": "cpp-intro",
+  "name": "C++ Introduction",
+  "description": "Learn modern C++17 with Venus Notebooks — from Hello World to STL containers, classes, and algorithms.",
+  "cells": [
+    {
+      "id": "cpp-intro-md-1",
+      "type": "MARKDOWN",
+      "source": "# C++ in Venus Notebooks\n\nVenus supports **C++17** via `g++` or `clang++`. Each cell compiles and runs instantly — no `main()` function needed.\n\n**Venus C++ helpers:**\n```cpp\nvenusHtml(\"<b>bold</b>\");   // render HTML in output\nvenusDisplay(value);          // cout << value\nvenusTable(myMap);            // formatted table\n```\n\n**Pipeline annotations (same as Java/C#):**\n```cpp\n//@ anchor: myName      // name this cell\n//@ depends: other      // inject other cell's code\n```",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: hello-world\n//@ description: Hello, World!\n// Hello, World!\ncout << \"Hello from C++ in Venus!\" << endl;\ncout << \"Compiled with C++17\" << endl;",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "hello-world",
+      "description": "Hello, World!"
+    },
+    {
+      "id": "cpp-intro-md-2",
+      "type": "MARKDOWN",
+      "source": "## Variables and Types\n\nC++ has strong static typing. C++17 added `auto` type deduction and structured bindings.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: fundamental-types\n//@ description: Fundamental types\n// Fundamental types\nint    age    = 30;\ndouble pi     = 3.14159265358979;\nbool   active = true;\nstring name   = \"Venus\";\nauto   count  = 42LL;  // long long via auto\n\ncout << \"Name:   \" << name   << \"\\n\";\ncout << \"Age:    \" << age    << \"\\n\";\ncout << \"Pi:     \" << fixed << setprecision(6) << pi << \"\\n\";\ncout << \"Active: \" << boolalpha << active << \"\\n\";\ncout << \"Count:  \" << count  << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "fundamental-types",
+      "description": "Fundamental types"
+    },
+    {
+      "id": "cpp-intro-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: c-17-structured-bindings-and-if-init\n//@ description: C++17 structured bindings and if-init\n// C++17 structured bindings and if-init\npair<string, int> person = {\"Alice\", 28};\nauto [pname, page] = person;  // structured binding\ncout << pname << \" is \" << page << \" years old\\n\";\n\n// if with initializer (C++17)\nif (auto x = 42; x > 10) {\n    cout << \"x = \" << x << \" is greater than 10\\n\";\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "c-17-structured-bindings-and-if-init",
+      "description": "C++17 structured bindings and if-init"
+    },
+    {
+      "id": "cpp-intro-md-3",
+      "type": "MARKDOWN",
+      "source": "## Control Flow",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: range-based-for-loop-c-11\n//@ description: Range-based for loop (C++11+)\n// Range-based for loop (C++11+)\nvector<string> fruits = {\"apple\", \"banana\", \"cherry\", \"date\"};\n\ncout << \"Fruits:\\n\";\nfor (const auto& fruit : fruits) {\n    cout << \"  - \" << fruit << \"\\n\";\n}\n\n// Traditional for with index\ncout << \"\\nWith indices:\\n\";\nfor (size_t i = 0; i < fruits.size(); ++i) {\n    cout << \"  [\" << i << \"] \" << fruits[i] << \"\\n\";\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "range-based-for-loop-c-11",
+      "description": "Range-based for loop (C++11+)"
+    },
+    {
+      "id": "cpp-intro-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: switch-with-fallthrough-and-fallthroug\n//@ description: Switch with fallthrough and [[fallthrough]] attribute\n// Switch with fallthrough and [[fallthrough]] attribute\nint day = 3;\nstring dayName;\nswitch (day) {\n    case 1: dayName = \"Monday\";    break;\n    case 2: dayName = \"Tuesday\";   break;\n    case 3: dayName = \"Wednesday\"; break;\n    case 4: dayName = \"Thursday\";  break;\n    case 5: dayName = \"Friday\";    break;\n    default: dayName = \"Weekend\";  break;\n}\ncout << \"Day \" << day << \" is \" << dayName << \"\\n\";\n\n// Ternary\nstring type = (day <= 5) ? \"Weekday\" : \"Weekend\";\ncout << \"Type: \" << type << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "switch-with-fallthrough-and-fallthroug",
+      "description": "Switch with fallthrough and [[fallthrough]] attribute"
+    },
+    {
+      "id": "cpp-intro-md-4",
+      "type": "MARKDOWN",
+      "source": "## Functions\n\nC++ functions can be overloaded, templated, or defined as lambdas.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: regular-function\n//@ description: Regular function\n// Regular function\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\n// Function overloading\ndouble square(double x) { return x * x; }\nint    square(int x)    { return x * x; }\n\n// Lambda function\nauto greet = [](const string& name) {\n    return \"Hello, \" + name + \"!\";\n};\n\ncout << \"5! = \" << factorial(5) << \"\\n\";\ncout << \"square(4)   = \" << square(4)   << \"\\n\";\ncout << \"square(3.5) = \" << square(3.5) << \"\\n\";\ncout << greet(\"Venus\") << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "regular-function",
+      "description": "Regular function"
+    },
+    {
+      "id": "cpp-intro-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: lambda-with-capture-and-std-function\n//@ description: Lambda with capture and std::function\n// Lambda with capture and std::function\nvector<int> nums = {5, 2, 8, 1, 9, 3, 7, 4, 6};\n\n// Capture by value\nint threshold = 5;\nauto biggerThan = [threshold](int x) { return x > threshold; };\n\nlong bigCount = count_if(nums.begin(), nums.end(), biggerThan);\ncout << \"Numbers > \" << threshold << \": \" << bigCount << \"\\n\";\n\n// Sort with custom comparator\nsort(nums.begin(), nums.end());\ncout << \"Sorted: \";\nfor (int n : nums) cout << n << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "lambda-with-capture-and-std-function",
+      "description": "Lambda with capture and std::function"
+    },
+    {
+      "id": "cpp-intro-md-5",
+      "type": "MARKDOWN",
+      "source": "## STL Containers\n\nThe Standard Template Library provides vector, map, set, and more.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: vector-dynamic-array\n//@ description: vector — dynamic array\n// vector — dynamic array\nvector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};\nv.push_back(5);\nv.push_back(3);\n\ncout << \"Vector size: \" << v.size() << \"\\n\";\ncout << \"Sum: \" << accumulate(v.begin(), v.end(), 0) << \"\\n\";\ncout << \"Max: \" << *max_element(v.begin(), v.end()) << \"\\n\";\ncout << \"Min: \" << *min_element(v.begin(), v.end()) << \"\\n\";\n\n// Remove duplicates\nsort(v.begin(), v.end());\nv.erase(unique(v.begin(), v.end()), v.end());\ncout << \"Unique sorted: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "vector-dynamic-array",
+      "description": "vector — dynamic array"
+    },
+    {
+      "id": "cpp-intro-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: map-key-value-store-sorted-by-key\n//@ description: map — key/value store (sorted by key)\n// map — key/value store (sorted by key)\nmap<string, int> scores;\nscores[\"Alice\"]   = 95;\nscores[\"Bob\"]     = 87;\nscores[\"Charlie\"] = 92;\nscores[\"Diana\"]   = 98;\n\ncout << \"Scores:\\n\";\nfor (const auto& [name, score] : scores) {\n    cout << \"  \" << setw(10) << left << name << \" : \" << score << \"\\n\";\n}\n\n// Find and check\nif (auto it = scores.find(\"Bob\"); it != scores.end()) {\n    cout << \"Bob's score: \" << it->second << \"\\n\";\n}\n\nvenusTable(scores);",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "map-key-value-store-sorted-by-key",
+      "description": "map — key/value store (sorted by key)"
+    },
+    {
+      "id": "cpp-intro-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: set-unique-sorted-elements\n//@ description: set — unique sorted elements\n// set — unique sorted elements\nset<string> tags = {\"c++\", \"programming\", \"c++\", \"venus\", \"programming\"};\ncout << \"Tags (unique): \";\nfor (const auto& t : tags) cout << t << \" \";\ncout << \"\\n\";\ncout << \"Count: \" << tags.size() << \"\\n\";\n\n// unordered_map — faster lookup, unordered\nunordered_map<string, int> freq;\nstring words[] = {\"the\", \"quick\", \"brown\", \"fox\", \"the\", \"quick\", \"the\"};\nfor (const auto& w : words) freq[w]++;\n\ncout << \"\\nWord frequencies:\\n\";\nfor (const auto& [word, count] : freq)\n    cout << \"  \" << word << \": \" << count << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "set-unique-sorted-elements",
+      "description": "set — unique sorted elements"
+    },
+    {
+      "id": "cpp-intro-md-6",
+      "type": "MARKDOWN",
+      "source": "## Classes and Objects\n\nC++ supports full OOP: encapsulation, inheritance, and polymorphism.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: area\n//@ description: Defines the area function\nclass Rectangle {\nprivate:\n    double width, height;\npublic:\n    Rectangle(double w, double h) : width(w), height(h) {}\n\n    double area()      const { return width * height; }\n    double perimeter() const { return 2 * (width + height); }\n\n    string toString() const {\n        ostringstream oss;\n        oss << \"Rectangle(\" << width << \"x\" << height << \")\";\n        return oss.str();\n    }\n};\n\nRectangle r1(5.0, 3.0);\nRectangle r2(7.5, 2.5);\n\ncout << r1.toString() << \"\\n\";\ncout << \"  Area:      \" << r1.area()      << \"\\n\";\ncout << \"  Perimeter: \" << r1.perimeter() << \"\\n\";\ncout << r2.toString() << \"  Area: \" << r2.area() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "area",
+      "description": "Defines the area function"
+    },
+    {
+      "id": "cpp-intro-12",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: inheritance-and-polymorphism\n//@ description: Inheritance and polymorphism\n// Inheritance and polymorphism\nclass Shape {\npublic:\n    virtual double area() const = 0;  // pure virtual\n    virtual string name() const = 0;\n    virtual ~Shape() = default;\n\n    void describe() const {\n        cout << name() << \" — area: \" << fixed << setprecision(2) << area() << \"\\n\";\n    }\n};\n\nclass Circle : public Shape {\n    double radius;\npublic:\n    Circle(double r) : radius(r) {}\n    double area() const override { return M_PI * radius * radius; }\n    string name() const override { return \"Circle(r=\" + to_string(radius) + \")\"; }\n};\n\nclass Triangle : public Shape {\n    double base, height;\npublic:\n    Triangle(double b, double h) : base(b), height(h) {}\n    double area() const override { return 0.5 * base * height; }\n    string name() const override { return \"Triangle(b=\" + to_string(base) + \",h=\" + to_string(height) + \")\"; }\n};\n\nvector<unique_ptr<Shape>> shapes;\nshapes.push_back(make_unique<Circle>(5.0));\nshapes.push_back(make_unique<Triangle>(6.0, 4.0));\nshapes.push_back(make_unique<Circle>(2.5));\n\nfor (const auto& s : shapes) s->describe();\n\ndouble totalArea = 0;\nfor (const auto& s : shapes) totalArea += s->area();\ncout << \"Total area: \" << fixed << setprecision(2) << totalArea << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "inheritance-and-polymorphism",
+      "description": "Inheritance and polymorphism"
+    },
+    {
+      "id": "cpp-intro-md-7",
+      "type": "MARKDOWN",
+      "source": "## Templates\n\nTemplates let you write generic code that works with any type.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-13",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: function-template-note-std-clamp-alr\n//@ description: Function template — note: std::clamp already exists in C++17, so we name ours cl\n// Function template — note: std::clamp already exists in C++17, so we name ours clampVal\ntemplate<typename T>\nT clampVal(T val, T lo, T hi) {\n    return max(lo, min(val, hi));\n}\n\n// Class template\ntemplate<typename T>\nclass Stack {\n    vector<T> data;\npublic:\n    void push(T val)  { data.push_back(val); }\n    T    pop()        { T v = data.back(); data.pop_back(); return v; }\n    T&   top()        { return data.back(); }\n    bool empty() const { return data.empty(); }\n    int  size()  const { return (int)data.size(); }\n};\n\ncout << \"clampVal(15, 0, 10) = \" << clampVal(15, 0, 10) << \"\\n\";\ncout << \"clampVal(5.5, 0.0, 10.0) = \" << clampVal(5.5, 0.0, 10.0) << \"\\n\";\n// std::clamp also available from <algorithm>:\ncout << \"std::clamp(15, 0, 10) = \" << clamp(15, 0, 10) << \"\\n\";\n\nStack<string> s;\ns.push(\"first\");\ns.push(\"second\");\ns.push(\"third\");\ncout << \"Stack top: \" << s.top() << \"  size: \" << s.size() << \"\\n\";\ncout << \"Popped: \" << s.pop() << \"\\n\";\ncout << \"Stack top: \" << s.top() << \"  size: \" << s.size() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "function-template-note-std-clamp-alr",
+      "description": "Function template — note: std::clamp already exists in C++17, so we name ours cl"
+    },
+    {
+      "id": "cpp-intro-md-8",
+      "type": "MARKDOWN",
+      "source": "## STL Algorithms\n\nThe `<algorithm>` header provides powerful generic algorithms.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-14",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: transform-square-each-element\n//@ description: transform: square each element\nvector<int> data = {64, 34, 25, 12, 22, 11, 90};\n\n// transform: square each element\nvector<int> squared(data.size());\ntransform(data.begin(), data.end(), squared.begin(),\n          [](int x) { return x * x; });\n\ncout << \"Original: \";\nfor (int x : data) cout << x << \" \";\ncout << \"\\n\";\n\ncout << \"Squared:  \";\nfor (int x : squared) cout << x << \" \";\ncout << \"\\n\";\n\n// partition: separate evens from odds\nvector<int> nums = {1,2,3,4,5,6,7,8,9,10};\nauto pivot = partition(nums.begin(), nums.end(), [](int x){ return x % 2 == 0; });\n\ncout << \"Even: \";\nfor (auto it = nums.begin(); it != pivot; ++it) cout << *it << \" \";\ncout << \"\\nOdd:  \";\nfor (auto it = pivot; it != nums.end(); ++it) cout << *it << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "transform-square-each-element",
+      "description": "transform: square each element"
+    },
+    {
+      "id": "cpp-intro-md-9",
+      "type": "MARKDOWN",
+      "source": "## Smart Pointers\n\nC++11 introduced `unique_ptr` and `shared_ptr` for automatic memory management.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-15",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: node\n//@ description: Defines Node type\nstruct Node {\n    int value;\n    unique_ptr<Node> next;\n    Node(int v) : value(v) {}\n};\n\n// Build a linked list with unique_ptr (automatic cleanup)\nauto head = make_unique<Node>(1);\nhead->next = make_unique<Node>(2);\nhead->next->next = make_unique<Node>(3);\nhead->next->next->next = make_unique<Node>(4);\n\ncout << \"Linked list: \";\nNode* cur = head.get();\nwhile (cur) {\n    cout << cur->value;\n    if (cur->next) cout << \" -> \";\n    cur = cur->next.get();\n}\ncout << \"\\n\";\n// Memory automatically freed when head goes out of scope\n\n// shared_ptr for shared ownership\nshared_ptr<string> s1 = make_shared<string>(\"shared\");\nshared_ptr<string> s2 = s1;  // both point to same string\ncout << \"Shared value: \" << *s1 << \"  use_count: \" << s1.use_count() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "node",
+      "description": "Defines Node type"
+    },
+    {
+      "id": "cpp-intro-md-10",
+      "type": "MARKDOWN",
+      "source": "## Optional and Variant (C++17)\n\n`std::optional` and `std::variant` provide type-safe alternatives to null pointers and unions.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-16",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: optional-safe-nullable-values\n//@ description: optional: safe nullable values\n// optional: safe nullable values\noptional<string> findUser(int id) {\n    if (id == 42) return \"Alice\";\n    return nullopt;\n}\n\nauto u1 = findUser(42);\nauto u2 = findUser(99);\ncout << \"User 42: \" << (u1 ? *u1 : \"not found\") << \"\\n\";\ncout << \"User 99: \" << (u2 ? *u2 : \"not found\") << \"\\n\";\ncout << \"Has value: \" << boolalpha << u1.has_value() << \"\\n\";\n\n// variant: type-safe union\nusing Value = variant<int, double, string, bool>;\n\nvector<Value> values = {42, 3.14, string(\"hello\"), true};\n\nfor (const auto& v : values) {\n    visit([](const auto& x) {\n        cout << \"Value: \" << boolalpha << x << \"  type: \" << typeid(x).name() << \"\\n\";\n    }, v);\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "optional-safe-nullable-values",
+      "description": "optional: safe nullable values"
+    },
+    {
+      "id": "cpp-intro-md-11",
+      "type": "MARKDOWN",
+      "source": "## Venus HTML Output\n\nUse `venusHtml()` to render formatted HTML directly in the notebook output.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp-intro-17",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: venus-html-renders-formatted-output-in-t\n//@ description: venusHtml renders formatted output in the notebook\n// venusHtml renders formatted output in the notebook\nvenusHtml(\"<h3 style='color:#06b6d4'>C++ Stats</h3>\");\n\nvector<int> data = {23, 45, 12, 67, 34, 89, 56, 78, 90, 11};\nint n = data.size();\ndouble sum = accumulate(data.begin(), data.end(), 0.0);\ndouble mean = sum / n;\n\nauto [minIt, maxIt] = minmax_element(data.begin(), data.end());\n\nvenusHtml(\"<table style='border-collapse:collapse;font-family:monospace'>\"\n    \"<tr><th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Stat</th>\"\n        \"<th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Value</th></tr>\"\n    \"<tr><td style='padding:4px 12px'>Count</td><td style='padding:4px 12px'>\" + to_string(n) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Sum</td><td style='padding:4px 12px'>\" + to_string((int)sum) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Mean</td><td style='padding:4px 12px'>\" + to_string(mean) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Min</td><td style='padding:4px 12px'>\" + to_string(*minIt) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Max</td><td style='padding:4px 12px'>\" + to_string(*maxIt) + \"</td></tr>\"\n    \"</table>\");",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "venus-html-renders-formatted-output-in-t",
+      "description": "venusHtml renders formatted output in the notebook"
+    },
+    {
+      "id": "cpp-intro-md-end",
+      "type": "MARKDOWN",
+      "source": "## Next Steps\n\n- **[cpp-501](cpp-501)** — Advanced C++: move semantics, variadic templates, concepts, ranges\n- **[Pipeline tutorial](cpp-intro)** — Use `//@ anchor:` and `//@ depends:` to share code between cells\n\n> **Tip:** Switch any cell to C++ mode by clicking the mode badge (⚙ C++) or pressing the cycle button.",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

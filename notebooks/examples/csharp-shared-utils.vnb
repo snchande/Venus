@@ -1,0 +1,61 @@
+{
+  "id": "csharp-shared-utils",
+  "name": "C# Shared Utilities",
+  "description": "Reusable C# types and helper functions — import from any notebook with notebook:csharp-shared-utils/anchorName",
+  "metadata": {
+    "category": "example",
+    "language": "csharp",
+    "level": 0,
+    "subcategory": "Examples & Demos"
+  },
+  "cells": [
+    {
+      "id": "csutils-md-1",
+      "type": "MARKDOWN",
+      "source": "# C# Shared Utilities\n\nThis notebook contains **reusable C# types and helper functions** that other notebooks can import.\n\n## How to import from another notebook\n\nUse the cross-notebook `//@ depends:` syntax:\n\n```csharp\n//@ depends: notebook:csharp-shared-utils/cs_dataTypes\n// All types from cs_dataTypes are now available\n```\n\nThe full format is `notebook:{notebookId}/{anchorName}` where `notebookId` is the notebook's `id` field (not its display name).\n\n## Anchors in this notebook\n\n| Anchor | Contents |\n|--------|----------|\n| `cs_dataTypes` | `Transaction`, `Product`, `SaleRecord` records |\n| `cs_statistics` | `Stats` helper: mean, median, stddev, percentile |\n| `cs_formatting` | `Format` helper: table printing, currency, number formatting |",
+      "output": "",
+      "executed": false
+    },
+    {
+      "id": "csutils-types",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_dataTypes",
+      "source": "//@ anchor: cs_dataTypes\n//@ description: Core domain types — Transaction, Product, SaleRecord\n\n// Financial transaction record\nrecord Transaction(\n    int    Id,\n    string Category,\n    string Description,\n    decimal Amount,\n    DateTime Date,\n    string Status\n);\n\n// Product catalogue entry\nrecord Product(\n    string Sku,\n    string Name,\n    string Category,\n    decimal Price,\n    int StockQty\n);\n\n// Aggregated sale record (output of groupBy operations)\nrecord SaleRecord(\n    string Key,\n    decimal TotalAmount,\n    int Count,\n    decimal AvgAmount\n);\n\nConsole.WriteLine(\"Loaded: Transaction, Product, SaleRecord types\");",
+      "output": "Loaded: Transaction, Product, SaleRecord types\n",
+      "executed": true,
+      "executionCount": 1,
+      "error": ""
+    },
+    {
+      "id": "csutils-stats",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_statistics",
+      "dependsOn": ["cs_dataTypes"],
+      "source": "//@ anchor: cs_statistics\n//@ depends: cs_dataTypes\n//@ description: Stats helper — mean, median, stddev, percentile\n\nstatic class Stats\n{\n    public static double Mean(IEnumerable<decimal> values)\n    {\n        var list = values.ToList();\n        return list.Any() ? (double)list.Average() : 0;\n    }\n\n    public static double Median(IEnumerable<decimal> values)\n    {\n        var sorted = values.OrderBy(v => v).ToList();\n        int n = sorted.Count;\n        if (n == 0) return 0;\n        return n % 2 == 0\n            ? (double)(sorted[n/2 - 1] + sorted[n/2]) / 2\n            : (double)sorted[n/2];\n    }\n\n    public static double StdDev(IEnumerable<decimal> values)\n    {\n        var list = values.ToList();\n        if (list.Count < 2) return 0;\n        double mean = Mean(list);\n        double variance = list.Average(v => Math.Pow((double)v - mean, 2));\n        return Math.Sqrt(variance);\n    }\n\n    public static decimal Percentile(IEnumerable<decimal> values, double pct)\n    {\n        var sorted = values.OrderBy(v => v).ToList();\n        if (!sorted.Any()) return 0;\n        int idx = (int)Math.Ceiling(pct / 100.0 * sorted.Count) - 1;\n        return sorted[Math.Clamp(idx, 0, sorted.Count - 1)];\n    }\n}\n\nConsole.WriteLine(\"Loaded: Stats helper (Mean, Median, StdDev, Percentile)\");",
+      "output": "Loaded: Stats helper (Mean, Median, StdDev, Percentile)\n",
+      "executed": true,
+      "executionCount": 2,
+      "error": ""
+    },
+    {
+      "id": "csutils-format",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_formatting",
+      "source": "//@ anchor: cs_formatting\n//@ description: Format helper — table printer, currency and number formatting\n\nstatic class Format\n{\n    public static string Currency(decimal amount)   => $\"{amount:C2}\";\n    public static string Pct(double ratio)           => $\"{ratio * 100:F1}%\";\n    public static string Number(decimal v, int dp=2) => v.ToString(\"N\" + dp);\n\n    public static void Table(string header, IEnumerable<(string Label, string Value)> rows)\n    {\n        int labelW = Math.Max(header.Length, rows.Max(r => r.Label.Length)) + 2;\n        int valueW = rows.Max(r => r.Value.Length) + 2;\n        string line = new string('-', labelW + valueW + 3);\n        Console.WriteLine(line);\n        Console.WriteLine($\" {header.PadRight(labelW - 1)} {\"Value\".PadLeft(valueW - 1)} \");\n        Console.WriteLine(line);\n        foreach (var (label, value) in rows)\n            Console.WriteLine($\" {label.PadRight(labelW - 1)} {value.PadLeft(valueW - 1)} \");\n        Console.WriteLine(line);\n    }\n}\n\nConsole.WriteLine(\"Loaded: Format helper (Currency, Pct, Number, Table)\");",
+      "output": "Loaded: Format helper (Currency, Pct, Number, Table)\n",
+      "executed": true,
+      "executionCount": 3,
+      "error": ""
+    },
+    {
+      "id": "csutils-md-usage",
+      "type": "MARKDOWN",
+      "source": "## Usage Example\n\nIn any other notebook:\n\n```csharp\n//@ anchor: myAnalysis\n//@ depends: notebook:csharp-shared-utils/cs_statistics, notebook:csharp-shared-utils/cs_formatting\n\nvar amounts = new[] { 100m, 250m, 75m, 320m, 180m };\nConsole.WriteLine($\"Mean:   {Stats.Mean(amounts):F2}\");\nConsole.WriteLine($\"Median: {Stats.Median(amounts):F2}\");\nConsole.WriteLine($\"StdDev: {Stats.StdDev(amounts):F2}\");\n```\n\n> **Tip**: Use **→ Run with deps** on a dependent cell, or use a **Pipeline** cell to execute the full chain automatically.",
+      "output": "",
+      "executed": false
+    }
+  ]
+}

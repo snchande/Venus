@@ -1,0 +1,246 @@
+{
+  "id": "cpp-101",
+  "name": "C++ 101 — Fundamentals",
+  "description": "First steps in C++: variables, data types, input/output, operators, control flow, and functions. No prior C++ knowledge required.",
+  "cells": [
+    {
+      "id": "cpp101-md-0",
+      "type": "MARKDOWN",
+      "source": "# C++ 101 — Fundamentals\n\nWelcome to C++ in Venus Notebooks! Each cell is a C++ snippet — no `main()` function needed. Just write code and press **Shift+Enter** to run it.\n\n**What's pre-loaded in every cell:**\n- All standard headers (`iostream`, `string`, `vector`, `map`, `algorithm`, etc.)\n- `using namespace std;` — so you can write `cout` instead of `std::cout`\n- Venus helpers: `venusHtml()`, `venusDisplay()`, `venusTable()`\n\n**Prerequisites:** None — this is the starting point.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-md-1",
+      "type": "MARKDOWN",
+      "source": "## 1. Hello, World!\n\nThe classic first program. `cout` is the standard output stream; `endl` flushes the buffer and adds a newline.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: hello-world\n//@ description: Prints Hello, World!\ncout << \"Hello, World!\" << endl;\ncout << \"Welcome to C++ in Venus Notebooks!\" << endl;",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "hello-world",
+      "description": "Prints Hello, World!"
+    },
+    {
+      "id": "cpp101-md-2",
+      "type": "MARKDOWN",
+      "source": "## 2. Variables and Fundamental Types\n\nC++ is **statically typed** — every variable has a fixed type known at compile time.\n\n| Type | Size | Example values |\n|------|------|----------------|\n| `int` | 4 bytes | -2B to +2B |\n| `long long` | 8 bytes | very large integers |\n| `double` | 8 bytes | 3.14, 2.7e10 |\n| `float` | 4 bytes | less precision than double |\n| `bool` | 1 byte | `true`, `false` |\n| `char` | 1 byte | `'A'`, `'z'` |\n| `string` | variable | `\"text\"` |\n\n`auto` lets the compiler deduce the type automatically.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: explicit-types\n//@ description: Explicit types\n// Explicit types\nint     age     = 25;\ndouble  height  = 1.75;\nbool    active  = true;\nchar    grade   = 'A';\nstring  name    = \"Alice\";\n\n// auto type deduction\nauto count = 100;          // int\nauto pi    = 3.14159;      // double\nauto msg   = string(\"hi\"); // string\n\ncout << \"Name:   \" << name   << \"\\n\";\ncout << \"Age:    \" << age    << \"\\n\";\ncout << \"Height: \" << height << \" m\\n\";\ncout << \"Grade:  \" << grade  << \"\\n\";\ncout << \"Active: \" << boolalpha << active << \"\\n\";\ncout << \"Pi:     \" << fixed << setprecision(5) << pi << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "explicit-types",
+      "description": "Explicit types"
+    },
+    {
+      "id": "cpp101-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: integer-sizes\n//@ description: Integer sizes\n// Integer sizes\nint8_t  tiny  = 127;           // -128 to 127\nint16_t small = 32767;         // -32768 to 32767\nint32_t med   = 2147483647;    // ~2 billion\nint64_t big   = 9223372036854775807LL; // ~9.2 quintillion\n\nunsigned int upos = 4294967295u; // 0 to ~4.3 billion\n\ncout << \"int8  max: \" << (int)tiny << \"\\n\";\ncout << \"int16 max: \" << small << \"\\n\";\ncout << \"int32 max: \" << med   << \"\\n\";\ncout << \"int64 max: \" << big   << \"\\n\";\ncout << \"uint  max: \" << upos  << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "integer-sizes",
+      "description": "Integer sizes"
+    },
+    {
+      "id": "cpp101-md-3",
+      "type": "MARKDOWN",
+      "source": "## 3. Arithmetic and Operators\n\nC++ supports all standard arithmetic operators. Integer division truncates toward zero.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: arithmetic-operators\n//@ description: Arithmetic operators: +, -, *, /, % with integers and floats\nint a = 17, b = 5;\n\ncout << \"a + b  = \" << (a + b) << \"\\n\";  // 22\ncout << \"a - b  = \" << (a - b) << \"\\n\";  // 12\ncout << \"a * b  = \" << (a * b) << \"\\n\";  // 85\ncout << \"a / b  = \" << (a / b) << \"\\n\";  // 3  (integer division!)\ncout << \"a % b  = \" << (a % b) << \"\\n\";  // 2  (remainder)\n\n// Floating-point division\ndouble x = 17.0, y = 5.0;\ncout << \"x / y  = \" << (x / y) << \"\\n\";  // 3.4\n\n// Increment and decrement\nint n = 10;\ncout << \"n++    = \" << n++ << \"\\n\";  // prints 10, then n becomes 11\ncout << \"++n    = \" << ++n << \"\\n\";  // n becomes 12, then prints 12\ncout << \"n--    = \" << n-- << \"\\n\";  // prints 12, then n becomes 11\n\n// Compound assignment\nn += 5;  cout << \"n += 5  → \" << n << \"\\n\";\nn *= 2;  cout << \"n *= 2  → \" << n << \"\\n\";\nn /= 3;  cout << \"n /= 3  → \" << n << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "arithmetic-operators",
+      "description": "Arithmetic operators: +, -, *, /, % with integers and floats"
+    },
+    {
+      "id": "cpp101-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: math-functions-from-cmath\n//@ description: Math functions from <cmath>\n// Math functions from <cmath>\ndouble v = 2.0;\ncout << \"sqrt(2)    = \" << sqrt(v)       << \"\\n\";\ncout << \"pow(2,10)  = \" << pow(v, 10.0)  << \"\\n\";\ncout << \"abs(-7.5)  = \" << abs(-7.5)     << \"\\n\";\ncout << \"floor(3.7) = \" << floor(3.7)    << \"\\n\";\ncout << \"ceil(3.2)  = \" << ceil(3.2)     << \"\\n\";\ncout << \"round(3.5) = \" << round(3.5)    << \"\\n\";\ncout << \"log(e)     = \" << log(M_E)      << \"\\n\";\ncout << \"log10(100) = \" << log10(100.0)  << \"\\n\";\ncout << \"sin(pi/2)  = \" << sin(M_PI/2)   << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "math-functions-from-cmath",
+      "description": "Math functions from <cmath>"
+    },
+    {
+      "id": "cpp101-md-4",
+      "type": "MARKDOWN",
+      "source": "## 4. String Operations\n\n`std::string` is a full-featured string class. Unlike C-style `char*` arrays, it manages memory automatically and supports all the operations you'd expect.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: string-operations\n//@ description: String operations: length, substr, find, upper, append\nstring s = \"Hello, Venus Notebooks!\";\n\ncout << \"Length:    \" << s.length() << \"\\n\";\ncout << \"Empty?     \" << boolalpha << s.empty() << \"\\n\";\ncout << \"Char [0]:  \" << s[0]       << \"\\n\";\ncout << \"Substr:    \" << s.substr(7, 5) << \"\\n\";  // \"Venus\"\ncout << \"Find:      \" << s.find(\"Venus\") << \"\\n\"; // position 7\ncout << \"Upper:     \";\nstring upper = s;\nfor (char& c : upper) c = toupper(c);\ncout << upper << \"\\n\";\n\n// Concatenation\nstring first = \"C++\";\nstring second = \" is great!\";\nstring combined = first + second;\ncout << \"Combined:  \" << combined << \"\\n\";\n\n// String comparison\ncout << \"Equal?     \" << (first == \"C++\") << \"\\n\";\ncout << \"Less?      \" << (\"apple\" < \"banana\") << \"\\n\";\n\n// String to number\nstring numStr = \"42\";\nint num = stoi(numStr);\ncout << \"stoi:      \" << num << \"\\n\";\n\n// Number to string\ncout << \"to_string: \" << to_string(3.14) << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "string-operations",
+      "description": "String operations: length, substr, find, upper, append"
+    },
+    {
+      "id": "cpp101-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: string-stream-for-formatted-output\n//@ description: String stream for formatted output\n// String stream for formatted output\nostringstream oss;\noss << \"Name: \" << setw(10) << left << \"Alice\";\noss << \"  Score: \" << fixed << setprecision(1) << 95.5;\ncout << oss.str() << \"\\n\";\n\n// String split (manual — no built-in split in C++)\nstring csv = \"apple,banana,cherry,date\";\nvector<string> parts;\nstringstream ss(csv);\nstring token;\nwhile (getline(ss, token, ',')) parts.push_back(token);\n\ncout << \"Parts from \\\"\" << csv << \"\\\":\\n\";\nfor (const auto& p : parts) cout << \"  \" << p << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "string-stream-for-formatted-output",
+      "description": "String stream for formatted output"
+    },
+    {
+      "id": "cpp101-md-5",
+      "type": "MARKDOWN",
+      "source": "## 5. Comparison and Logical Operators\n\nC++ uses `==`, `!=`, `<`, `>`, `<=`, `>=` for comparison and `&&`, `||`, `!` for logic.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: comparison-operators\n//@ description: Comparison operators\nint x = 10, y = 20;\n\n// Comparison operators\ncout << \"x == y: \" << (x == y) << \"\\n\";  // false\ncout << \"x != y: \" << (x != y) << \"\\n\";  // true\ncout << \"x < y:  \" << (x < y)  << \"\\n\";  // true\ncout << \"x > y:  \" << (x > y)  << \"\\n\";  // false\ncout << \"x <= 10:\" << (x <= 10) << \"\\n\"; // true\ncout << \"x >= 10:\" << (x >= 10) << \"\\n\"; // true\n\n// Logical operators\nbool a = true, b = false;\ncout << \"\\na && b: \" << (a && b) << \"\\n\"; // false\ncout << \"a || b: \" << (a || b) << \"\\n\"; // true\ncout << \"!a:     \" << (!a)     << \"\\n\"; // false\ncout << \"!b:     \" << (!b)     << \"\\n\"; // true\n\n// Short-circuit evaluation\nint zero = 0;\nbool safe = (zero != 0) && (100 / zero > 0); // second part NOT evaluated\ncout << \"\\nShort-circuit safe: \" << safe << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "comparison-operators",
+      "description": "Comparison operators"
+    },
+    {
+      "id": "cpp101-md-6",
+      "type": "MARKDOWN",
+      "source": "## 6. Control Flow — if / else / switch\n\nC++ control flow is identical to Java/C#. `if` conditions must produce a `bool`.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: if-else-if-else\n//@ description: if / else if / else\n// if / else if / else\nint score = 78;\nstring grade;\n\nif (score >= 90)      grade = \"A\";\nelse if (score >= 80) grade = \"B\";\nelse if (score >= 70) grade = \"C\";\nelse if (score >= 60) grade = \"D\";\nelse                  grade = \"F\";\n\ncout << \"Score: \" << score << \"  Grade: \" << grade << \"\\n\";\n\n// Ternary operator\nstring result = (score >= 60) ? \"PASS\" : \"FAIL\";\ncout << \"Result: \" << result << \"\\n\";\n\n// C++17 if-with-initializer\nif (int r = score % 10; r >= 5) {\n    cout << \"Rounded up:   \" << (score - r + 10) << \"\\n\";\n} else {\n    cout << \"Rounded down: \" << (score - r) << \"\\n\";\n}",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "if-else-if-else",
+      "description": "if / else if / else"
+    },
+    {
+      "id": "cpp101-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: switch-statement\n//@ description: switch statement\n// switch statement\nint day = 3;\nstring dayName;\n\nswitch (day) {\n    case 1: dayName = \"Monday\";    break;\n    case 2: dayName = \"Tuesday\";   break;\n    case 3: dayName = \"Wednesday\"; break;\n    case 4: dayName = \"Thursday\";  break;\n    case 5: dayName = \"Friday\";    break;\n    case 6: dayName = \"Saturday\";  break;\n    case 7: dayName = \"Sunday\";    break;\n    default: dayName = \"Invalid\";  break;\n}\ncout << \"Day \" << day << \" = \" << dayName << \"\\n\";\n\nbool isWeekend = (day == 6 || day == 7);\ncout << \"Weekend: \" << boolalpha << isWeekend << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "switch-statement",
+      "description": "switch statement"
+    },
+    {
+      "id": "cpp101-md-7",
+      "type": "MARKDOWN",
+      "source": "## 7. Loops\n\nC++ has `for`, `while`, `do-while`, and the range-based `for` (C++11).",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: classic-for-loop\n//@ description: Classic for loop\n// Classic for loop\ncout << \"Classic for: \";\nfor (int i = 0; i < 5; ++i) cout << i << \" \";\ncout << \"\\n\";\n\n// while loop\ncout << \"While (collatz from 6): \";\nint n = 6;\nwhile (n != 1) {\n    cout << n << \" \";\n    n = (n % 2 == 0) ? n / 2 : 3 * n + 1;\n}\ncout << \"1\\n\";\n\n// do-while (executes at least once)\nint x = 0;\ndo {\n    cout << \"do-while executed: x = \" << x << \"\\n\";\n    x++;\n} while (x < 1);\n\n// Range-based for (C++11)\nvector<string> fruits = {\"apple\", \"banana\", \"cherry\"};\ncout << \"Fruits: \";\nfor (const auto& f : fruits) cout << f << \" \";\ncout << \"\\n\";\n\n// break and continue\ncout << \"Skip multiples of 3: \";\nfor (int i = 1; i <= 10; i++) {\n    if (i % 3 == 0) continue;  // skip\n    cout << i << \" \";\n}\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "classic-for-loop",
+      "description": "Classic for loop"
+    },
+    {
+      "id": "cpp101-md-8",
+      "type": "MARKDOWN",
+      "source": "## 8. Functions\n\nFunctions in C++ must be declared before use (or forward-declared). Parameters are passed by value by default; use `&` for pass-by-reference.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-12",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: basic-function-return-value\n//@ description: Basic function (return value)\n// Basic function (return value)\nint add(int a, int b) {\n    return a + b;\n}\n\n// Void function (no return value)\nvoid printSeparator(int n = 40) {  // default parameter\n    cout << string(n, '-') << \"\\n\";\n}\n\n// Pass by value vs reference\nvoid doubleValue(int x)  { x *= 2; }       // copy — caller unchanged\nvoid doubleRef(int& x)   { x *= 2; }       // reference — caller IS changed\nvoid doublePtr(int* x)   { *x *= 2; }      // pointer — caller IS changed\n\ncout << \"add(3, 4) = \" << add(3, 4) << \"\\n\";\nprintSeparator();\nprintSeparator(20);\n\nint val = 10;\ndoubleValue(val); cout << \"After doubleValue: \" << val << \"\\n\"; // still 10\ndoubleRef(val);   cout << \"After doubleRef:   \" << val << \"\\n\"; // 20 (modified)\ndoublePtr(&val);  cout << \"After doublePtr:   \" << val << \"\\n\"; // 40 (modified)",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "basic-function-return-value",
+      "description": "Basic function (return value)"
+    },
+    {
+      "id": "cpp101-13",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: function-overloading-same-name-differ\n//@ description: Function overloading — same name, different parameter types\n// Function overloading — same name, different parameter types\ndouble area(double radius) {\n    return M_PI * radius * radius;\n}\ndouble area(double width, double height) {\n    return width * height;\n}\nint area(int side) {\n    return side * side;\n}\n\ncout << \"Circle area(5.0)     = \" << fixed << setprecision(2) << area(5.0)      << \"\\n\";\ncout << \"Rectangle area(4,3)  = \" << area(4.0, 3.0) << \"\\n\";\ncout << \"Square area(6)       = \" << area(6)         << \"\\n\";\n\n// Recursive function\nint fibonacci(int n) {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\ncout << \"Fibonacci sequence: \";\nfor (int i = 0; i <= 10; i++) cout << fibonacci(i) << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "function-overloading-same-name-differ",
+      "description": "Function overloading — same name, different parameter types"
+    },
+    {
+      "id": "cpp101-md-9",
+      "type": "MARKDOWN",
+      "source": "## 9. Arrays and Vectors\n\nC-style arrays have fixed size at compile time. `std::vector` is a dynamic array — use it in modern C++.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-14",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: c-style-array-fixed-size\n//@ description: C-style array (fixed size)\n// C-style array (fixed size)\nint scores[5] = {85, 92, 78, 95, 88};\ncout << \"Array [0]: \" << scores[0] << \"\\n\";\ncout << \"Size:      \" << sizeof(scores)/sizeof(scores[0]) << \"\\n\";\n\n// std::vector (dynamic, preferred)\nvector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};\nv.push_back(5);    // add to end\nv.push_back(3);\n\ncout << \"\\nVector size: \" << v.size() << \"\\n\";\ncout << \"Front: \" << v.front() << \"  Back: \" << v.back() << \"\\n\";\ncout << \"At[2]: \" << v.at(2) << \"\\n\";  // bounds-checked access\n\n// Iterate\ncout << \"Contents: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";\n\n// Sort and search\nsort(v.begin(), v.end());\ncout << \"Sorted:   \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";\n\nbool found = binary_search(v.begin(), v.end(), 5);\ncout << \"Contains 5: \" << boolalpha << found << \"\\n\";\n\n// Remove element\nv.erase(remove(v.begin(), v.end(), 1), v.end());  // remove all 1s\ncout << \"After remove 1s: \";\nfor (int x : v) cout << x << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "c-style-array-fixed-size",
+      "description": "C-style array (fixed size)"
+    },
+    {
+      "id": "cpp101-md-10",
+      "type": "MARKDOWN",
+      "source": "## 10. Type Conversions\n\nC++ performs some conversions implicitly. Use casts explicitly for others.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp101-15",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: implicit-conversions-compiler-does-thes\n//@ description: Implicit conversions (compiler does these automatically)\n// Implicit conversions (compiler does these automatically)\nint i = 42;\ndouble d = i;           // int → double (widening, safe)\ncout << \"int 42 as double: \" << d << \"\\n\";\n\nchar c = 'A';\nint ascii = c;           // char → int (ASCII value)\ncout << \"'A' as int: \" << ascii << \"\\n\";\n\n// Explicit C++ casts\ndouble pi = 3.14159;\nint truncated = static_cast<int>(pi);  // 3 (truncates)\ncout << \"static_cast<int>(3.14): \" << truncated << \"\\n\";\n\n// C-style cast (less safe, avoid in modern C++)\nint x = (int)3.99;  // 3\ncout << \"C-style cast (int)3.99: \" << x << \"\\n\";\n\n// const_cast example\nconst int constVal = 100;\nconst int* cp = &constVal;\n// int* p = const_cast<int*>(cp);  // removes const (use with extreme care)\n\n// Numeric limits\ncout << \"\\nNumeric limits:\\n\";\ncout << \"  INT_MIN: \" << INT_MIN << \"\\n\";\ncout << \"  INT_MAX: \" << INT_MAX << \"\\n\";\ncout << \"  DBL_MAX: \" << scientific << DBL_MAX << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "implicit-conversions-compiler-does-thes",
+      "description": "Implicit conversions (compiler does these automatically)"
+    },
+    {
+      "id": "cpp101-md-end",
+      "type": "MARKDOWN",
+      "source": "## Summary — C++ 101 Complete!\n\nYou've covered the building blocks of C++:\n\n| Topic | Key Points |\n|-------|------------|\n| Variables | Static typing, `auto`, fundamental types |\n| Arithmetic | Integer division truncates; use `double` for fractions |\n| Strings | `std::string` — full-featured, manages its own memory |\n| Control flow | `if/else`, `switch`, ternary, C++17 if-init |\n| Loops | `for`, `while`, `do-while`, range-based `for` |\n| Functions | Overloading, default params, pass by value/reference/pointer |\n| Arrays/Vectors | Prefer `std::vector` over C-style arrays |\n| Type casts | Use `static_cast<>` for explicit conversions |\n\n**Next:** [C++ 201](cpp-201) — Classes, OOP, and STL containers",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "level": "101",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

@@ -1,0 +1,361 @@
+# Venus Notebooks — Architecture
+
+## Overview
+
+Venus Notebooks is a **single-server Java application** that serves a browser-based notebook UI and exposes REST and WebSocket APIs for interactive code execution across **six runtimes**: JShell, Java, JavaScript, C#, F#, and C++. There is no frontend build step — the browser loads static HTML/CSS/JS directly from Spring Boot's static resource handler.
+
+```
+Browser                          Venus Server (Spring Boot 3.2, Java 21)
+────────                         ──────────────────────────────────────
+                                 ┌──────────────────────────┐
+  HTTP GET /            ──────▶  │ Static Resource Handler  │
+                        ◀──────  │ index.html · css · js    │
+                                 └──────────────────────────┘
+
+  REST /api/*           ──────▶  ┌──────────────────────────┐
+                        ◀──────  │ Spring MVC Controllers   │
+                                 └────────────┬─────────────┘
+                                              │
+  WebSocket /ws         ══════▶  ┌──────────────────────────┐
+  (STOMP/SockJS)        ◀══════  │ STOMP/SockJS Endpoint    │
+                                 └──────────────────────────┘
+
+                      ┌──────────────────────────────────────────────────────┐
+                      │              Execution Services                      │
+                      │                                                      │
+                      │  JShellManager  ·  JavaCompilerService               │
+                      │  NodeJsExecutionService  ·  DotNetExecutionService   │
+                      │  CppExecutionService                                 │
+                      └──────────────────────────────────────────────────────┘
+
+                      ┌──────────────────────────────────────────────────────┐
+                      │                  AI Services                         │
+                      │                                                      │
+                      │  ClaudeService · CopilotCliService · GeminiService   │
+                      │  (routed by LLMController based on active provider)  │
+                      └──────────────────────────────────────────────────────┘
+
+  AI chat/generate      ──────▶  claude / copilot / gemini CLI (local subprocess)
+                        ◀──────  stdout response
+```
+
+---
+
+## Component Map
+
+### Backend (`src/main/java/com/venus/`)
+
+```
+com.venus/
+├── VenusApplication          Spring Boot entry point
+│
+├── config/
+│   ├── WebSocketConfig       STOMP over SockJS endpoint (/ws)
+│   └── CorsConfig            Cross-origin policy (localhost only)
+│
+├── model/                    Pure data classes — plain Java, no Lombok, manual Builder
+│   ├── Notebook              Top-level notebook container (.vnb JSON)
+│   ├── Cell                  Individual cell (type, mode, source, anchor, dependsOn, output)
+│   ├── CellType              CODE | MARKDOWN | PIPELINE
+│   ├── PackageInfo           Installed Maven package
+│   ├── NuGetPackageInfo      Installed NuGet package for C# / F#
+│   ├── VenusSettings         All application settings (model, theme, font size, …)
+│   └── ExecutionResult       Unified execution output (all runtimes, all modes)
+│
+├── shell/                    JShell integration
+│   ├── JShellManager         Spring @Service; manages one ShellSession per session ID
+│   └── ShellSession          Wraps a single JShell instance; synchronized execute()
+│
+├── service/                  Business logic
+│   ├── NotebookService       CRUD for .vnb files; tutorial registry
+│   ├── PackageService        Maven Central download + classpath injection into JShell
+│   ├── JavaCompilerService   javax.tools compile + subprocess run for Java-mode cells
+│   ├── NodeJsExecutionService Node.js subprocess for JS cells; npm module resolution
+│   ├── DotNetExecutionService C# (dotnet run) + F# (dotnet fsi) — see §DotNet below
+│   ├── CppExecutionService   C++ compile (g++/clang++) + run; anchor/depends injection
+│   ├── NuGetService          NuGet package list management (data/nuget-packages.json)
+│   ├── OrchestrationService  Dependency graph, topological sort, cross-notebook refs
+│   ├── ClaudeService         Claude CLI integration (local subprocess, no API key stored)
+│   ├── CopilotCliService     Copilot CLI integration (`copilot` binary, stdin pipe)
+│   ├── GeminiService         Gemini CLI integration (`gemini -p` subprocess)
+│   └── SettingsService       Settings load/save (data/settings.json)
+│
+├── controller/               REST API layer
+│   ├── NotebookController    /api/notebooks/*
+│   ├── ShellController       /api/shell/* — routes by cell mode to execution service
+│   ├── PackageController     /api/packages/* (Maven)
+│   ├── NuGetController       /api/nuget/* (NuGet)
+│   ├── LLMController         /api/llm/* — routes to active AI provider service
+│   ├── SystemController      /api/system/restart  /api/system/shutdown
+│   └── SettingsController    /api/settings/*
+│
+└── util/
+    └── VenusDisplay          Data science helpers: chart rendering, DataFrame display
+```
+
+### Frontend (`src/main/resources/static/`)
+
+```
+index.html                    Single-page app shell (all tabs, modals, overlays)
+css/
+└── venus.css                 All styles — dark theme, cell colour coding, step navigator
+js/
+├── app.js                    Global init, tab navigation, WebSocket/STOMP, REST helpers
+├── notebook.js               Notebook editor: cells, execution, step navigator, save
+├── console-tab.js            Interactive console (JShell / Java / JS runtimes)
+├── orchestration.js          Pipeline dep-badge rendering, graph validation UI
+├── packages.js               Maven + npm package manager UI
+├── nuget.js                  NuGet package manager UI (C# / F#)
+├── settings.js               Settings form (AI provider, theme, font size, auth)
+├── ai-assistant.js           AI chat + notebook generation; dynamic provider switcher
+├── docs.js                   In-app documentation overlay (tabbed)
+└── server-lifecycle.js       Shutdown/restart overlay, health-poll reconnect
+```
+
+---
+
+## Execution Model
+
+### JShell (default mode)
+
+- State-sharing REPL: all cells in a notebook share the **same JShell session** (`nb-{notebookId}`)
+- Variables, imports, and method definitions persist across cell boundaries within a session
+- Session is reset only when the user clicks **Restart** or the server restarts
+- On every new session: server classpath is injected automatically (Maven packages, data science libs)
+- Pre-loaded imports: `java.util.*`, `java.util.stream.*`, `java.io.*`, `java.math.*`, `java.time.*`, all XChart / Commons Math / Tablesaw / OpenCSV classes, and `VenusDisplay`
+
+### Java (compile-and-run)
+
+- Each cell is compiled as a standalone `public class Main { }` via `javax.tools`
+- Compilation errors are reported with adjusted line numbers (preamble offset removed)
+- Subprocess is used for running the compiled class; stdout/stderr are captured
+
+### JavaScript (Node.js)
+
+- Each cell runs in a Node.js subprocess via `node -e <code>`
+- `require()` resolves packages from `data/npm-modules/node_modules/`
+- Built-in `venus` object provides `venus.table()`, `venus.display()`, `venus.html()`, `venus.stats()`
+
+### C# (`dotnet run`)
+
+- Each cell runs as a **C# 9+ top-level program** inside a generated temp directory with a `.csproj`
+- `dotnet run --project <tempDir> -v q` compiles and runs the cell
+- No `dotnet-script` required — standard .NET SDK only
+- NuGet packages installed via the NuGet tab are added as `<PackageReference>` in the `.csproj`
+- Inline `#r "nuget: PackageId, Version"` directives in cells are stripped (C#) — use NuGet tab instead
+- Type declarations (`class`, `record`, `struct`, `enum`, `namespace`) are automatically moved to the end of `Program.cs` to satisfy the C# 9+ top-level statement ordering rule (CS8803)
+
+### F# (`dotnet fsi`)
+
+- Each cell runs as an `.fsx` script via `dotnet fsi --nologo --exec <file.fsx>`
+- NuGet packages installed via the NuGet tab are prepended as `#r "nuget: ..."` directives
+- Inline `#r "nuget: ..."` directives in cells are **extracted** from the user's code and placed at the **top** of the script file (before any `open` statements), ensuring `dotnet fsi` resolves them before compilation
+- Pre-opened namespaces: `System`, `System.Linq`, `System.Collections.Generic`
+- Built-in helpers: `venusHtml`, `venusDisplay`, `venusTable`
+
+### C++ (`g++` / `clang++`)
+
+- Each cell is compiled by `g++` or `clang++` (auto-detected on PATH) with `-std=c++17 -Wall`
+- Cells run in **notebook mode** by default — Venus wraps the code in `main()` automatically; no boilerplate required
+- If the cell contains `int main(`, it is compiled as a **complete program** with the preamble prepended
+- **Preamble** injected into every cell: 25 standard headers (`<iostream>` through `<chrono>`) + `using namespace std;` + Venus helper functions
+- **Declaration splitting**: lines/blocks that look like class, struct, function, or template definitions are extracted to global scope; statements go inside `main()`
+- **Pipeline dependency injection** (same `//@ anchor:` / `//@ depends:` DSL as C#/F#):
+  - Ancestor **declarations** injected at global scope before current cell's declarations
+  - Ancestor **statements** injected inside `main()` with stdout suppressed via `__VenusNullBuf`
+- **Venus helpers** available in every cell:
+  ```cpp
+  venusHtml("...");              // outputs VENUS_HTML: sentinel → rendered HTML
+  venusDisplay(value);           // cout << value
+  venusTable(myVector);          // formatted item count
+  venusTable(myMap);             // key/value ASCII table
+  ```
+- **Error normalisation**: temp file paths are replaced with `main.cpp`; line numbers are adjusted to subtract the preamble line count
+- **Timeout**: 60 seconds (compile + run combined)
+- **Prerequisite**: `g++` (MinGW-w64 on Windows, `build-essential` on Linux, Xcode CLI on macOS) or `clang++` on PATH
+
+---
+
+## Pipeline / Orchestration System
+
+`OrchestrationService` implements a full dependency graph engine. The same annotation DSL works in **all six execution modes**: JShell, Java, JavaScript, C#, F#, and C++.
+
+### Annotation DSL
+
+```
+//@ anchor: loadData          — give a cell a reusable name
+//@ depends: loadData, utils  — declare prerequisite anchors (local or cross-notebook)
+//@ pipeline: myPipeline      — name a PIPELINE cell
+//@ steps: step1, step2       — ordered step list for a PIPELINE cell
+//@ description: text         — human-readable label
+//@ namespace: com.utils      — wrap JShell cell in a class (cross-notebook only)
+```
+
+### Dependency Resolution
+
+1. Build an `anchor → Cell` map from the notebook
+2. Compute the **transitive closure** of the target cell's dependencies (DFS)
+3. **Topological sort** (Kahn's algorithm) for execution order
+4. **Cycle detection** (DFS back-edge detection) — reports the cycle path in the error
+5. Execute cells in sorted order
+
+### Cross-Notebook References
+
+Cross-notebook references have the form `notebook:{notebookId}/{anchorName}`:
+
+```
+//@ depends: notebook:java-utils/math-helpers
+```
+
+**JShell / Java cross-notebook modules** are loaded by executing the foreign cell's source in the current JShell session. An optional `//@ namespace: com.mylib` annotation wraps the foreign source in a class to prevent name collisions.
+
+**C# / F# cross-notebook modules** cannot share session state (each cell is a subprocess). Instead, `OrchestrationService` pre-builds the foreign cell's **expanded source** — the topologically ordered chain of all its local dependencies' source code, concatenated and annotation-stripped. This expanded source is stored in `DotNetExecutionService`'s per-session anchor cache under the key `"notebook:notebookId/anchorName"`. When the dependent cell compiles, `resolveTransitiveDeps` finds this key and injects the expanded source (with output suppressed) before the current cell's code.
+
+### C#/F# Pipeline Dependency Injection
+
+When a C# or F# cell has `//@ depends: X`:
+
+1. `OrchestrationService` (or `DotNetExecutionService.resolveTransitiveDeps`) resolves the full transitive closure of anchor names in topological order
+2. For each ancestor cell's source, the **executable statements** are wrapped in output suppression:
+   ```csharp
+   var __venusCtxOut = Console.Out;
+   Console.SetOut(TextWriter.Null);
+   // [ancestor code — variables and types are defined but output is silenced]
+   Console.SetOut(__venusCtxOut);
+   ```
+3. For C#: type declarations (`class`, `record`, etc.) from all ancestors are collected and placed **after** all executable statements (satisfying CS8803)
+4. The current cell's code follows with output fully active — only this cell's output is visible
+
+---
+
+## Session Anchor Cache
+
+`DotNetExecutionService` maintains a per-session source cache for C#/F# pipeline support:
+
+```
+sessionAnchorSources: Map<sessionId, Map<anchorKey, sourceCode>>
+```
+
+- **Written** when a cell with `//@ anchor: name` executes successfully (stores the cell's source with annotations intact for transitive `parseDepends` resolution)
+- **Written** by `OrchestrationService.cacheAnchorSource()` when loading cross-notebook C#/F# modules (stores the expanded source under `"notebook:notebookId/anchorName"`)
+- **Read** by `resolveTransitiveDeps` when building the combined program for a dependent cell
+- **Cleared** on session restart (`clearSessionAnchors(sessionId)`)
+
+---
+
+## Real-time Output (WebSocket)
+
+Venus uses **STOMP over SockJS** for streaming cell output.
+
+| Direction | Destination | Payload | Purpose |
+|-----------|-------------|---------|---------|
+| Client → Server | `/app/shell/{sessionId}` | `{code, cellId, mode}` | Execute cell |
+| Server → Client | `/topic/shell/{sessionId}` | `ExecutionResult` | Cell output |
+| Server → Client | `/topic/shell/{sessionId}` | `{type:"input_needed", cellId, text}` | Stdin prompt |
+
+`ExecutionResult` fields: `sessionId`, `cellId`, `output`, `error`, `status`, `success`, `executionTimeMs`, `executionCount`, `notebookId`.
+
+Special output sentinels parsed by `notebook.js`:
+
+| Sentinel | Rendered as |
+|----------|-------------|
+| `VENUS_HTML:<html>` | Inline HTML block in cell output |
+| `VENUS_IMG:data:image/png;base64,...` | Inline PNG chart image |
+
+---
+
+## Server Lifecycle
+
+`SystemController` provides graceful shutdown and self-restart via `/api/system/*`.
+
+- **Shutdown** (`POST /api/system/shutdown`): replies immediately, then calls `SpringApplication.exit()` on a background thread after 300 ms
+- **Restart** (`POST /api/system/restart`): writes an OS-specific **trampoline script** to a temp file, launches it in the background, then exits. The trampoline polls until port 8585 is free, then re-launches the JAR with the same JVM flags
+- **Auto-detect**: `server-lifecycle.js` monitors the WebSocket; if it drops for > 5 s, the overlay appears and `/actuator/health` is polled every 2 s. Server back → page reload. No response in 35 s → "Server stopped" state
+- **External watchdog**: `scripts/start.sh` and `scripts/start.bat` loop on exit code 42 (the "restart requested" sentinel)
+
+---
+
+## Data Science Stack (JShell / Java)
+
+Pre-loaded in every JShell session — no installation required:
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **XChart** | 3.8.6 | Charts (XY, bar, pie, area, histogram) |
+| **Commons Math** | 3.6.1 | Statistics, regression, distributions |
+| **Tablesaw** | 0.43.1 | DataFrame (load CSV, filter, groupBy, aggregate) |
+| **OpenCSV** | 5.9 | Raw CSV parsing |
+
+`VenusDisplay` is the bridge between these libraries and the browser:
+- `VenusDisplay.show(chart)` → PNG → `VENUS_IMG:…` sentinel → `<img>` in cell output
+- `VenusDisplay.show(table)` → HTML → `VENUS_HTML:…` sentinel → rendered HTML in cell output
+
+---
+
+## Storage Layout
+
+```
+venus/
+├── notebooks/
+│   ├── examples/          Pre-built example notebooks (checked in)
+│   ├── tutorials/         Built-in tutorials: JShell, Java, JS, C#, F# series (checked in)
+│   └── <userId>/          User notebooks — gitignored by default
+│       └── *.vnb
+└── data/
+    ├── settings.json      App settings — gitignored (may contain API key)
+    ├── packages.json      Installed Maven packages
+    ├── nuget-packages.json Installed NuGet packages (C# / F#)
+    └── packages/          Downloaded JAR files
+        └── *.jar
+```
+
+### Notebook File Format (`.vnb`)
+
+```json
+{
+  "id": "unique-id",
+  "name": "Notebook Name",
+  "cells": [
+    {
+      "id": "cell-1",
+      "type": "CODE",
+      "mode": "jshell",
+      "source": "// code here",
+      "anchor": "myStep",
+      "dependsOn": ["prevStep", "notebook:other-nb/sharedUtil"],
+      "output": "…",
+      "error": "",
+      "executed": true,
+      "executionCount": 3
+    }
+  ]
+}
+```
+
+Cell `mode` values: `jshell` · `java` · `nodejs` · `csharp` · `fsharp` · `cpp`
+
+---
+
+## Security Model
+
+- **Local only**: no authentication by default. Bind to `127.0.0.1` only (default Spring Boot behaviour).
+- **No API keys in transit**: all three AI providers (Claude, Copilot, Gemini) are invoked as local CLI subprocesses — no credentials leave the machine through Venus.
+- **Code execution**: JShell, Java, Node.js, `dotnet run`, `dotnet fsi`, and `g++`/MSVC all run with the same OS-user permissions as the Venus server process. Do **not** expose Venus to untrusted network access.
+- **CORS**: configured for `localhost` only. Restrict further in production.
+
+---
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| No Lombok | Avoided due to JDK 25+ build compatibility issues; plain Java getters/setters + manual Builder |
+| No frontend build step | Zero tooling friction — change a JS file, refresh the browser |
+| `dotnet run` instead of `dotnet-script` | Standard SDK only, no global tool install required |
+| Source injection for C#/F#/C++ pipeline deps | Processes are isolated; injecting source is the only way to share types/variables across cells |
+| C++ declaration splitting | Brace-depth tracker separates global-scope items (classes/functions) from statements; enables the no-`main()` notebook UX |
+| Multi-CLI AI provider pattern | Each provider (Claude/Copilot/Gemini) is a standalone `*Service`; `LLMController` dispatches via a thin `AIDelegate` interface — adding a new provider requires only a new service + one switch case |
+| Trampoline restart | Works whether started via `mvn spring-boot:run`, `start.sh`, or JAR directly |
+| Health-poll reconnect | More reliable than STOMP reconnect; works regardless of how the server stopped |
+| Cell expand/collapse | CSS `max-height` transition (96px collapsed → 2000px expanded); CodeMirror `refresh()` after transition keeps line rendering correct |
+| Language conversion on mode switch | Mode toggles immediately; an optional banner offers AI-powered conversion via `/api/llm/chat` — non-blocking, auto-dismisses after 15 s |

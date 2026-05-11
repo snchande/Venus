@@ -1,0 +1,198 @@
+{
+  "id": "cpp-501",
+  "name": "C++ Advanced (501)",
+  "description": "Advanced C++17/20 features: move semantics, CRTP, variadic templates, ranges, coroutines, and pipeline anchors.",
+  "cells": [
+    {
+      "id": "cpp501-md-1",
+      "type": "MARKDOWN",
+      "source": "# Advanced C++ in Venus\n\nThis notebook covers modern C++ features at an intermediate-to-advanced level.\n\n**Prerequisites:** Familiarity with C++ basics (see [C++ Introduction](cpp-intro)).\n\n**Topics:**\n- Move semantics and perfect forwarding\n- CRTP (Curiously Recurring Template Pattern)\n- Variadic templates and fold expressions\n- `std::ranges` (C++20)\n- Compile-time programming (`constexpr`)\n- Pipeline anchors — sharing code between cells",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-md-2",
+      "type": "MARKDOWN",
+      "source": "## Move Semantics\n\nMove semantics allow transferring resources from temporary objects instead of copying, eliminating expensive copies.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: buffer\n//@ description: Defines Buffer type\nclass Buffer {\n    vector<int> data;\n    string name;\npublic:\n    Buffer(string n, size_t size) : name(n), data(size, 0) {\n        cout << \"Constructed: \" << name << \" (size=\" << size << \")\\n\";\n    }\n    // Copy constructor\n    Buffer(const Buffer& other) : name(other.name + \"_copy\"), data(other.data) {\n        cout << \"Copied: \" << name << \"\\n\";\n    }\n    // Move constructor\n    Buffer(Buffer&& other) noexcept : name(move(other.name)), data(move(other.data)) {\n        other.name = \"(moved)\";\n        cout << \"Moved: \" << name << \"\\n\";\n    }\n    size_t size() const { return data.size(); }\n    const string& getName() const { return name; }\n};\n\nBuffer b1(\"original\", 1000);\nBuffer b2 = b1;              // copy\nBuffer b3 = move(b1);        // move (cheap — transfers ownership)\n\ncout << \"b1: \" << b1.getName() << \"\\n\";\ncout << \"b2: \" << b2.getName() << \"  size=\" << b2.size() << \"\\n\";\ncout << \"b3: \" << b3.getName() << \"  size=\" << b3.size() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "buffer",
+      "description": "Defines Buffer type"
+    },
+    {
+      "id": "cpp501-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: perfect-forwarding-with-universal-refere\n//@ description: Perfect forwarding with universal references\n// Perfect forwarding with universal references\ntemplate<typename T>\nvoid process(T&& val) {\n    if constexpr (is_lvalue_reference_v<T>) {\n        cout << \"lvalue: \" << val << \"\\n\";\n    } else {\n        cout << \"rvalue: \" << val << \"\\n\";\n    }\n}\n\n// Forwarding factory\ntemplate<typename T, typename... Args>\nunique_ptr<T> makeUnique(Args&&... args) {\n    return make_unique<T>(forward<Args>(args)...);\n}\n\nstring s = \"hello\";\nprocess(s);           // lvalue\nprocess(\"world\");     // rvalue (string literal → temporary)\nprocess(42);          // rvalue\n\nint x = 10;\nprocess(x);           // lvalue\nprocess(x + 5);       // rvalue (temporary)",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "perfect-forwarding-with-universal-refere",
+      "description": "Perfect forwarding with universal references"
+    },
+    {
+      "id": "cpp501-md-3",
+      "type": "MARKDOWN",
+      "source": "## CRTP — Curiously Recurring Template Pattern\n\nCRTP enables static polymorphism (resolved at compile time, no virtual dispatch overhead).",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: crtp-base-printable-mixin\n//@ description: CRTP base: Printable mixin\n// CRTP base: Printable mixin\ntemplate<typename Derived>\nclass Printable {\npublic:\n    void print() const {\n        static_cast<const Derived*>(this)->printImpl();\n    }\n    void printLine() const {\n        print();\n        cout << \"\\n\";\n    }\n};\n\n// CRTP base: Comparable mixin\ntemplate<typename Derived>\nclass Comparable {\npublic:\n    bool operator!=(const Derived& other) const {\n        return !static_cast<const Derived*>(this)->operator==(other);\n    }\n    bool operator>(const Derived& other) const {\n        return other < *static_cast<const Derived*>(this);\n    }\n    bool operator>=(const Derived& other) const {\n        return !(*static_cast<const Derived*>(this) < other);\n    }\n};\n\nstruct Point : Printable<Point>, Comparable<Point> {\n    double x, y;\n    Point(double x, double y) : x(x), y(y) {}\n\n    void printImpl() const {\n        cout << \"Point(\" << x << \", \" << y << \")\";\n    }\n    bool operator==(const Point& o) const { return x==o.x && y==o.y; }\n    bool operator< (const Point& o) const {\n        return (x*x + y*y) < (o.x*o.x + o.y*o.y);  // compare by distance from origin\n    }\n    double dist() const { return sqrt(x*x + y*y); }\n};\n\nPoint p1(3, 4), p2(1, 1), p3(3, 4);\np1.printLine();\np2.printLine();\n\ncout << \"p1 == p3: \" << boolalpha << (p1 == p3) << \"\\n\";\ncout << \"p1 > p2:  \" << (p1 > p2) << \"\\n\";\ncout << \"p1 dist:  \" << p1.dist() << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "crtp-base-printable-mixin",
+      "description": "CRTP base: Printable mixin"
+    },
+    {
+      "id": "cpp501-md-4",
+      "type": "MARKDOWN",
+      "source": "## Variadic Templates and Fold Expressions (C++17)\n\nFold expressions make working with parameter packs dramatically simpler.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: variadic-sum-using-fold-expression\n//@ description: Variadic sum using fold expression\n// Variadic sum using fold expression\ntemplate<typename... Ts>\nauto sum(Ts... args) {\n    return (args + ...);  // unary right fold\n}\n\n// All-of with fold\ntemplate<typename... Bs>\nbool allTrue(Bs... bs) {\n    return (bs && ...);  // fold with &&\n}\n\n// Print all args\ntemplate<typename... Ts>\nvoid printAll(Ts... args) {\n    ((cout << args << \" \"), ...);\n    cout << \"\\n\";\n}\n\n// Tuple-like type list\ntemplate<typename... Ts>\nstruct TypeList {\n    static constexpr size_t size = sizeof...(Ts);\n};\n\ncout << \"sum(1,2,3,4,5) = \" << sum(1,2,3,4,5) << \"\\n\";\ncout << \"sum(1.1, 2.2, 3.3) = \" << sum(1.1, 2.2, 3.3) << \"\\n\";\ncout << \"allTrue(true,true,true) = \" << boolalpha << allTrue(true,true,true) << \"\\n\";\ncout << \"allTrue(true,false,true) = \" << allTrue(true,false,true) << \"\\n\";\n\ncout << \"printAll: \";\nprintAll(42, \"hello\", 3.14, true);\n\nusing MyTypes = TypeList<int, double, string, bool>;\ncout << \"TypeList size: \" << MyTypes::size << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "variadic-sum-using-fold-expression",
+      "description": "Variadic sum using fold expression"
+    },
+    {
+      "id": "cpp501-md-5",
+      "type": "MARKDOWN",
+      "source": "## Constexpr — Compile-time Computation\n\n`constexpr` functions run at compile time when given constant arguments.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: compile-time-factorial\n//@ description: Compile-time factorial\n// Compile-time factorial\nconstexpr long long factorial(int n) {\n    return (n <= 1) ? 1 : n * factorial(n - 1);\n}\n\n// Compile-time Fibonacci\nconstexpr long long fib(int n) {\n    if (n <= 1) return n;\n    long long a = 0, b = 1;\n    for (int i = 2; i <= n; ++i) {\n        long long c = a + b;\n        a = b; b = c;\n    }\n    return b;\n}\n\n// Compile-time array of powers of 2\ntemplate<size_t N>\nconstexpr array<int, N> powersOf2() {\n    array<int, N> result{};\n    for (size_t i = 0; i < N; ++i)\n        result[i] = (1 << i);\n    return result;\n}\n\n// These are computed at compile time:\nconstexpr long long fact10 = factorial(10);\nconstexpr long long fib20  = fib(20);\nconstexpr auto pow2s = powersOf2<8>();\n\ncout << \"10! = \" << fact10 << \"\\n\";\ncout << \"fib(20) = \" << fib20 << \"\\n\";\ncout << \"Powers of 2: \";\nfor (int p : pow2s) cout << p << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "compile-time-factorial",
+      "description": "Compile-time factorial"
+    },
+    {
+      "id": "cpp501-md-6",
+      "type": "MARKDOWN",
+      "source": "## Pipeline Anchors — Sharing Code Between Cells\n\nUse `//@ anchor:` to name a cell, then `//@ depends:` in another to inject it.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "anchor": "cpp_matrix",
+      "source": "//@ anchor: cpp_matrix\n//@ description: A simple Matrix class available to dependent cells\n// A simple Matrix class available to dependent cells\ntemplate<typename T>\nclass Matrix {\n    size_t rows, cols;\n    vector<T> data;\npublic:\n    Matrix(size_t r, size_t c, T fill = T{}) : rows(r), cols(c), data(r*c, fill) {}\n\n    T& at(size_t r, size_t c)             { return data[r*cols+c]; }\n    T  at(size_t r, size_t c) const       { return data[r*cols+c]; }\n\n    Matrix operator+(const Matrix& o) const {\n        Matrix result(rows, cols);\n        for (size_t i = 0; i < data.size(); ++i)\n            result.data[i] = data[i] + o.data[i];\n        return result;\n    }\n\n    Matrix operator*(const Matrix& o) const {\n        Matrix result(rows, o.cols);\n        for (size_t i = 0; i < rows; ++i)\n            for (size_t j = 0; j < o.cols; ++j)\n                for (size_t k = 0; k < cols; ++k)\n                    result.at(i,j) += at(i,k) * o.at(k,j);\n        return result;\n    }\n\n    void print(const string& label = \"\") const {\n        if (!label.empty()) cout << label << \":\\n\";\n        for (size_t i = 0; i < rows; ++i) {\n            cout << \"  [ \";\n            for (size_t j = 0; j < cols; ++j)\n                cout << setw(4) << at(i,j) << \" \";\n            cout << \"]\\n\";\n        }\n    }\n\n    size_t numRows() const { return rows; }\n    size_t numCols() const { return cols; }\n};\n\n// Test the Matrix class\nMatrix<int> m1(2, 2);\nm1.at(0,0)=1; m1.at(0,1)=2;\nm1.at(1,0)=3; m1.at(1,1)=4;\n\nMatrix<int> m2(2, 2);\nm2.at(0,0)=5; m2.at(0,1)=6;\nm2.at(1,0)=7; m2.at(1,1)=8;\n\nm1.print(\"M1\");\nm2.print(\"M2\");",
+      "output": "",
+      "executionCount": 0,
+      "description": "A simple Matrix class available to dependent cells"
+    },
+    {
+      "id": "cpp501-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ depends: cpp_matrix\n//@ anchor: matrix-arithmetic-uses-the-matrix-t-cla\n//@ description: Matrix arithmetic uses the Matrix<T> class defined in cpp_matrix above\n// Matrix arithmetic uses the Matrix<T> class defined in cpp_matrix above\n\nMatrix<int> a(2,2), b(2,2);\na.at(0,0)=1; a.at(0,1)=2; a.at(1,0)=3; a.at(1,1)=4;\nb.at(0,0)=5; b.at(0,1)=6; b.at(1,0)=7; b.at(1,1)=8;\n\nauto sum = a + b;\nauto product = a * b;\n\nsum.print(\"A + B\");\nproduct.print(\"A * B\");",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "matrix-arithmetic-uses-the-matrix-t-cla",
+      "description": "Matrix arithmetic uses the Matrix<T> class defined in cpp_matrix above"
+    },
+    {
+      "id": "cpp501-md-7",
+      "type": "MARKDOWN",
+      "source": "## Exception Safety and RAII\n\nRAII (Resource Acquisition Is Initialization) ensures resources are always released.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: raii-resource-guard\n//@ description: RAII resource guard\n// RAII resource guard\ntemplate<typename F>\nclass ScopeGuard {\n    F cleanup;\n    bool active;\npublic:\n    ScopeGuard(F f) : cleanup(f), active(true) {}\n    ~ScopeGuard() { if (active) cleanup(); }\n    void dismiss() { active = false; }\n};\n\ntemplate<typename F>\nauto makeGuard(F f) { return ScopeGuard<F>(f); }\n\n// Exception-safe transaction pattern\nstruct Database {\n    vector<string> records;\n    vector<string> backup;\n\n    void beginTransaction() {\n        backup = records;\n        cout << \"Transaction started\\n\";\n    }\n\n    void commit() {\n        backup.clear();\n        cout << \"Committed \" << records.size() << \" record(s)\\n\";\n    }\n\n    void rollback() {\n        records = backup;\n        cout << \"Rolled back to \" << records.size() << \" record(s)\\n\";\n    }\n};\n\nDatabase db;\ndb.records = {\"rec1\", \"rec2\"};\n\ntry {\n    db.beginTransaction();\n    auto guard = makeGuard([&db]{ db.rollback(); });\n\n    db.records.push_back(\"rec3\");\n    db.records.push_back(\"rec4\");\n\n    // Simulate error\n    throw runtime_error(\"Simulated failure\");\n\n    db.commit();\n    guard.dismiss();\n} catch (const exception& e) {\n    cout << \"Error: \" << e.what() << \"\\n\";\n}\n\ncout << \"Records after rollback: \" << db.records.size() << \"\\n\";\nfor (auto& r : db.records) cout << \"  \" << r << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "raii-resource-guard",
+      "description": "RAII resource guard"
+    },
+    {
+      "id": "cpp501-md-8",
+      "type": "MARKDOWN",
+      "source": "## Composable Pipelines (C++17 STL)\n\nSTL algorithms compose into pipelines. `std::ranges` / `views::` are C++20 (GCC 10+ / VS 2022 17.2+); the examples below use C++17 equivalents that work everywhere.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: c-17-composable-pipelines-using-stl-alg\n//@ description: C++17 composable pipelines using STL algorithms\n// C++17 composable pipelines using STL algorithms\n// (std::ranges / views:: require C++20 and GCC 10+ / VS2022 17.2+)\nvector<int> numbers = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};\n\n// Filter evens, square them, take first 4\nvector<int> result;\nfor (int x : numbers) {\n    if (x % 2 == 0) {\n        result.push_back(x * x);\n        if (result.size() == 4) break;\n    }\n}\ncout << \"Even squares (first 4): \";\nfor (int x : result) cout << x << \" \";\ncout << \"\\n\";\n\n// Sort and search using iterators\nvector<string> words = {\"banana\", \"apple\", \"cherry\", \"date\", \"elderberry\"};\nsort(words.begin(), words.end());\ncout << \"Sorted: \";\nfor (const auto& w : words) cout << w << \" \";\ncout << \"\\n\";\n\nauto it = find(words.begin(), words.end(), \"cherry\");\nif (it != words.end())\n    cout << \"Found: \" << *it << \" at index \" << distance(words.begin(), it) << \"\\n\";\n\n// copy_if + transform pipeline\nvector<int> evens;\ncopy_if(numbers.begin(), numbers.end(), back_inserter(evens), [](int x){ return x % 2 == 0; });\nvector<int> squared(evens.size());\ntransform(evens.begin(), evens.end(), squared.begin(), [](int x){ return x * x; });\ncout << \"All even squares: \";\nfor (int x : squared) cout << x << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "c-17-composable-pipelines-using-stl-alg",
+      "description": "C++17 composable pipelines using STL algorithms"
+    },
+    {
+      "id": "cpp501-md-9",
+      "type": "MARKDOWN",
+      "source": "## Type Traits and SFINAE\n\nType traits let you query and constrain types at compile time.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: conditional-function-using-if-constexpr\n//@ description: Conditional function using if constexpr\n#include <type_traits>\n\n// Conditional function using if constexpr\ntemplate<typename T>\nstring describe(T val) {\n    if constexpr (is_integral_v<T>) {\n        return \"integer: \" + to_string(val);\n    } else if constexpr (is_floating_point_v<T>) {\n        ostringstream ss;\n        ss << fixed << setprecision(4) << val;\n        return \"float: \" + ss.str();\n    } else if constexpr (is_same_v<T, string>) {\n        return \"string[\" + to_string(val.size()) + \"]: \\\"\" + val + \"\\\"\";\n    } else {\n        return \"other type\";\n    }\n}\n\ncout << describe(42)         << \"\\n\";\ncout << describe(3.14159)    << \"\\n\";\ncout << describe(string(\"hello\")) << \"\\n\";\ncout << describe(true)       << \"\\n\";\n\n// Type trait queries\ncout << \"\\nis_integral<int>:         \" << boolalpha << is_integral_v<int>      << \"\\n\";\ncout << \"is_integral<double>:      \" << is_integral_v<double>   << \"\\n\";\ncout << \"is_same<int,int>:         \" << is_same_v<int,int>      << \"\\n\";\ncout << \"is_base_of<A,B> example:  \";\n\nstruct A {};\nstruct B : A {};\ncout << is_base_of_v<A,B> << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "conditional-function-using-if-constexpr",
+      "description": "Conditional function using if constexpr"
+    },
+    {
+      "id": "cpp501-md-10",
+      "type": "MARKDOWN",
+      "source": "## Concurrency Basics\n\nC++ has built-in threading support via `<thread>`, `<mutex>`, and `<future>`.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp501-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: task1\n//@ description: Declares task1 variable\n#include <thread>\n#include <mutex>\n#include <future>\n#include <atomic>\n\n// Atomic counter (lock-free)\natomic<int> counter{0};\n\nvector<thread> workers;\nfor (int i = 0; i < 4; ++i) {\n    workers.emplace_back([&counter]() {\n        for (int j = 0; j < 1000; ++j)\n            counter.fetch_add(1, memory_order_relaxed);\n    });\n}\nfor (auto& t : workers) t.join();\ncout << \"Atomic counter: \" << counter << \" (expected 4000)\\n\";\n\n// std::async for parallel computation\nauto task1 = async(launch::async, [](){\n    vector<int> v = {1,2,3,4,5};\n    return accumulate(v.begin(), v.end(), 0);\n});\nauto task2 = async(launch::async, [](){\n    int sum = 0;\n    for (int i = 6; i <= 10; ++i) sum += i;\n    return sum;\n});\n\nint result = task1.get() + task2.get();\ncout << \"Sum 1..10 (parallel): \" << result << \" (expected 55)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "task1",
+      "description": "Declares task1 variable"
+    },
+    {
+      "id": "cpp501-md-end",
+      "type": "MARKDOWN",
+      "source": "## Summary\n\n| Feature | C++ Version | Benefit |\n|---------|-------------|----------|\n| Move semantics | C++11 | Zero-cost ownership transfer |\n| Perfect forwarding | C++11 | Preserve value category |\n| `constexpr` | C++11/14/17 | Compile-time computation |\n| Fold expressions | C++17 | Concise variadic templates |\n| Structured bindings | C++17 | Clean tuple unpacking |\n| `if constexpr` | C++17 | Compile-time branches |\n| `std::ranges` | C++20 | Composable lazy sequences |\n| `std::atomic` | C++11 | Lock-free threading |\n| `std::async` | C++11 | Simple async tasks |\n\n> **Venus C++ Note:** All cells compile with `-std=c++17` by default. C++20 features like `std::ranges` work on GCC 10+/Clang 10+.",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

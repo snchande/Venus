@@ -1,0 +1,64 @@
+{
+  "id": "csharp-cross-notebook",
+  "name": "C# Cross-Notebook Pipeline",
+  "description": "Demonstrates importing types and utilities from another notebook using notebook:id/anchor cross-notebook references",
+  "metadata": {
+    "category": "example",
+    "language": "csharp",
+    "level": 0,
+    "subcategory": "Examples & Demos"
+  },
+  "cells": [
+    {
+      "id": "cscross-md-1",
+      "type": "MARKDOWN",
+      "source": "# Cross-Notebook Pipelines in C#\n\nVenus supports **cross-notebook cell references**: a cell in this notebook can declare a dependency on a cell in *any other notebook* using the syntax:\n\n```\n//@ depends: notebook:{notebookId}/{anchorName}\n```\n\nThis lets you:\n- Build **shared utility libraries** once, use them everywhere\n- Keep data models separate from analysis notebooks\n- Share common helpers across a team's notebooks\n\n## This Example\n\nThis notebook imports from **`csharp-shared-utils`** (the C# Shared Utilities notebook):\n\n| Anchor | What it provides |\n|--------|------------------|\n| `notebook:csharp-shared-utils/cs_dataTypes` | `Transaction`, `Product`, `SaleRecord` records |\n| `notebook:csharp-shared-utils/cs_statistics` | `Stats` class: mean, median, stddev |\n| `notebook:csharp-shared-utils/cs_formatting` | `Format` class: currency, table printing |\n\nClick **Run Pipeline** on the pipeline cell at the bottom to run everything end-to-end.",
+      "output": "",
+      "executed": false
+    },
+    {
+      "id": "cscross-load",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_loadTransactions",
+      "dependsOn": ["notebook:csharp-shared-utils/cs_dataTypes"],
+      "source": "//@ anchor: cs_loadTransactions\n//@ depends: notebook:csharp-shared-utils/cs_dataTypes\n//@ description: Load sample transactions using the shared Transaction type\n\n// Transaction is defined in notebook:csharp-shared-utils/cs_dataTypes\nvar transactions = new List<Transaction>\n{\n    new(1, \"Food\",      \"Supermarket weekly shop\",  142.50m, new DateTime(2026,1,5),  \"cleared\"),\n    new(2, \"Transport\", \"Monthly rail pass\",        89.00m,  new DateTime(2026,1,7),  \"cleared\"),\n    new(3, \"Food\",      \"Restaurant dinner\",        67.80m,  new DateTime(2026,1,12), \"cleared\"),\n    new(4, \"Utilities\", \"Electricity bill\",         115.00m, new DateTime(2026,1,15), \"cleared\"),\n    new(5, \"Food\",      \"Online grocery order\",     98.30m,  new DateTime(2026,1,18), \"cleared\"),\n    new(6, \"Transport\", \"Taxi rides\",               34.50m,  new DateTime(2026,1,22), \"cleared\"),\n    new(7, \"Utilities\", \"Internet and phone\",       65.00m,  new DateTime(2026,1,25), \"cleared\"),\n    new(8, \"Food\",      \"Farmers market\",           45.20m,  new DateTime(2026,1,28), \"cleared\"),\n    new(9, \"Leisure\",   \"Cinema tickets\",           28.00m,  new DateTime(2026,2,1),  \"cleared\"),\n    new(10,\"Food\",      \"Cafe and lunch\",           52.40m,  new DateTime(2026,2,3),  \"cleared\"),\n};\n\nConsole.WriteLine($\"Loaded {transactions.Count} transactions\");\nVenusTable(transactions);",
+      "output": "",
+      "executed": false,
+      "error": ""
+    },
+    {
+      "id": "cscross-analyze",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_analyzeSpend",
+      "dependsOn": ["cs_loadTransactions", "notebook:csharp-shared-utils/cs_statistics"],
+      "source": "//@ anchor: cs_analyzeSpend\n//@ depends: cs_loadTransactions, notebook:csharp-shared-utils/cs_statistics\n//@ description: Compute per-category statistics using shared Stats helper\n\n// transactions from cs_loadTransactions; Stats from cs_statistics (shared utils)\nvar byCategory = transactions\n    .GroupBy(t => t.Category)\n    .Select(g => new\n    {\n        Category = g.Key,\n        Total    = g.Sum(t => t.Amount),\n        Count    = g.Count(),\n        Mean     = (decimal)Stats.Mean(g.Select(t => t.Amount)),\n        Median   = Stats.Percentile(g.Select(t => t.Amount), 50),\n        StdDev   = (decimal)Stats.StdDev(g.Select(t => t.Amount))\n    })\n    .OrderByDescending(c => c.Total)\n    .ToList();\n\nConsole.WriteLine(\"Spending by category:\");\nVenusTable(byCategory);",
+      "output": "",
+      "executed": false,
+      "error": ""
+    },
+    {
+      "id": "cscross-report",
+      "type": "CODE",
+      "mode": "csharp",
+      "anchor": "cs_finalReport",
+      "dependsOn": ["cs_analyzeSpend", "notebook:csharp-shared-utils/cs_formatting"],
+      "source": "//@ anchor: cs_finalReport\n//@ depends: cs_analyzeSpend, notebook:csharp-shared-utils/cs_formatting\n//@ description: Formatted summary report using shared Format helper\n\n// byCategory from cs_analyzeSpend; Format from cs_formatting (shared utils)\nvar totalSpend  = transactions.Sum(t => t.Amount);\nvar topCategory = byCategory.First();\nvar foodTotal   = byCategory.FirstOrDefault(c => c.Category == \"Food\")?.Total ?? 0;\n\nVenusHtml($@\"\n<div style='font-family:sans-serif;padding:16px;background:#1e2030;border-radius:8px;color:#cdd6f4'>\n  <h3 style='margin:0 0 12px;color:#89b4fa'>Monthly Spend Summary</h3>\n  <table style='border-collapse:collapse;width:100%'>\n    <tr><td style='padding:4px 12px 4px 0;color:#a6adc8'>Total Spend</td>\n        <td style='color:#a6e3a1;font-weight:bold'>{Format.Currency(totalSpend)}</td></tr>\n    <tr><td style='padding:4px 12px 4px 0;color:#a6adc8'>Top Category</td>\n        <td style='color:#fab387'>{topCategory.Category} — {Format.Currency(topCategory.Total)}</td></tr>\n    <tr><td style='padding:4px 12px 4px 0;color:#a6adc8'>Food Budget</td>\n        <td style='color:#f38ba8'>{Format.Currency(foodTotal)} ({Format.Pct((double)(foodTotal/totalSpend))} of total)</td></tr>\n    <tr><td style='padding:4px 12px 4px 0;color:#a6adc8'>Categories</td>\n        <td style='color:#cba6f7'>{byCategory.Count} tracked</td></tr>\n  </table>\n</div>\");\n\nFormat.Table(\"Category breakdown\",\n    byCategory.Select(c => (c.Category, $\"{Format.Currency(c.Total)} ({c.Count} items)\"))\n);",
+      "output": "",
+      "executed": false,
+      "error": ""
+    },
+    {
+      "id": "cscross-pipeline",
+      "type": "PIPELINE",
+      "mode": "csharp",
+      "anchor": "cs_fullAnalysisPipeline",
+      "pipelineSteps": ["cs_loadTransactions", "cs_analyzeSpend", "cs_finalReport"],
+      "source": "//@ pipeline: C# Cross-Notebook Analysis\n//@ steps: cs_loadTransactions, cs_analyzeSpend, cs_finalReport\n//@ description: Full pipeline — imports types and helpers from shared utils notebook\n// Click ▶ Run Pipeline to execute all steps in dependency order.\n// Venus will automatically load cross-notebook refs from csharp-shared-utils.",
+      "output": "",
+      "executed": false,
+      "error": ""
+    }
+  ]
+}

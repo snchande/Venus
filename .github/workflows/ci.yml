@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Build & Test (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java: [ '21' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+          cache: maven
+
+      - name: Build
+        run: mvn clean package -DskipTests --no-transfer-progress
+
+      - name: Test
+        run: mvn test --no-transfer-progress
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: venus-notebooks-jar
+          path: target/venus-notebooks-*.jar
+          retention-days: 7

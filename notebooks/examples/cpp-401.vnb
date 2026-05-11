@@ -1,0 +1,188 @@
+{
+  "id": "cpp-401",
+  "name": "C++ 401 — Advanced Patterns",
+  "description": "Move semantics, perfect forwarding, concurrency, design patterns, and compile-time programming with constexpr and type traits.",
+  "cells": [
+    {
+      "id": "cpp401-md-0",
+      "type": "MARKDOWN",
+      "source": "# C++ 401 — Advanced Patterns\n\n**Prerequisites:** [C++ 301](cpp-301) — templates, lambdas, smart pointers\n\n**What you'll learn:**\n- Move semantics and rvalue references\n- Perfect forwarding with `std::forward`\n- Concurrency: `std::thread`, `std::mutex`, `std::atomic`, `std::async`\n- Design patterns in modern C++\n- `if constexpr` and type traits\n- Exception safety guarantees",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-md-1",
+      "type": "MARKDOWN",
+      "source": "## 1. Move Semantics\n\nC++11 introduced **rvalue references** (`T&&`) and move semantics. Moving transfers ownership of resources from a source object (often a temporary) instead of copying them — making it effectively free for heap-allocated data.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-1",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: heavy-data\n//@ description: Defines HeavyData type\nclass HeavyData {\n    vector<int> payload;\n    string      label;\npublic:\n    HeavyData(string lbl, size_t n) : label(lbl), payload(n, 42) {\n        cout << \"Constructed \" << label << \" (\" << n << \" ints)\\n\";\n    }\n    HeavyData(const HeavyData& o) : payload(o.payload), label(o.label + \"_copy\") {\n        cout << \"COPY  \" << o.label << \" → \" << label << \" (\" << payload.size() << \" ints copied)\\n\";\n    }\n    HeavyData(HeavyData&& o) noexcept\n        : payload(move(o.payload)), label(move(o.label)) {\n        o.label = \"(moved-from)\";\n        cout << \"MOVE  \" << label << \" (no copy!)\\n\";\n    }\n    HeavyData& operator=(HeavyData&& o) noexcept {\n        payload = move(o.payload);\n        label   = move(o.label);\n        o.label = \"(moved-from)\";\n        cout << \"MOVE= \" << label << \"\\n\";\n        return *this;\n    }\n    string info() const {\n        return label + \"[\" + to_string(payload.size()) + \"]\"; }\n};\n\nHeavyData a(\"alpha\", 1000000);  // 1M ints\nHeavyData b = a;                 // COPY — expensive\nHeavyData c = move(a);          // MOVE — cheap (pointer swap)\n\ncout << \"b: \" << b.info() << \"\\n\";\ncout << \"c: \" << c.info() << \"\\n\";\ncout << \"a: \" << a.info() << \" (empty after move)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "heavy-data",
+      "description": "Defines HeavyData type"
+    },
+    {
+      "id": "cpp401-2",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: move-semantics-in-containers-emplace-b\n//@ description: Move semantics in containers — emplace_back vs push_back\n// Move semantics in containers — emplace_back vs push_back\nvector<string> words;\n\nwords.push_back(\"hello\");          // copy into vector\nwords.push_back(string(\"world\")); // move temporary into vector\nwords.emplace_back(\"venus\");       // construct in-place (most efficient)\n\nstring s = \"existing\";\nwords.push_back(move(s));          // move s into vector\ncout << \"s after move: '\" << s << \"' (empty)\\n\";\n\ncout << \"words: \";\nfor (const auto& w : words) cout << w << \" \";\ncout << \"\\n\";\n\n// Return value optimization (RVO) — compiler elides the copy\nauto makeVector = [](size_t n) {\n    vector<int> v(n, 1); // constructed in-place in caller's frame\n    return v;            // no copy/move — RVO\n};\n\nauto big = makeVector(1000000);\ncout << \"RVO result size: \" << big.size() << \" (no copy/move occurred)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "move-semantics-in-containers-emplace-b",
+      "description": "Move semantics in containers — emplace_back vs push_back"
+    },
+    {
+      "id": "cpp401-md-2",
+      "type": "MARKDOWN",
+      "source": "## 2. Perfect Forwarding\n\n`std::forward` preserves the value category (lvalue/rvalue) of arguments when passing them through template functions.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-3",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: without-forwarding-all-args-become-lva\n//@ description: Without forwarding — all args become lvalues inside the wrapper\n// Without forwarding — all args become lvalues inside the wrapper\ntemplate<typename T>\nvoid wrapperBad(T val) {\n    // val is always an lvalue here, even if called with rvalue\n    cout << \"wrapperBad: val is lvalue ref: \" << is_lvalue_reference_v<T> << \"\\n\";\n}\n\n// With perfect forwarding\ntemplate<typename T>\nvoid wrapperGood(T&& val) {\n    cout << \"forward: is lvalue ref: \" << is_lvalue_reference_v<T&&> << \"\\n\";\n    // forward<T>(val) preserves rvalue-ness for the inner call\n}\n\nstring s = \"hello\";\nwrapperBad(s);           // lvalue\nwrapperBad(string(\"hi\")); // rvalue — but becomes lvalue in wrapperBad\n\nwrapperGood(s);            // lvalue preserved\nwrapperGood(string(\"hi\")); // rvalue preserved\n\n// Practical: forwarding factory\ntemplate<typename T, typename... Args>\nunique_ptr<T> make(Args&&... args) {\n    return make_unique<T>(forward<Args>(args)...);\n}\n\nstruct Point { int x, y; Point(int x, int y) : x(x), y(y) {} };\nauto pt = make<Point>(3, 4);\ncout << \"Point: (\" << pt->x << \", \" << pt->y << \")\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "without-forwarding-all-args-become-lva",
+      "description": "Without forwarding — all args become lvalues inside the wrapper"
+    },
+    {
+      "id": "cpp401-md-3",
+      "type": "MARKDOWN",
+      "source": "## 3. Concurrency\n\nC++11 added portable threading support. The standard library provides threads, mutexes, condition variables, atomics, and async tasks.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-4",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: thread-basics-two-threads-writing-to-a\n//@ description: Thread basics — two threads writing to a shared vector under a mutex\n#include <thread>\n#include <mutex>\n\n// Thread basics — two threads writing to a shared vector under a mutex\nvector<int> results;\nmutex mtx;\n\nauto addResults = [&]() {\n    for (int i = 0; i < 5; i++) {\n        this_thread::sleep_for(chrono::milliseconds(10));\n        lock_guard<mutex> lock(mtx);\n        results.push_back(i * 2);\n    }\n};\n\nthread t1(addResults);\nthread t2(addResults);\nt1.join();\nt2.join();\n\nsort(results.begin(), results.end());\ncout << \"Thread results (\" << results.size() << \" items): \";\nfor (int r : results) cout << r << \" \";\ncout << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "thread-basics-two-threads-writing-to-a",
+      "description": "Thread basics — two threads writing to a shared vector under a mutex"
+    },
+    {
+      "id": "cpp401-4b",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: pass-mutex-by-reference-so-worker-is-a-p\n//@ description: Pass mutex by reference so worker is a pure function — no global state needed\n#include <thread>\n#include <mutex>\n\n// Pass mutex by reference so worker is a pure function — no global state needed\nvoid worker(int id, int count, mutex& mtx) {\n    for (int i = 0; i < count; i++) {\n        lock_guard<mutex> lock(mtx);\n        cout << \"Worker \" << id << \": \" << i << \"\\n\";\n    }\n}\n\nmutex printMtx;\nthread t1(worker, 1, 3, ref(printMtx));\nthread t2(worker, 2, 3, ref(printMtx));\nt1.join();\nt2.join();\ncout << \"Both threads done\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "pass-mutex-by-reference-so-worker-is-a-p",
+      "description": "Pass mutex by reference so worker is a pure function — no global state needed"
+    },
+    {
+      "id": "cpp401-5",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: threads\n//@ description: Declares THREADS variable\n#include <thread>\n#include <atomic>\n#include <future>\n\n// atomic — lock-free integer operations\natomic<int> counter{0};\nconst int THREADS = 4, OPS = 10000;\n\nvector<thread> threads;\nfor (int i = 0; i < THREADS; i++)\n    threads.emplace_back([&](){\n        for (int j = 0; j < OPS; j++)\n            counter.fetch_add(1, memory_order_relaxed);\n    });\nfor (auto& t : threads) t.join();\ncout << \"atomic counter: \" << counter\n     << \" (expected \" << THREADS*OPS << \")\\n\";\n\n// std::async — simple parallel tasks\nauto slowSum = [](int lo, int hi) {\n    int s = 0;\n    for (int i = lo; i <= hi; i++) s += i;\n    return s;\n};\n\nauto f1 = async(launch::async, slowSum, 1,    500);\nauto f2 = async(launch::async, slowSum, 501, 1000);\n\nint total = f1.get() + f2.get();\ncout << \"sum 1..1000 (parallel async): \" << total\n     << \" (expected 500500)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "threads",
+      "description": "Declares THREADS variable"
+    },
+    {
+      "id": "cpp401-6",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: done\n//@ description: Declares done variable\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n\n// condition_variable — thread synchronization\nqueue<int> workQueue;\nmutex queueMtx;\ncondition_variable cv;\nbool done = false;\n\nthread producer([&]() {\n    for (int i = 1; i <= 5; i++) {\n        this_thread::sleep_for(chrono::milliseconds(5));\n        {\n            lock_guard<mutex> lk(queueMtx);\n            workQueue.push(i * 10);\n            cout << \"Produced: \" << i * 10 << \"\\n\";\n        }\n        cv.notify_one();\n    }\n    {\n        lock_guard<mutex> lk(queueMtx);\n        done = true;\n    }\n    cv.notify_all();\n});\n\nthread consumer([&]() {\n    while (true) {\n        unique_lock<mutex> lk(queueMtx);\n        cv.wait(lk, [&]{ return !workQueue.empty() || done; });\n        while (!workQueue.empty()) {\n            cout << \"Consumed: \" << workQueue.front() << \"\\n\";\n            workQueue.pop();\n        }\n        if (done) break;\n    }\n});\n\nproducer.join();\nconsumer.join();\ncout << \"Producer-consumer complete\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "done",
+      "description": "Declares done variable"
+    },
+    {
+      "id": "cpp401-md-4",
+      "type": "MARKDOWN",
+      "source": "## 4. Design Patterns in Modern C++\n\nClassic patterns reimplemented with modern C++ idioms.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-7",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: observer-pattern-with-std-function-call\n//@ description: Observer pattern with std::function callbacks\n// Observer pattern with std::function callbacks\nclass EventEmitter {\n    map<string, vector<function<void(const string&)>>> listeners;\npublic:\n    void on(const string& event, function<void(const string&)> cb) {\n        listeners[event].push_back(cb);\n    }\n    void emit(const string& event, const string& data) {\n        if (auto it = listeners.find(event); it != listeners.end())\n            for (const auto& cb : it->second) cb(data);\n    }\n};\n\nEventEmitter emitter;\nemitter.on(\"data\",  [](const string& d){ cout << \"[Logger] data: \" << d << \"\\n\"; });\nemitter.on(\"data\",  [](const string& d){ cout << \"[Metrics] received: \" << d.size() << \" bytes\\n\"; });\nemitter.on(\"error\", [](const string& e){ cout << \"[Alert] ERROR: \" << e << \"\\n\"; });\n\nemitter.emit(\"data\",  \"hello world\");\nemitter.emit(\"data\",  \"more data\");\nemitter.emit(\"error\", \"connection refused\");",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "observer-pattern-with-std-function-call",
+      "description": "Observer pattern with std::function callbacks"
+    },
+    {
+      "id": "cpp401-8",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: builder-pattern-builder-stores-fields\n//@ description: Builder pattern — Builder stores fields independently (avoids incomplete-type is\n// Builder pattern — Builder stores fields independently (avoids incomplete-type issue)\nstruct HttpRequest {\n    string method_, url_, body_;\n    map<string,string> headers_;\n    int timeout_ = 30;\n\n    struct Builder {\n        string method_, url_, body_;\n        map<string,string> headers_;\n        int timeout_ = 30;\n\n        Builder& method(const string& m)  { method_ = m;  return *this; }\n        Builder& url(const string& u)     { url_ = u;     return *this; }\n        Builder& header(const string& k, const string& v) {\n            headers_[k] = v; return *this;\n        }\n        Builder& body(const string& b)    { body_ = b;    return *this; }\n        Builder& timeout(int t)           { timeout_ = t; return *this; }\n        HttpRequest build() const {\n            return {method_, url_, body_, headers_, timeout_};\n        }\n    };\n\n    void describe() const {\n        cout << method_ << \" \" << url_ << \" (timeout=\" << timeout_ << \"s)\\n\";\n        for (const auto& [k,v] : headers_)\n            cout << \"  \" << k << \": \" << v << \"\\n\";\n        if (!body_.empty()) cout << \"  Body: \" << body_ << \"\\n\";\n    }\n};\n\nauto req = HttpRequest::Builder{}\n    .method(\"POST\")\n    .url(\"/api/data\")\n    .header(\"Content-Type\", \"application/json\")\n    .header(\"Authorization\", \"Bearer token123\")\n    .body(\"{\\\"key\\\": \\\"value\\\"}\")\n    .timeout(60)\n    .build();\n\nreq.describe();",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "builder-pattern-builder-stores-fields",
+      "description": "Builder pattern — Builder stores fields independently (avoids incomplete-type is"
+    },
+    {
+      "id": "cpp401-md-5",
+      "type": "MARKDOWN",
+      "source": "## 5. Compile-time Programming\n\n`if constexpr` and type traits let you branch at **compile time**, generating different code paths with no runtime overhead.",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-9",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: if-constexpr-compile-time-branch-diff\n//@ description: if constexpr — compile-time branch (different code per type)\n#include <type_traits>\n\n// if constexpr — compile-time branch (different code per type)\ntemplate<typename T>\nvoid printType(const T& val) {\n    if constexpr (is_integral_v<T>) {\n        cout << \"int[\" << sizeof(T)*8 << \"b]: \" << val\n             << \"  hex: 0x\" << hex << val << dec << \"\\n\";\n    } else if constexpr (is_floating_point_v<T>) {\n        cout << \"float: \" << scientific << setprecision(6) << val << defaultfloat << \"\\n\";\n    } else if constexpr (is_same_v<T, string>) {\n        cout << \"string[\" << val.size() << \"]: \\\"\" << val << \"\\\"\\n\";\n    } else {\n        cout << \"other: \" << val << \"\\n\";\n    }\n}\n\nprintType(42);\nprintType(255u);\nprintType(3.14159);\nprintType(string(\"hello\"));\nprintType('A');\n\n// constexpr function — computed at compile time when args are const\nconstexpr int factorial(int n) {\n    return (n <= 1) ? 1 : n * factorial(n - 1);\n}\nconstexpr long long fib(int n) {\n    long long a=0, b=1;\n    for (int i=2; i<=n; i++) { auto c=a+b; a=b; b=c; }\n    return b;\n}\n\n// These are evaluated at compile time (no runtime cost)\nstatic_assert(factorial(5) == 120,  \"5! must be 120\");\nstatic_assert(fib(10)      == 55,   \"fib(10) must be 55\");\n\ncout << \"10! = \" << factorial(10) << \" (compile-time)\\n\";\ncout << \"fib(30) = \" << fib(30) << \" (compile-time)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "if-constexpr-compile-time-branch-diff",
+      "description": "if constexpr — compile-time branch (different code per type)"
+    },
+    {
+      "id": "cpp401-10",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: sfinae-enable-if-selects-function-over\n//@ description: SFINAE — enable_if selects function overload at compile time\n#include <type_traits>\n\n// SFINAE — enable_if selects function overload at compile time\ntemplate<typename T, enable_if_t<is_integral_v<T>, int> = 0>\nstring classify(T) { return \"integer\"; }\n\ntemplate<typename T, enable_if_t<is_floating_point_v<T>, int> = 0>\nstring classify(T) { return \"floating-point\"; }\n\ntemplate<typename T, enable_if_t<is_same_v<T,string>, int> = 0>\nstring classify(T) { return \"string\"; }\n\ncout << \"classify(42):         \" << classify(42)          << \"\\n\";\ncout << \"classify(3.14):       \" << classify(3.14)         << \"\\n\";\ncout << \"classify(string\\\"hi\\\"): \" << classify(string(\"hi\")) << \"\\n\";\n\n// Type transformation traits\ncout << \"\\nType traits:\\n\";\ncout << \"remove_const<const int>:    int? \" << is_same_v<remove_const_t<const int>, int> << \"\\n\";\ncout << \"add_pointer<int>:   int*? \"        << is_same_v<add_pointer_t<int>, int*>      << \"\\n\";\ncout << \"is_pod<int>: \"                     << is_trivially_copyable_v<int>             << \"\\n\";\ncout << \"is_abstract<vector<int>>: \"        << is_abstract_v<vector<int>>              << \"\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "sfinae-enable-if-selects-function-over",
+      "description": "SFINAE — enable_if selects function overload at compile time"
+    },
+    {
+      "id": "cpp401-md-6",
+      "type": "MARKDOWN",
+      "source": "## 6. Exception Safety Levels\n\nC++ has four exception safety guarantees:\n\n| Level | Guarantee |\n|-------|-----------|\n| **No-throw** | Operation never throws (`noexcept`) |\n| **Strong** | Either succeeds fully or rolls back (commit-or-rollback) |\n| **Basic** | Invariants preserved; resources not leaked, but state may change |\n| **None** | No guarantees — avoid this |",
+      "output": "",
+      "executionCount": 0
+    },
+    {
+      "id": "cpp401-11",
+      "type": "CODE",
+      "mode": "cpp",
+      "source": "//@ anchor: strong-exception-safety-via-copy-and-swa\n//@ description: Strong exception safety via copy-and-swap idiom\n// Strong exception safety via copy-and-swap idiom\nclass StrongVector {\n    vector<int> data;\npublic:\n    StrongVector(initializer_list<int> il) : data(il) {}\n\n    // Strong guarantee: either all appended or none\n    void appendAll(const vector<int>& items) {\n        vector<int> tmp = data;          // make a copy\n        for (int x : items) {\n            if (x < 0) throw invalid_argument(\"Negative values not allowed: \" + to_string(x));\n            tmp.push_back(x);\n        }\n        data = move(tmp);                // noexcept swap — commit\n    }\n\n    void print() const {\n        cout << \"[\";\n        for (size_t i=0; i<data.size(); i++) {\n            if (i) cout << \", \";\n            cout << data[i];\n        }\n        cout << \"]\\n\";\n    }\n    size_t size() const { return data.size(); }\n};\n\nStrongVector sv = {1, 2, 3};\ncout << \"Before: \"; sv.print();\n\n// Successful transaction\nsv.appendAll({4, 5, 6});\ncout << \"After good append: \"; sv.print();\n\n// Failed transaction — strong guarantee: original preserved\ntry {\n    sv.appendAll({7, 8, -9, 10}); // fails on -9\n} catch (const invalid_argument& e) {\n    cout << \"Error: \" << e.what() << \"\\n\";\n}\ncout << \"After failed append: \"; sv.print();\ncout << \"Size unchanged: \" << sv.size() << \" (strong guarantee)\\n\";",
+      "output": "",
+      "executionCount": 0,
+      "anchor": "strong-exception-safety-via-copy-and-swa",
+      "description": "Strong exception safety via copy-and-swap idiom"
+    },
+    {
+      "id": "cpp401-md-end",
+      "type": "MARKDOWN",
+      "source": "## Summary — C++ 401 Complete!\n\n| Topic | Key Points |\n|-------|------------|\n| Move semantics | `T&&`, `noexcept`, move ctor + move assignment; use `make_unique`/`emplace_back` |\n| Perfect forwarding | `template<typename T> f(T&& v)` + `forward<T>(v)` preserves value category |\n| `std::thread` | Join/detach; always protect shared state with `mutex` or `atomic` |\n| `std::async` | Simplest way to run tasks in parallel; `future::get()` synchronizes |\n| `condition_variable` | Producer-consumer patterns; `wait` + `notify_one`/`notify_all` |\n| Observer pattern | `map<string, vector<function<>>>` for type-safe event dispatch |\n| Builder pattern | Inner `Builder` class with chained setters; `build()` returns complete object |\n| `if constexpr` | Compile-time branching; different code per type, no runtime overhead |\n| SFINAE / `enable_if` | Select overloads at compile time; use concepts (C++20) for cleaner syntax |\n| Strong exception safety | Copy-and-swap idiom: modify a copy, commit with `move` |\n\n**Next:** [C++ 501](cpp-501) — CRTP, variadic templates, std::ranges, and metaprogramming",
+      "output": "",
+      "executionCount": 0
+    }
+  ],
+  "metadata": {
+    "language": "cpp",
+    "level": "401",
+    "created": "2026-05-02T00:00:00Z"
+  }
+}

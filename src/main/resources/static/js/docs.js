@@ -1,0 +1,1960 @@
+/**
+ * Venus Notebooks — In-App Documentation
+ * Usage Guide · Setup & Install · Tutorials · Pipelines/Workflows · MCP & Agents
+ * API Reference · Architecture · Developer Guide
+ */
+
+const DocsPanel = (() => {
+    const DOCS = {
+
+// ═══════════════════════════════════════════════════════
+// USER MANUAL
+// ═══════════════════════════════════════════════════════
+usage: `
+# Venus Notebooks — User Guide
+
+Venus is a multi-language interactive notebook environment. Write and run code across six languages — JShell, Java, JavaScript, C#, F#, and C++ — in cells that live alongside Markdown documentation. Organise work with named Workflows, get AI assistance from Claude, GitHub Copilot, or Gemini, and expose everything as an API.
+
+---
+
+## 1. Getting Started
+
+1. **Open the app** at [http://localhost:8585](http://localhost:8585)
+2. **Create a notebook** — click **+ New** in the top bar, give it a name, press Enter
+3. **Add cells** — use the toolbar:
+   - **+ Code** — an executable code cell (default: JShell)
+   - **+ Markdown** — a text/documentation cell
+   - **+ Pipeline** — a named workflow cell (see Section 5)
+4. **Run a code cell** — press the ▶ button, or press **Shift+Enter** inside the editor
+5. **Save** — press **Ctrl+S** or click **Save**
+
+---
+
+## 2. Execution Modes
+
+Every code cell has an **execution mode** badge in its header. Click it to cycle through all available languages.
+
+| Mode badge | Language | Runtime | Shared state |
+|---|---|---|---|
+| **JShell** | Java (REPL) | Built-in JDK | ✓ Shared across cells |
+| **Java** | Java (compile+run) | \`javax.tools\` + subprocess | ✗ Per-cell |
+| **JS** | JavaScript | Node.js subprocess | ✗ Per-cell |
+| **C#** | C# 9+ top-level | \`dotnet run\` | ✗ Per-cell (pipeline injection) |
+| **F#** | F# Script | \`dotnet fsi\` | ✗ Per-cell (pipeline injection) |
+| **C++** | C++ 17/20 | MSVC / GCC / Clang subprocess | ✗ Per-cell |
+
+---
+
+### 2.1 JShell Mode — Java REPL (default)
+
+All cells in a notebook share **one JShell session**. Variables, methods, and imports declared in one cell are available in all later cells — just like Jupyter.
+
+\`\`\`java
+// Cell 1 — declare variables
+var name = "Venus";
+var version = 2;
+
+// Cell 2 — use what Cell 1 declared
+System.out.printf("Hello from %s v%d!%n", name, version);
+\`\`\`
+
+**Tips:**
+- Omit \`public class\` and \`public static void main\` — write statements directly
+- Use \`var\` for type inference
+- Expressions automatically show their value (green return-value display)
+- Pre-loaded: \`java.util.*\`, streams, Tablesaw, XChart, Commons Math, OpenCSV
+
+---
+
+### 2.2 Java Mode — Compile + Run
+
+Each cell is compiled as a standalone \`public class Main\` and executed in a subprocess.
+
+\`\`\`java
+public class Greeter {
+    private final String name;
+    public Greeter(String name) { this.name = name; }
+    public String greet() { return "Hello, " + name + "!"; }
+    public static void main(String[] args) {
+        System.out.println(new Greeter("World").greet());
+    }
+}
+\`\`\`
+
+Bare statements are auto-wrapped — no class boilerplate required.
+
+---
+
+### 2.3 JavaScript Mode — Node.js
+
+Each cell runs as a Node.js script. A built-in \`venus\` object provides output helpers.
+
+\`\`\`javascript
+const data = [10, 25, 37, 42, 18];
+const mean = data.reduce((a, b) => a + b, 0) / data.length;
+venus.table([{ metric: "Mean", value: mean.toFixed(2) }]);
+\`\`\`
+
+**Built-in helpers:** \`venus.table(rows)\`, \`venus.display(value)\`, \`venus.html(html)\`, \`venus.stats(arr)\`
+
+Install npm packages via the **Packages → npm** tab. Modules are available via \`require()\`.
+
+---
+
+### 2.4 C# Mode — dotnet run
+
+Each C# cell runs as a **C# 9+ top-level program** compiled and executed via \`dotnet run\`. No project file setup required — Venus generates everything automatically.
+
+\`\`\`csharp
+//@ anchor: loadData
+//@ description: Load transaction records
+
+var transactions = new List<(string Category, decimal Amount)>
+{
+    ("Food",      142.50m),
+    ("Transport",  89.00m),
+    ("Utilities", 115.00m),
+};
+
+Console.WriteLine($"Loaded {transactions.Count} records");
+VenusTable(transactions);
+\`\`\`
+
+**Built-in helpers:** \`VenusHtml(html)\`, \`VenusDisplay(obj)\`, \`VenusTable<T>(list)\`
+
+**Auto-usings:** \`System\`, \`System.Linq\`, \`System.Collections.Generic\`, \`System.Text\`, \`System.IO\`
+
+Use the **Packages → NuGet** tab to install NuGet packages. They are automatically injected into every C# and F# cell.
+
+---
+
+### 2.5 F# Mode — dotnet fsi
+
+Each F# cell runs as an \`.fsx\` script via F# Interactive. No installation beyond the .NET SDK.
+
+\`\`\`fsharp
+//@ anchor: computeStats
+//@ description: Compute basic statistics
+
+let values = [| 10.0; 25.0; 37.0; 42.0; 18.0 |]
+let mean   = Array.average values
+let sorted = Array.sort values
+let median = sorted.[sorted.Length / 2]
+
+printfn "Mean:   %.2f" mean
+printfn "Median: %.2f" median
+venusTable [| {| Metric = "Mean"; Value = mean |}
+              {| Metric = "Median"; Value = median |} |]
+\`\`\`
+
+**Built-in helpers:** \`venusHtml\`, \`venusDisplay\`, \`venusTable\`
+
+**Auto-opens:** \`System\`, \`System.Linq\`, \`System.Collections.Generic\`
+
+Inline \`#r "nuget: PackageId, Version"\` directives are supported and automatically placed at the correct position in the script.
+
+---
+
+### 2.6 C++ Mode — Native Compilation
+
+Each C++ cell is compiled and run as a standalone program using the best available compiler: **MSVC** on Windows (Visual Studio Build Tools), **GCC** or **Clang** on macOS/Linux. No project setup required — Venus generates a temp source file, compiles it, and runs it.
+
+\`\`\`cpp
+//@ anchor: hello-cpp
+//@ description: Basic C++ hello world with STL
+
+#include <iostream>
+#include <vector>
+#include <numeric>
+
+int main() {
+    std::vector<int> nums = {1, 2, 3, 4, 5};
+    int sum = std::accumulate(nums.begin(), nums.end(), 0);
+    std::cout << "Sum: " << sum << std::endl;
+    return 0;
+}
+\`\`\`
+
+**Standard headers included by default** (no \`#include\` needed — but you can add them for clarity):
+\`<iostream>\`, \`<vector>\`, \`<string>\`, \`<map>\`, \`<algorithm>\`, \`<numeric>\`, \`<sstream>\`, \`<fstream>\`, \`<functional>\`, \`<memory>\`, \`<thread>\`, \`<mutex>\`, \`<chrono>\`, \`<regex>\`, \`<filesystem>\`, \`<optional>\`, \`<variant>\`, \`<tuple>\`, \`<array>\`, \`<deque>\`, \`<queue>\`, \`<stack>\`, \`<set>\`, \`<unordered_map>\`, \`<unordered_set>\`
+
+**Important:** C++ cells are per-cell isolated — there is no shared state between cells. Each cell compiles and runs as a complete program.
+
+See **Packages → C++ (Built-in)** for the full header reference grouped by category.
+
+---
+
+### 2.7 Cell Output
+
+| Output type | Shown as |
+|---|---|
+| \`System.out.println\` / \`Console.WriteLine\` / \`console.log\` / \`printfn\` / \`std::cout\` | Plain text below the cell |
+| Return value expression (JShell) | Green ⟹ value display |
+| \`VenusHtml()\` / \`venus.html()\` / \`venusHtml\` | Rendered inline HTML block |
+| \`VenusDisplay(chart)\` (XChart) | Inline PNG chart image |
+| Compile error | Red ✖ with line numbers |
+| Runtime exception | Red ✖ with stack trace excerpt |
+
+---
+
+## 3. Markdown Cells
+
+Click a Markdown cell to enter edit mode. Press **Escape** or click elsewhere to render.
+
+Supported: headings, bold/italic, lists, code blocks (\`\`\`java\`\`\`), blockquotes, tables, links, inline code.
+
+---
+
+## 4. Keyboard Shortcuts
+
+| Key | Action |
+|---|---|
+| **Shift+Enter** | Run current cell |
+| **Ctrl+Enter** | Run current cell (alternative) |
+| **Ctrl+S** | Save notebook |
+| **Ctrl+\\** | Toggle AI Assistant sidebar |
+| **↑ / ↓** (Console) | Navigate command history |
+| **Escape** (Markdown) | Exit edit mode |
+
+---
+
+## 5. Package Managers
+
+### Maven (Java / JShell)
+
+Go to **Packages → Maven** to install Maven Central packages.
+
+1. Enter a Maven coordinate: \`groupId:artifactId:version\`
+2. Click **Install** — the JAR is downloaded and added to all JShell sessions
+3. Use it in any JShell or Java cell — no import step required for pre-installed libs
+
+### npm (JavaScript)
+
+Go to **Packages → npm** to install npm packages.
+
+1. Enter a package name (e.g. \`lodash\`, \`mathjs\`)
+2. Click **Install** — the package is downloaded to \`data/npm-modules/\`
+3. Use via \`require('lodash')\` in JS cells
+
+### NuGet (C# / F#)
+
+Go to **Packages → NuGet** to install NuGet packages.
+
+1. Enter a Package ID and Version (e.g. \`Newtonsoft.Json\`, \`13.0.3\`)
+2. Click **Install** — the package is registered and automatically injected into every C# and F# cell
+3. Use it immediately — no \`#r\` directive needed in cell code
+
+### C++ (Built-in Headers)
+
+Go to **Packages → C++ (Built-in)** to see the reference panel.
+
+C++ does **not** use installable packages — instead, Venus pre-includes 26 standard C++ headers covering all major categories: I/O, containers, algorithms, threading, filesystem, and more. The panel shows these grouped by category with usage examples.
+
+For third-party libraries (Boost, Eigen, nlohmann/json, etc.) install them system-wide using your OS package manager so the compiler can find them — Venus does not manage C++ package installation.
+
+> **Removing a package:** The Maven, npm, and NuGet tabs each have a **Remove** button next to installed packages. You'll be warned that any notebook cells using that package will fail until it is re-installed.
+
+---
+
+## 6. Cell Workflows (Pipelines)
+
+Venus includes a named-cell dependency system that works across all five languages. See the **Pipelines** tab for the full reference.
+
+**Quick start:**
+1. Click the **+ anchor** badge in a cell header to name a cell (e.g. \`loadData\`)
+2. Add \`//@ depends: loadData, setup\` at the top of a dependent cell
+3. Click **▶▶** (run-with-deps) to auto-execute prerequisites in order
+4. Add a **+ Pipeline** cell to define and run a complete named workflow
+
+---
+
+## 7. AI Assistant
+
+Open with **Ctrl+\\** or the **AI** button.
+
+- **Chat** — ask anything about code in any of the six languages; attach cell context with the 🤖 button
+- **Generate notebook** — click ★, describe your goal, get a full multi-cell notebook
+- **Explain / Fix** — right-click on a cell or use the 🤖 button to explain or fix errors
+- **Insert code** — code blocks in AI responses include **+ Insert into notebook**
+- **Switch provider** — use the provider bar at the top of the AI panel to switch between Claude, GitHub Copilot CLI, and Gemini CLI. The active provider is saved in Settings.
+- **Language conversion** — when you switch a cell's language, a banner appears offering to convert the existing code to the new language using AI
+
+All three providers run as **local CLI subprocesses** — no API key or cloud account needed (only CLI login).
+
+---
+
+## 8. Interactive Console
+
+The Console tab is a live REPL for JShell, Java, and JavaScript — separate from notebooks.
+
+- **JShell** — stateful; use the Session field to share a notebook's session (\`nb-{notebookId}\`)
+- **Java** — compile-and-run per command
+- **JavaScript** — Node.js per command
+- **Tab** — auto-complete in JShell mode
+- **↑ / ↓** — navigate history (up to 500 entries)
+
+---
+
+## 9. Settings
+
+| Setting | Description |
+|---|---|
+| AI Provider | Claude CLI · GitHub Copilot CLI · Gemini CLI |
+| Model | Model name for the selected provider (e.g. claude-sonnet-4-6) |
+| Theme | Dark (default) or Light |
+| Font Size | Editor font size in pixels |
+| Line Numbers | Show/hide in code cells |
+| Focus executing cell | Scroll to the cell being run during pipeline execution |
+
+The **Server Status** panel shows which runtimes are detected: Java, Node.js, .NET SDK, C++ Compiler, Claude CLI, Copilot CLI, Gemini CLI.
+
+---
+
+## 10. Saving
+
+- **Auto-save** every 30 seconds when changes are present (yellow dot on Save button)
+- **Manual save** with Ctrl+S
+- Notebooks are \`.vnb\` JSON files in \`notebooks/\` — cell output is persisted with the notebook
+`,
+
+// ═══════════════════════════════════════════════════════
+// SETUP & INSTALL
+// ═══════════════════════════════════════════════════════
+setup: `
+# Setup & Install
+
+Venus runs on any platform — Windows, macOS, and Linux. Install only the runtimes you plan to use.
+
+---
+
+## Required: Java
+
+| Requirement | Minimum | Recommended |
+|---|---|---|
+| Java JDK | 17 | 21 LTS |
+| Maven | 3.8 | 3.9+ |
+
+> You need a full **JDK**, not just a JRE — JShell is a JDK tool.
+> Verify: \`javac -version\` (should show 17+)
+
+**Windows (JAVA_HOME):**
+\`\`\`cmd
+set JAVA_HOME=C:\\Program Files\\Java\\jdk-21
+set PATH=%JAVA_HOME%\\bin;%PATH%
+\`\`\`
+
+**Mac/Linux:**
+\`\`\`bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+\`\`\`
+
+---
+
+## Optional: Node.js (JavaScript cells)
+
+| Requirement | Minimum |
+|---|---|
+| Node.js | 18 LTS |
+
+Download from [nodejs.org](https://nodejs.org). After install, verify: \`node --version\`
+
+Without Node.js, JavaScript cells will fail. All other languages (JShell, Java, C#, F#) work normally.
+
+---
+
+## Optional: .NET SDK (C# and F# cells)
+
+| Requirement | Minimum |
+|---|---|
+| .NET SDK | 6.0 |
+
+Download from [dot.net](https://dot.net). The SDK is free and runs on Windows, Mac, and Linux.
+
+**No extra tools needed** — Venus uses \`dotnet run\` for C# and \`dotnet fsi\` for F#, both bundled in the SDK.
+
+Verify after install:
+\`\`\`bash
+dotnet --version      # SDK version
+dotnet fsi --version  # F# Interactive version
+\`\`\`
+
+Without .NET SDK, C# and F# cells will show a ".NET SDK not found" error. JShell, Java, and JavaScript cells work normally.
+
+### NuGet packages
+
+C# and F# packages are installed via the **Packages → NuGet** tab. Venus uses the .NET SDK's built-in NuGet restore — no extra NuGet CLI installation needed.
+
+NuGet package cache location:
+- **Windows:** \`%USERPROFILE%\\.nuget\\packages\`
+- **Mac/Linux:** \`~/.nuget/packages\`
+
+---
+
+## Optional: C++ (C++ cells)
+
+Venus detects whichever C++ compiler is available on your system. No extra install needed if you already have one.
+
+| Platform | Compiler | Install |
+|---|---|---|
+| Windows | MSVC | Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) — select "Desktop development with C++" |
+| macOS | Clang | \`xcode-select --install\` |
+| Linux | GCC | \`sudo apt install g++\` or \`sudo dnf install gcc-c++\` |
+
+Verify: \`cl\` (Windows) or \`g++ --version\` / \`clang++ --version\`
+
+Without a C++ compiler, C++ cells will show a "No C++ compiler found" error. All other languages work normally.
+
+---
+
+## Optional: AI Assistant
+
+Venus supports three AI providers — all run as **local CLI subprocesses**, no API key required.
+
+### Claude CLI (default)
+
+1. Install Claude Code from [claude.ai/code](https://claude.ai/code)
+2. Run \`claude auth\` in a terminal to sign in
+3. Start Venus — Claude is detected automatically
+
+Verify: \`claude --version\`
+
+### GitHub Copilot CLI
+
+1. Install: \`npm install -g @githubnext/github-copilot-cli\`
+2. Authenticate: \`github-copilot-cli auth\`
+3. Select **GitHub Copilot** in Venus Settings → AI Provider
+
+Verify: \`copilot --version\`
+
+### Gemini CLI
+
+1. Install: \`npm install -g @google/gemini-cli\`
+2. Authenticate: \`gemini auth\`
+3. Select **Gemini** in Venus Settings → AI Provider
+
+Verify: \`gemini --version\`
+
+The Settings tab → Server Status shows which AI providers are detected.
+
+---
+
+## Building and Running Venus
+
+### Step 1 — Get the code
+
+\`\`\`bash
+git clone https://github.com/yourusername/venus-notebooks.git
+cd venus-notebooks
+\`\`\`
+
+### Step 2 — Build
+
+\`\`\`bash
+mvn clean package -DskipTests
+\`\`\`
+
+Creates \`target/venus-notebooks-1.0.0-SNAPSHOT.jar\`.
+
+### Step 3 — Start Venus
+
+**Option A — Windows launcher (recommended)**
+\`\`\`cmd
+venus
+\`\`\`
+Auto-builds if needed, starts the server, and opens your browser.
+
+**Option B — Startup scripts**
+\`\`\`bash
+./scripts/start.sh      # Unix/Mac
+scripts\\start.bat       # Windows
+\`\`\`
+
+**Option C — Maven dev mode**
+\`\`\`bash
+mvn spring-boot:run
+\`\`\`
+
+**Option D — JAR directly**
+\`\`\`bash
+java \\
+  --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \\
+  --add-opens=java.base/java.lang=ALL-UNNAMED \\
+  --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \\
+  -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+\`\`\`
+
+### Step 4 — Open Browser
+
+Navigate to: **http://localhost:8585**
+
+---
+
+## Environment Verification Checklist
+
+| Runtime | Verify command | Expected |
+|---|---|---|
+| Java JDK | \`javac -version\` | \`javac 17\` or higher |
+| Maven | \`mvn -version\` | \`Apache Maven 3.8\` or higher |
+| Node.js | \`node --version\` | \`v18\` or higher |
+| .NET SDK (C#) | \`dotnet --version\` | \`6.0\` or higher |
+| F# Interactive | \`dotnet fsi --version\` | \`F# ...\` line |
+| C++ (Windows) | \`cl\` | MSVC version line |
+| C++ (Mac/Linux) | \`g++ --version\` or \`clang++ --version\` | any version |
+| Claude CLI | \`claude --version\` | any version |
+| Copilot CLI | \`copilot --version\` | any version |
+| Gemini CLI | \`gemini --version\` | any version |
+
+The **Settings → Server Status** panel shows which runtimes Venus detected on startup.
+
+---
+
+## Configuration
+
+### Change port (default: 8585)
+
+In \`src/main/resources/application.properties\`:
+\`\`\`properties
+server.port=9000
+\`\`\`
+
+Or at startup:
+\`\`\`bash
+java ... -jar venus-notebooks.jar --server.port=9000
+\`\`\`
+
+---
+
+## Venus CLI (Windows)
+
+\`venus.cmd\` is in the project root:
+
+| Command | Description |
+|---|---|
+| \`venus\` | Start server, open browser |
+| \`venus start --bg\` | Start in background (logs → \`venus.log\`) |
+| \`venus stop\` | Stop the running server |
+| \`venus status\` | Running state, PID, Java version |
+| \`venus rebuild\` | Force clean build |
+| \`venus logs\` | Tail \`venus.log\` |
+
+---
+
+## IDE Setup
+
+### IntelliJ IDEA
+
+Add these JVM args to your run configuration:
+\`\`\`
+--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED
+\`\`\`
+
+### VS Code
+
+In \`.vscode/launch.json\`:
+\`\`\`json
+{
+  "configurations": [{
+    "type": "java",
+    "name": "Venus Notebooks",
+    "request": "launch",
+    "mainClass": "com.venus.VenusApplication",
+    "vmArgs": "--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED"
+  }]
+}
+\`\`\`
+
+---
+
+## Troubleshooting
+
+### JShell not starting / InaccessibleObjectException
+Missing JVM flags or JRE instead of JDK. Ensure you use all three \`--add-opens\` flags and that \`javac -version\` works.
+
+### C# cells fail — ".NET SDK not found"
+Install the .NET SDK from [dot.net](https://dot.net). Verify: \`dotnet --version\`. Restart Venus.
+
+### F# cells fail — ".NET SDK not found"
+Same fix — F# Interactive (\`dotnet fsi\`) is bundled with the .NET SDK.
+
+### NuGet packages not loading
+Check **Packages → NuGet** tab that the package is listed. Ensure internet access for first-time package download. The .NET runtime caches packages in \`~/.nuget/packages\` after first use.
+
+### C++ cells fail — "No C++ compiler found"
+- **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) with the "Desktop development with C++" workload. Restart Venus.
+- **macOS:** Run \`xcode-select --install\`. Verify: \`clang++ --version\`.
+- **Linux:** Run \`sudo apt install g++\` (Debian/Ubuntu) or \`sudo dnf install gcc-c++\` (Fedora).
+
+### AI not responding
+- **Claude:** Run \`claude auth\` in a terminal, then restart Venus. Check Settings → Server Status: **Claude CLI** must show ✓ Found.
+- **Copilot CLI:** Run \`github-copilot-cli auth\`. Verify: \`copilot --version\`.
+- **Gemini CLI:** Run \`gemini auth\`. Verify: \`gemini --version\`.
+- Switch providers in Settings → AI Provider if one CLI is not available.
+
+### Port 8585 in use
+Change the port in \`application.properties\` or pass \`--server.port=8586\` at startup.
+
+### WebSocket connection failed
+Check the browser console (F12). Ensure no proxy is intercepting WebSocket connections. Try restarting the server.
+
+### Package download fails (Maven)
+Verify internet access to \`repo1.maven.org\`. Check the coordinate format: \`groupId:artifactId:version\`.
+`,
+
+// ═══════════════════════════════════════════════════════
+// TUTORIALS
+// ═══════════════════════════════════════════════════════
+tutorials: `
+# Tutorial Notebooks
+
+Venus ships with **built-in tutorial notebooks** covering all five languages, from beginner to expert. Open them from the **Browse** button in the toolbar.
+
+---
+
+## JShell Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **JShell 101** | Beginner | Variables, types, operators, control flow, methods, collections |
+| **JShell 201** | Intermediate | Lambdas, streams, records, Optional, functional patterns |
+| **JShell 301** | Advanced | Concurrency, virtual threads, sealed types, pattern matching |
+| **JShell 401** | Expert | Design patterns, JShell APIs, tooling |
+| **JShell 501** | Expert | Data science with Tablesaw, XChart, Commons Math |
+
+---
+
+## Java Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **Java 101** | Beginner | Classes, OOP, collections, exceptions |
+| **Java 201** | Intermediate | Generics, interfaces, streams, records |
+| **Java 301** | Advanced | Concurrency, NIO, reflection |
+| **Java 401** | Expert | Design patterns, testing patterns |
+| **Java 501** | Expert | Functional Java, reactive patterns |
+| **Java 601** | Expert | Data science with Tablesaw and XChart |
+
+---
+
+## JavaScript Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **JS 101** | Beginner | Variables, functions, arrays, objects |
+| **JS 201** | Intermediate | Promises, async/await, closures |
+| **JS 301** | Advanced | Functional patterns, generators |
+| **JS 401** | Expert | Data analysis with mathjs |
+| **JS 501** | Expert | D3.js visualization |
+
+---
+
+## C# Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **C# 101** | Beginner | Types, records, LINQ, collections, VenusTable |
+| **C# 201** | Intermediate | Pipeline dependencies, session anchors, shared data |
+
+---
+
+## C++ Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **C++ 101** | Beginner | Variables, arithmetic, strings, vectors, control flow |
+| **C++ 201** | Intermediate | Classes, templates, STL algorithms, lambdas, modern C++17/20 |
+| **C++ 301** | Advanced | Threading, smart pointers, filesystem, regex, chrono |
+
+---
+
+## F# Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **F# 101** | Beginner | Functions, pattern matching, lists, discriminated unions |
+| **F# 201** | Intermediate | NuGet packages, pipelines, cross-cell data sharing |
+
+---
+
+## Example Notebooks
+
+| Notebook | Language | Demonstrates |
+|---|---|---|
+| **C# Shared Utilities** | C# | Reusable types and helpers — import from any notebook |
+| **C# Cross-Notebook Pipeline** | C# | Finance analysis importing shared types across notebooks |
+
+---
+
+## How to Open a Tutorial
+
+1. Click the **Browse** button (folder icon) in the toolbar
+2. Find the tutorial under its language group
+3. Click to open — tutorials are read-only by default
+4. Press **Run All** to execute everything, or step through with **Shift+Enter**
+5. Experiment freely — edits are not saved back to the tutorial
+
+---
+
+## Copy Between Notebooks
+
+| Action | How |
+|---|---|
+| Copy a cell | Click the **⧉ copy icon** on the cell header |
+| Paste as new cell | Click **Paste** in toolbar or **Ctrl+Shift+V** |
+| Duplicate a cell | Click the **duplicate icon** on the cell header |
+| Copy to another notebook | Copy the cell, switch notebooks, then Paste |
+`,
+
+// ═══════════════════════════════════════════════════════
+// PIPELINE / WORKFLOW REFERENCE
+// ═══════════════════════════════════════════════════════
+pipeline: `
+# Cell Workflows & Orchestration
+
+Venus introduces **named cell orchestration** — a system for naming cells, declaring dependencies between them, and building deterministic, reusable execution workflows.
+
+Workflows work the same way in **all six execution modes**: JShell, Java, JavaScript, C#, F#, and C++. They also extend **across notebooks**, enabling modular code libraries shared across your entire workspace.
+
+---
+
+## Why Notebooks Need Workflows
+
+Traditional notebooks number cells by execution order (\`[3]\`). This creates hidden, fragile coupling: cell 5 silently depends on cell 2 having run, but nothing enforces or communicates this. When you share a notebook, re-order cells, or restart a session, things break in unpredictable ways.
+
+**Venus solves this with explicit, named dependencies:**
+
+| Feature | Traditional notebooks | Venus |
+|---|---|---|
+| Cell identity | Execution number (\`[3]\`) | Semantic name (\`loadData\`) |
+| Dependencies | Implicit (position-based) | Explicit (\`//@ depends:\`) |
+| Named workflows | None | Pipeline cells |
+| Cycle detection | None | Built-in, with full error path |
+| Minimum execution | "Run All Above" (everything) | Transitive closure only |
+| Cross-notebook sharing | None | \`notebook:{id}/{anchor}\` refs |
+| Language support | Single language | All 5 languages |
+
+---
+
+## 1. Naming Cells — Anchors
+
+Any CODE or PIPELINE cell can have an **anchor name** — a stable identifier used to reference it.
+
+**Two ways to set an anchor:**
+
+**Click the badge** in the cell header (the faint \`+ anchor\` label on hover), type a name, press Enter.
+
+**Or add an annotation** in the cell source:
+\`\`\`
+//@ anchor: loadData
+//@ description: Load raw transaction records from source
+\`\`\`
+
+**Naming rules:** letters, digits, hyphens, underscores. No spaces. Must be unique in the notebook.
+
+---
+
+## 2. Declaring Dependencies
+
+Add \`//@ depends:\` at the top of a cell to declare what must run before it:
+
+\`\`\`
+//@ anchor: summarize
+//@ depends: loadData, normalize
+//@ description: Aggregate by category
+\`\`\`
+
+Click **▶▶** (run-with-deps) and Venus:
+1. Finds all declared dependencies (and their dependencies recursively)
+2. Runs a cycle check — reports an error with the full cycle path if one exists
+3. Topologically sorts the execution order
+4. Runs each cell in order, updating status badges as it goes
+
+**Dependency badge colours:**
+- ⬜ **pending** — not yet run this session
+- 🟡 **running** — currently executing
+- 🟢 **ok** — last run succeeded
+- 🔴 **error** — last run had errors
+- 🟡 **stale** — source edited since last run
+
+---
+
+## 3. Pipeline Cells — Named Workflows
+
+A **PIPELINE cell** defines a named, self-contained workflow that can be run with a single click.
+
+\`\`\`
+//@ pipeline: monthly-report
+//@ description: End-to-end monthly spend analysis
+//@ steps: loadData, normalize, summarize, visualize, report
+//@ on-error: stop
+\`\`\`
+
+| Directive | Required | Description |
+|---|---|---|
+| \`//@ pipeline: name\` | Yes | Names this workflow (also its anchor) |
+| \`//@ steps: a, b, c\` | Yes | Ordered step list |
+| \`//@ description: text\` | No | Human-readable label in the cell header |
+| \`//@ on-error: stop\|continue\` | No | Stop on first failure (default: stop) |
+
+When you click **Run Pipeline**, Venus resolves the full dependency graph for all steps — even if a step itself has \`//@ depends:\` — and runs everything in the correct order.
+
+---
+
+## 4. Example — Multi-Cell Workflow (C#)
+
+\`\`\`csharp
+//@ anchor: loadData
+//@ description: Load monthly transactions
+var data = new[] {
+    (Category: "Food",      Amount: 142.50m),
+    (Category: "Transport", Amount:  89.00m),
+    (Category: "Utilities", Amount: 115.00m),
+};
+Console.WriteLine($"Loaded {data.Length} records");
+\`\`\`
+
+\`\`\`csharp
+//@ anchor: summarize
+//@ depends: loadData
+//@ description: Aggregate spend by category
+var summary = data.GroupBy(r => r.Category)
+                  .Select(g => new { Category = g.Key, Total = g.Sum(r => r.Amount) })
+                  .OrderByDescending(x => x.Total)
+                  .ToList();
+VenusTable(summary);
+\`\`\`
+
+\`\`\`
+//@ pipeline: spendReport
+//@ description: Monthly spend report
+//@ steps: loadData, summarize
+\`\`\`
+
+Click **▶ Run Pipeline** on the pipeline cell to execute the entire workflow.
+
+---
+
+## 5. Cross-Notebook References
+
+Cells in one notebook can depend on cells in **any other notebook**:
+
+\`\`\`
+//@ depends: notebook:{notebookId}/{anchorName}
+\`\`\`
+
+**Example:**
+\`\`\`csharp
+//@ anchor: analyzeSpend
+//@ depends: notebook:csharp-shared-utils/cs_statistics
+//@ description: Use shared Stats helper from another notebook
+
+var amounts = transactions.Select(t => t.Amount);
+Console.WriteLine($"Mean: {Stats.Mean(amounts):F2}");
+\`\`\`
+
+**How it works by language:**
+
+| Language | Cross-notebook mechanism |
+|---|---|
+| JShell / Java | Foreign cell's source is executed in the current shared session |
+| C# / F# | Venus builds the full transitive dependency chain of the foreign cell (annotation-stripped, in topological order), injects it with output suppressed, then runs the current cell |
+| C++ | Foreign cell's source is prepended to the current cell before compilation (per-cell isolation; no shared state) |
+
+This means C# and F# cells can share types, records, and classes across notebooks — the injected source is compiled together with the dependent cell.
+
+**Cross-notebook output suppression:** When injecting foreign cell code, Venus wraps it with console output suppression so only the current cell's output is visible. Earlier cells in the dependency chain are re-executed silently to recreate their state.
+
+---
+
+## 6. Run Actions
+
+Each CODE cell has three run actions:
+
+| Button | Action |
+|---|---|
+| ▶ | Run this cell only |
+| ▶▶ | Run this cell with all \`//@ depends:\` resolved first (transitive) |
+| ⏭ | Run from the top of the notebook down to this cell (positional) |
+
+**Toolbar:** Click **Validate** to check the entire notebook's dependency graph for unknown anchors and cycles.
+
+---
+
+## 7. Execution Rules
+
+1. **Transitive resolution:** If A depends on B, and B depends on C, running A also runs C then B first
+2. **Topological order:** Dependencies always run before the cells that need them (Kahn's algorithm)
+3. **No skip:** Venus always re-runs the full dependency closure — state is always fresh, never stale
+4. **Cycle detection:** DFS back-edge detection before any execution. Clear error: *"Cycle detected: A → B → A"*
+5. **Unknown anchors:** Clear error if a \`//@ depends:\` names an anchor that doesn't exist in the notebook or the referenced cross-notebook
+
+---
+
+## 8. Full Annotation Reference
+
+\`\`\`
+//@ anchor: myCell          — give this cell a stable name
+//@ depends: a, b, c        — run these anchors (and their deps) before this cell
+//@ depends: notebook:id/anchor  — cross-notebook dependency
+//@ pipeline: myWorkflow    — (PIPELINE cells) name this workflow
+//@ steps: a, b, c          — (PIPELINE cells) ordered step list
+//@ on-error: stop|continue — stop on first failure (default: stop)
+//@ description: text       — human-readable label shown in UI
+//@ namespace: com.mylib   — (JShell cross-notebook) wrap source in a class to prevent name collisions
+\`\`\`
+
+The same DSL works identically in JShell, Java, JavaScript, C#, and F# cells. In C#/F# the comment syntax is \`//\`, consistent with how those languages use comments. In JShell/Java you can also use \`//\`.
+`,
+
+// ═══════════════════════════════════════════════════════
+// MCP & AGENTS
+// ═══════════════════════════════════════════════════════
+mcp: `
+# MCP & Agent Integration
+
+## What is MCP?
+
+The **Model Context Protocol (MCP)** is an open standard that allows AI systems — Claude Desktop, Claude Code, GitHub Copilot, and custom agents — to discover and invoke tools provided by external servers. Think of it as a universal plugin system for AI: instead of an AI hallucinating code, it can actually execute it.
+
+## Why Venus + MCP is Unique
+
+Most MCP servers provide read-only data sources: search results, database queries, file contents. **Venus is fundamentally different** — it provides a live **multi-language computational environment**.
+
+When an AI agent connects to Venus, it gains the ability to:
+
+- **Write and execute code** across five languages (JShell, Java, JavaScript, C#, F#) and see real output
+- **Create, read, and organise notebooks** — persistent, structured documents with cells, anchors, and dependencies
+- **Trigger named workflows** (pipelines) that execute entire analysis chains in a single tool call
+- **Build cumulative sessions** — load a module once, use it across many code executions
+- **Generate and verify results** — run computations, inspect output, iterate until correct
+
+This transforms AI from a code *suggester* into a code *executor* — an agent that can actually compute answers, build data pipelines, and verify its own work.
+
+---
+
+## MCP Endpoint
+
+\`\`\`
+GET  http://localhost:8585/api/mcp/sse       — SSE stream (MCP transport)
+POST http://localhost:8585/api/mcp/messages  — JSON-RPC 2.0 messages
+\`\`\`
+
+Venus implements **JSON-RPC 2.0 over HTTP+SSE** (MCP spec 2024-11-05).
+
+---
+
+## Available Tools (8)
+
+| Tool | Required Params | What it does |
+|---|---|---|
+| \`venus_execute_code\` | \`code\` | Execute code in a live session (any language via \`mode\`) |
+| \`venus_list_notebooks\` | *(none)* | List all notebooks with metadata |
+| \`venus_read_notebook\` | \`notebookId\` | Read all cells (source, anchors, output) |
+| \`venus_run_pipeline\` | \`notebookId\`, \`cellId\` | Execute a full workflow with dependency resolution |
+| \`venus_search_cells\` | \`query\` | Find cells by anchor name or source content |
+| \`venus_load_module\` | \`notebookRef\` | Load \`notebookId/anchor\` into a session |
+| \`venus_create_notebook\` | \`name\` | Create a notebook (optionally with cells pre-populated) |
+| \`venus_append_cell\` | \`notebookId\`, \`source\` | Append a cell and optionally execute it immediately |
+
+---
+
+## 1. Connect Claude Desktop
+
+Edit your Claude Desktop config:
+- **Windows:** \`%APPDATA%\\Claude\\claude_desktop_config.json\`
+- **macOS:** \`~/Library/Application Support/Claude/claude_desktop_config.json\`
+
+\`\`\`json
+{
+  "mcpServers": {
+    "venus-notebooks": {
+      "url": "http://localhost:8585/api/mcp/sse"
+    }
+  }
+}
+\`\`\`
+
+Restart Claude Desktop. You can now say:
+> *"Create a Venus notebook called 'Sales Analysis' and compute the monthly totals for this CSV data…"*
+> *"Run the ETL pipeline in my data-processing notebook and show the results"*
+> *"Search my notebooks for cells that compute fibonacci"*
+
+---
+
+## 2. Connect Claude Code (CLI)
+
+Add to \`.claude/settings.json\` (project) or \`~/.claude/settings.json\` (global):
+
+\`\`\`json
+{
+  "mcpServers": {
+    "venus": {
+      "url": "http://localhost:8585/api/mcp/sse"
+    }
+  }
+}
+\`\`\`
+
+Then in a Claude Code session:
+\`\`\`bash
+claude "List all Venus notebooks and tell me which have pipeline cells"
+claude "Create a C# notebook that computes descriptive statistics for this data and runs it"
+claude "Load the math-helpers module from my utilities notebook and use it to compute the moving average"
+\`\`\`
+
+---
+
+## 3. Use Cases
+
+### Autonomous Data Analysis
+An agent reads a dataset, writes JShell or C# code to analyse it, executes the code, reads the output, refines the approach, and produces a summary — all without human intervention.
+
+### Code Generation + Verification
+An agent generates a solution, creates it as a Venus cell, executes it, inspects the output, and confirms correctness before reporting success.
+
+### Notebook-as-Module Library
+Build reusable analytical modules in notebooks with named anchors. An agent can discover these via \`venus_search_cells\` and load them via \`venus_load_module\` — composing complex analyses from pre-verified building blocks.
+
+### CI/CD Integration
+A CI agent can execute a pipeline notebook after each deployment to verify system behaviour, comparing current output against expected results.
+
+### Multi-Language Agents
+An agent working on a polyglot project can execute Java, C#, and JavaScript code in the same session context — switching languages per task without losing notebook state.
+
+---
+
+## 4. Execute Code via MCP
+
+\`\`\`bash
+curl -X POST http://localhost:8585/api/mcp/messages \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+    "params": {
+      "name": "venus_execute_code",
+      "arguments": {
+        "code": "var x = List.of(1,2,3,4,5); x.stream().mapToInt(i->i).sum()",
+        "session": "agent-session",
+        "mode": "jshell"
+      }
+    }
+  }'
+\`\`\`
+
+---
+
+## 5. Create a Notebook via MCP
+
+\`\`\`bash
+curl -X POST http://localhost:8585/api/mcp/messages \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+    "params": {
+      "name": "venus_create_notebook",
+      "arguments": {
+        "name": "Agent Analysis",
+        "description": "Generated by Claude",
+        "cells": [
+          {"type": "MARKDOWN", "source": "# Agent-Generated Analysis"},
+          {"type": "CODE", "source": "System.out.println(\\"Hello from AI!\\");", "anchor": "init"}
+        ]
+      }
+    }
+  }'
+\`\`\`
+
+---
+
+## 6. Expose Cells as Reusable Modules
+
+Any cell with \`//@ anchor: name\` is discoverable and loadable by agents:
+
+1. **Annotate your cell:**
+\`\`\`java
+//@ anchor: fibonacci
+//@ description: Compute fibonacci numbers up to n
+int fib(int n) { return n <= 1 ? n : fib(n-1) + fib(n-2); }
+\`\`\`
+
+2. **Agent searches for it:**
+\`\`\`json
+{"method": "tools/call", "params": {"name": "venus_search_cells", "arguments": {"query": "fibonacci"}}}
+\`\`\`
+
+3. **Agent loads it into its session:**
+\`\`\`json
+{"method": "tools/call", "params": {"name": "venus_load_module", "arguments": {"notebookRef": "my-notebook/fibonacci", "session": "agent-1"}}}
+\`\`\`
+
+4. **Agent uses it:**
+\`\`\`json
+{"method": "tools/call", "params": {"name": "venus_execute_code", "arguments": {"code": "System.out.println(fib(10));", "session": "agent-1"}}}
+\`\`\`
+
+---
+
+## 7. Quick Test
+
+\`\`\`bash
+# List all available tools
+curl -s -X POST http://localhost:8585/api/mcp/messages \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \\
+  | python -m json.tool
+\`\`\`
+`,
+
+// ═══════════════════════════════════════════════════════
+// API REFERENCE
+// ═══════════════════════════════════════════════════════
+api: `
+# REST API Reference
+
+## Why Venus Has an API
+
+Venus was designed **API-first** from the beginning. The notebook UI is a client of the API — every action the browser performs is an HTTP call that any other system can make too.
+
+This means Venus is not just a notebook tool for humans. It is a **programmable computational environment** that can be:
+
+- **Embedded** in CI/CD pipelines — execute a data verification notebook after every deployment
+- **Driven by AI agents** — generate, run, and inspect notebook cells without the browser
+- **Integrated with other tools** — push results to dashboards, trigger workflows from external events
+- **Automated** — run recurring analysis notebooks on a schedule
+- **Tested** — validate notebook behaviour from automated test suites
+
+Every execution engine (JShell, Java, JavaScript, C#, F#), every pipeline workflow, every package manager, and every AI endpoint is accessible via the same REST API the browser uses.
+
+---
+
+**Base URL:** \`http://localhost:8585/api\`
+
+All requests and responses use JSON. No authentication required (local use only).
+
+---
+
+## Notebooks
+
+| Method | Path | Description |
+|---|---|---|
+| GET | /notebooks | List all notebooks (metadata only) |
+| POST | /notebooks | Create notebook — body: \`{name}\` |
+| GET | /notebooks/{id} | Get full notebook including all cells |
+| PUT | /notebooks/{id} | Save/update a notebook |
+| DELETE | /notebooks/{id} | Delete a notebook |
+| GET | /notebooks/tutorials | List all tutorial and example notebooks |
+| GET | /notebooks/tutorials/{id} | Get a tutorial or example notebook |
+
+**Create response:**
+\`\`\`json
+{ "id": "abc123", "name": "My Notebook", "cells": [], "created": "...", "modified": "..." }
+\`\`\`
+
+---
+
+## Code Execution
+
+| Method | Path | Description |
+|---|---|---|
+| POST | /shell/execute | Execute code in any language |
+| POST | /shell/{sessionId}/restart | Restart a session (clears all state) |
+| DELETE | /shell/{sessionId} | Close a session |
+| GET | /shell/sessions | List active session IDs |
+| GET | /shell/{sessionId}/info | Session info (classpath, execution count) |
+| POST | /shell/complete | JShell tab-completion suggestions |
+
+**Execute request:**
+\`\`\`json
+{
+  "sessionId": "nb-my-notebook-id",
+  "code": "System.out.println(42);",
+  "cellId": "cell-123",
+  "mode": "jshell"
+}
+\`\`\`
+
+**mode values:** \`jshell\` · \`java\` · \`nodejs\` · \`csharp\` · \`fsharp\` · \`cpp\`
+
+**Execute response:**
+\`\`\`json
+{
+  "output": "42\\n",
+  "error": "",
+  "status": "VALID",
+  "success": true,
+  "executionTimeMs": 12,
+  "executionCount": 1
+}
+\`\`\`
+
+---
+
+## Workflow Execution (Orchestration)
+
+| Method | Path | Description |
+|---|---|---|
+| POST | /shell/execute-pipeline | Run a PIPELINE cell (resolves all deps) |
+| POST | /shell/execute-with-deps | Run a cell with its \`//@ depends:\` resolved |
+| POST | /shell/run-to-here | Run all cells from top to a target cell |
+| GET | /shell/validate-graph/{notebookId} | Validate the full dependency graph |
+
+**Execute-pipeline request:**
+\`\`\`json
+{
+  "notebookId": "abc123",
+  "pipelineCellId": "cell-456",
+  "sessionId": "nb-abc123"
+}
+\`\`\`
+
+**Validate-graph response:**
+\`\`\`json
+{
+  "valid": false,
+  "errors": [
+    "Unknown anchor 'xyz' referenced by cell #analysis",
+    "Cycle detected: setup → transform → setup"
+  ]
+}
+\`\`\`
+
+---
+
+## Maven Packages (Java / JShell)
+
+| Method | Path | Description |
+|---|---|---|
+| GET | /packages | List installed Maven packages |
+| POST | /packages/install | Install — body: \`{coordinate}\` |
+| DELETE | /packages/{g}/{a}/{v} | Remove by coordinate |
+| GET | /packages/search?q= | Search Maven Central |
+
+Coordinate format: \`groupId:artifactId:version\` — e.g. \`com.google.code.gson:gson:2.10.1\`
+
+---
+
+## NuGet Packages (C# / F#)
+
+| Method | Path | Description |
+|---|---|---|
+| GET | /nuget | List installed NuGet packages |
+| POST | /nuget/install | Install — body: \`{packageId, version}\` |
+| DELETE | /nuget/{packageId} | Remove by package ID |
+
+\`\`\`json
+// Install request
+{ "packageId": "Newtonsoft.Json", "version": "13.0.3" }
+\`\`\`
+
+---
+
+## AI Assistant
+
+Venus routes all AI calls through the active provider (Claude, Copilot, or Gemini) configured in Settings.
+
+| Method | Path | Description |
+|---|---|---|
+| GET | /llm/provider | Current provider info: \`{provider, label, model, available}\` |
+| POST | /llm/chat | Chat with the active AI provider |
+| POST | /llm/generate | Generate a full notebook from a prompt |
+| POST | /llm/explain | Explain a code snippet |
+| POST | /llm/fix | Suggest a fix for an error |
+
+\`\`\`json
+// Chat request
+{ "message": "How do I use C++ smart pointers?", "history": [] }
+
+// Provider response
+{ "provider": "claude", "label": "Claude", "model": "claude-sonnet-4-6", "available": true }
+\`\`\`
+
+---
+
+## Settings
+
+| Method | Path | Description |
+|---|---|---|
+| GET | /settings | Get current settings |
+| PUT | /settings | Update settings |
+| GET | /settings/status | Server status (runtimes, versions) |
+
+The status endpoint reports which runtimes are detected: \`javaAvailable\`, \`nodeAvailable\`, \`dotnetAvailable\`, \`cppAvailable\`, \`cppCompilerDetail\`, \`claudeCliAvailable\`, \`copilotCliAvailable\`, \`geminiCliAvailable\`.
+
+---
+
+## WebSocket (Real-time Output)
+
+Connect to \`/ws\` using STOMP over SockJS.
+
+- Subscribe to \`/topic/shell/{sessionId}\` — receive \`ExecutionResult\` JSON after each execution
+- Send to \`/app/shell/{sessionId}\` — body: \`{code, cellId, mode}\` — executes and broadcasts to all subscribers
+
+The WebSocket path is used by the browser to stream cell output in real time. External clients can subscribe to the same topics to monitor execution in progress.
+
+---
+
+## Cross-Notebook Reference in API
+
+When calling \`execute-with-deps\` or \`execute-pipeline\` on a cell that has \`//@ depends: notebook:{id}/{anchor}\`, Venus automatically:
+
+1. Loads the referenced notebook from disk
+2. Resolves the anchor's full dependency chain
+3. For JShell/Java: executes the foreign source in the current session
+4. For C#/F#: builds the expanded source and injects it with output suppressed
+
+No special API parameter is needed — the cross-notebook resolution is automatic.
+`,
+
+// ═══════════════════════════════════════════════════════
+// ARCHITECTURE
+// ═══════════════════════════════════════════════════════
+arch: `
+# Architecture
+
+Venus is a **single-server application** — one Spring Boot process serves the static frontend and provides all APIs. There is no separate frontend build, no microservices, no message queue. Everything communicates over HTTP REST and STOMP WebSocket.
+
+---
+
+## System Overview
+
+\`\`\`mermaid
+graph LR
+    subgraph Browser["Browser (SPA — no build step)"]
+        UI[HTML/CSS/JS]
+    end
+
+    subgraph Server["Venus Server — Spring Boot 3.2 / Java 21"]
+        Controllers["REST Controllers\n+ WebSocket"]
+        Services["Execution Services"]
+        Storage["File Storage (.vnb)"]
+    end
+
+    subgraph Engines["Execution Engines (6 languages)"]
+        JShell["JShell (in-process)"]
+        Java["javac + subprocess"]
+        Node["node subprocess"]
+        DotNet["dotnet run / fsi"]
+        CPP["cl.exe / g++ / clang++"]
+    end
+
+    subgraph AI["AI Providers (CLI subprocess)"]
+        Claude["claude CLI"]
+        Copilot["copilot CLI"]
+        Gemini["gemini CLI"]
+    end
+
+    UI -- "HTTP REST\n+ STOMP/SockJS" --> Controllers
+    Controllers --> Services
+    Services --> Storage
+    Services --> JShell
+    Services --> Java
+    Services --> Node
+    Services --> DotNet
+    Services --> CPP
+    Services --> Claude
+    Services --> Copilot
+    Services --> Gemini
+\`\`\`
+
+---
+
+## Backend Layer Map
+
+\`\`\`mermaid
+graph TD
+    HTTP["HTTP Request"] --> Controller["Controller Layer\nNotebookController · ShellController\nPackageController · NuGetController\nLLMController · SettingsController\nNpmPackageController · McpController"]
+    WS["WebSocket / STOMP"] --> Controller
+
+    Controller --> Orchestration["OrchestrationService\nDep graph · Toposort · Cycle detection\nCross-notebook resolution"]
+    Controller --> Shell["JShellManager\nShellSession (one per notebook)"]
+    Controller --> Compiler["JavaCompilerService\njavax.tools + subprocess"]
+    Controller --> NodeSvc["NodeJsExecutionService\nnode -e subprocess"]
+    Controller --> DotNetSvc["DotNetExecutionService\ndotnet run (C#) · dotnet fsi (F#)\nSession anchor cache"]
+    Controller --> CppSvc["CppExecutionService\ncl.exe / g++ / clang++\nAuto-detects MSVC · GCC · Clang"]
+    Controller --> NbSvc["NotebookService\n.vnb CRUD · tutorial registry"]
+    Controller --> PkgSvc["PackageService\nMaven Central download\nJShell classpath injection"]
+    Controller --> NuGetSvc["NuGetService\nNuGet package list management"]
+    Controller --> AIDelegate["AIDelegate interface\nRoutes to active provider"]
+    AIDelegate --> ClaudeSvc["ClaudeService\nclaude CLI subprocess"]
+    AIDelegate --> CopilotSvc["CopilotCliService\ncopilot CLI subprocess"]
+    AIDelegate --> GeminiSvc["GeminiService\ngemini CLI subprocess"]
+    Controller --> SettingsSvc["SettingsService\ndata/settings.json"]
+
+    Orchestration --> Shell
+    Orchestration --> Compiler
+    Orchestration --> NodeSvc
+    Orchestration --> DotNetSvc
+    Orchestration --> CppSvc
+\`\`\`
+
+---
+
+## Cell Execution — Per Language
+
+\`\`\`mermaid
+graph TD
+    Cell["Cell with mode"] --> R{Route by mode}
+
+    R -- "jshell" --> JS["JShellManager.execute()\nShared in-process JShell session\nVariables persist across cells"]
+    R -- "java" --> JC["JavaCompilerService\nCompile via javax.tools\nRun as subprocess\nPer-cell isolation"]
+    R -- "nodejs" --> ND["NodeJsExecutionService\nnode -e subprocess\nrequire() from data/npm-modules"]
+    R -- "csharp" --> CS["DotNetExecutionService.executeCSharp()\nGenerate temp .csproj\ndotnet run\nInject dep context if //@ depends:"]
+    R -- "fsharp" --> FS["DotNetExecutionService.executeFSharp()\nWrite .fsx script\ndotnet fsi --exec\nExtract #r nuget: to top of file"]
+    R -- "cpp" --> CPP["CppExecutionService.execute()\nDetect: MSVC / GCC / Clang\nWrite temp .cpp file\nCompile + run subprocess\nPer-cell isolation"]
+
+    JS --> Result["ExecutionResult"]
+    JC --> Result
+    ND --> Result
+    CS --> Result
+    FS --> Result
+    CPP --> Result
+
+    Result --> WS["Broadcast via\nSTOMP WebSocket\n/topic/shell/{sessionId}"]
+\`\`\`
+
+---
+
+## Pipeline / Workflow Execution
+
+\`\`\`mermaid
+sequenceDiagram
+    participant B as Browser
+    participant SC as ShellController
+    participant OS as OrchestrationService
+    participant NS as NotebookService
+    participant EE as ExecutionEngine
+
+    B->>SC: POST /shell/execute-pipeline
+    SC->>NS: getNotebook(notebookId)
+    NS-->>SC: Notebook with all cells
+    SC->>OS: executePipeline(notebook, pipelineCell, sessionId)
+    Note over OS: Parse annotations and build anchor map
+    Note over OS: DFS cycle detection + Kahn topological sort
+    loop For each step in execution order
+        OS->>EE: execute(source, mode, sessionId)
+        EE-->>OS: ExecutionResult
+        OS-->>B: Broadcast result via WebSocket
+    end
+    OS-->>SC: PipelineResult
+    SC-->>B: HTTP 200 PipelineResult
+\`\`\`
+
+---
+
+## Cross-Notebook Reference Resolution
+
+\`\`\`mermaid
+graph TD
+    Dep["Cell with\n//@ depends: notebook:shared-utils/helper"]
+    -->
+    Load["OrchestrationService\nloadCrossNotebookModule()"]
+
+    Load --> Mode{Foreign cell mode?}
+
+    Mode -- "jshell/java" --> ExecForeign["Execute foreign cell source\nin current JShell session\n(shared variable space)"]
+
+    Mode -- "csharp/fsharp" --> Expand["buildExpandedDotNetSource()\nCollect all transitive deps of\nforeign cell in topological order\nAnnotation-strip, concatenate"]
+
+    Expand --> Cache["DotNetExecutionService\ncacheAnchorSource(sessionId,\n'notebook:shared-utils/helper',\nexpandedSource)"]
+
+    Cache --> Inject["When dependent cell runs:\nresolveTransitiveDeps() finds cached source\nInject with output suppression:\nConsole.SetOut(TextWriter.Null)\n[ancestor code]\nConsole.SetOut(original)"]
+
+    ExecForeign --> Ready["Types/variables available\nin session"]
+    Inject --> Ready
+\`\`\`
+
+---
+
+## Notebook Data Model
+
+\`\`\`mermaid
+erDiagram
+    Notebook {
+        string id
+        string name
+        string description
+        datetime created
+        datetime modified
+        map metadata
+    }
+    Cell {
+        string id
+        CellType type
+        string mode
+        string source
+        string anchor
+        list dependsOn
+        list pipelineSteps
+        string output
+        string error
+        boolean executed
+        int executionCount
+    }
+    Notebook ||--o{ Cell : contains
+\`\`\`
+
+**Cell types:** \`CODE\` · \`MARKDOWN\` · \`PIPELINE\`
+
+**Cell modes:** \`jshell\` · \`java\` · \`nodejs\` · \`csharp\` · \`fsharp\` · \`cpp\`
+
+**Storage format:** Pretty-printed JSON in \`notebooks/{userId}/{id}.vnb\`
+
+---
+
+## Frontend Module Structure
+
+\`\`\`mermaid
+graph TD
+    HTML["index.html\nSingle-page app shell"] --> AppJS["app.js\nVenus global module\nREST helpers · STOMP client\nTab navigation · Status bar"]
+
+    AppJS --> NB["notebook.js\nNotebook editor · Cell rendering\nExecution · Cross-notebook picker\nLanguage conversion banner"]
+    AppJS --> Console["console-tab.js\nInteractive REPL\nJShell · Java · JS modes\nTab completion · History"]
+    AppJS --> Orch["orchestration.js\nClient-side dep graph\nAnchor parsing · Badge updates\nStaleness detection"]
+    AppJS --> Pkg["packages.js\nMaven package manager UI\nC++ built-in headers panel"]
+    AppJS --> NPM["npm-packages.js\nnpm package manager UI"]
+    AppJS --> NuGet["nuget.js\nNuGet package manager UI"]
+    AppJS --> AI["ai-assistant.js\nMulti-provider AI panel\nClaude · Copilot · Gemini\nNotebook generation"]
+    AppJS --> Settings["settings.js\nSettings form · Server status\nAI provider switcher"]
+    AppJS --> Docs["docs.js\nThis documentation overlay"]
+    AppJS --> SLC["server-lifecycle.js\nHealth poll · Reconnect overlay\nShutdown/restart UI"]
+\`\`\`
+
+All frontend modules use the **IIFE pattern** — no build step, no bundler. Change a JS file and refresh the browser.
+
+---
+
+## Data Flow — Real-time Output
+
+\`\`\`mermaid
+sequenceDiagram
+    participant B as Browser
+    participant WS as STOMP Broker
+    participant JM as JShellManager
+    participant SS as ShellSession
+
+    B->>WS: SUBSCRIBE /topic/shell/nb-abc123
+    B->>WS: SEND /app/shell/nb-abc123
+    Note over B,WS: payload: code, cellId, mode
+    WS->>JM: execute(sessionId, code, cellId)
+    JM->>SS: execute(code, cellId)
+    SS->>SS: jshell.eval(code)
+    Note over SS: Capture stdout via proxy OutputStream
+    SS-->>JM: ExecutionResult
+    JM->>WS: broadcast to /topic/shell/nb-abc123
+    WS-->>B: ExecutionResult JSON
+    Note over B: Update cell output and dep badges
+\`\`\`
+
+---
+
+## Session Anchor Cache (C# / F#)
+
+\`\`\`mermaid
+graph LR
+    Exec["DotNetExecutionService\nexecuteCSharp / executeFSharp"]
+    --> Parse["Parse //@ anchor:\nand //@ depends:"]
+    --> Check{All deps\ncached?}
+    Check -- No --> Error["Return error:\n'Run anchor X first'"]
+    Check -- Yes --> Resolve["resolveTransitiveDeps()\nPost-order DFS through dep chain"]
+    --> Inject["Build combined program:\n[suppress] dep1 source\n[suppress] dep2 source\n[active] current cell source"]
+    --> Run["dotnet run / dotnet fsi"]
+    --> Success{Success?}
+    Success -- Yes --> Store["cacheAnchorSource(sessionId, anchor, source)\nStore for future dependents"]
+    Success -- No --> Err2["Return error result"]
+\`\`\`
+
+---
+
+## Storage Layout
+
+\`\`\`
+venus/
+├── notebooks/
+│   ├── tutorials/          Built-in tutorials (read-only, checked in)
+│   ├── examples/           Example notebooks (read-only, checked in)
+│   └── {userId}/           User notebooks (gitignored)
+│       └── *.vnb
+└── data/
+    ├── settings.json       App settings (gitignored — may contain keys)
+    ├── packages.json       Installed Maven packages
+    ├── nuget-packages.json Installed NuGet packages
+    ├── packages/           Downloaded JARs
+    │   └── *.jar
+    └── npm-modules/        npm packages
+        └── node_modules/
+\`\`\`
+
+---
+
+## Security Model
+
+- **Local only:** Binds to \`127.0.0.1\`. No authentication — do not expose to a network.
+- **No API keys in transit:** Claude calls go through the local \`claude\` CLI subprocess.
+- **Code execution:** All runtimes run with the same OS-user permissions as the Venus server process.
+- **CORS:** Configured for localhost only.
+`,
+
+// ═══════════════════════════════════════════════════════
+// DEVELOPER GUIDE
+// ═══════════════════════════════════════════════════════
+dev: `
+# Developer Guide
+
+Venus is an open-source project. This guide covers the architecture for developers who want to extend it, contribute to it, or build on top of it.
+
+---
+
+## 1. Development Environment
+
+**Requirements:**
+- JDK 17–21 (full JDK, not JRE — needed for JShell and \`javax.tools\`)
+- Maven 3.8+
+- Node.js 18+ (for JavaScript cell testing)
+- .NET SDK 6+ (for C#/F# cell testing)
+- IntelliJ IDEA or VS Code
+
+**Start in dev mode:**
+\`\`\`bash
+mvn spring-boot:run
+\`\`\`
+
+The frontend has no build step — change a JS/CSS file and refresh the browser. Backend changes require a server restart (or Spring Boot DevTools hot-reload).
+
+**JVM flags** (applied automatically via \`pom.xml\`):
+\`\`\`
+--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED
+\`\`\`
+
+---
+
+## 2. Key Services
+
+| Service | Purpose |
+|---|---|
+| \`JShellManager\` | Session map; creates, manages, and broadcasts from JShell sessions |
+| \`ShellSession\` | Wraps one JShell instance; synchronized execute(); stdout capture via proxy OutputStream |
+| \`JavaCompilerService\` | javax.tools compile → temp dir → subprocess run; auto-wraps bare statements |
+| \`NodeJsExecutionService\` | node -e subprocess; require() resolves from data/npm-modules/ |
+| \`DotNetExecutionService\` | dotnet run (C#) + dotnet fsi (F#); session anchor cache; dep injection |
+| \`CppExecutionService\` | Auto-detects MSVC/GCC/Clang; writes temp .cpp; compiles + runs; exposes isAvailable() / getCompilerDetail() |
+| \`OrchestrationService\` | Anchor parsing; dep graph; toposort (Kahn's); cycle detection (DFS); cross-notebook resolution |
+| \`NotebookService\` | .vnb CRUD; tutorial + example registry (scans notebooks/tutorials/ and notebooks/examples/) |
+| \`PackageService\` | Maven Central HTTP download; JShell classpath injection |
+| \`NuGetService\` | NuGet package list persistence; per-cell injection for C#/F# |
+| \`ClaudeService\` | claude CLI subprocess; streams stdout back to caller |
+| \`CopilotCliService\` | copilot CLI subprocess; implements AIDelegate |
+| \`GeminiService\` | gemini CLI subprocess; implements AIDelegate |
+| \`SettingsService\` | data/settings.json load/save |
+
+---
+
+## 3. Adding a New REST Endpoint
+
+1. **Choose the right controller** in \`src/main/java/com/venus/controller/\`
+2. **Add the method:**
+\`\`\`java
+@GetMapping("/notebooks/{id}/stats")
+public ResponseEntity<Map<String, Object>> getStats(@PathVariable String id) {
+    return ResponseEntity.ok(Map.of("cellCount", notebookService.getNotebook(id, userId).getCells().size()));
+}
+\`\`\`
+3. Keep controllers thin — delegate to services
+4. Update **API Reference** in this docs overlay and \`docs/API.md\`
+
+---
+
+## 4. Adding a New Execution Language
+
+Adding a language requires changes in five places:
+
+1. **Create a new service** e.g. \`RubyExecutionService\` — implement \`execute(sessionId, cellId, code)\` returning \`ExecutionResult\`
+
+2. **Route in \`ShellController\`:**
+\`\`\`java
+case "ruby" -> rubyExecutionService.execute(sessionId, req.getCellId(), req.getCode());
+\`\`\`
+
+3. **Route in \`OrchestrationService.executeSingleCell()\`:**
+\`\`\`java
+} else if ("ruby".equals(mode)) {
+    return rubyExecutionService.execute(sessionId, cell.getId(), cell.getSource());
+}
+\`\`\`
+
+4. **Add the mode to \`notebook.js\` mode cycle:**
+\`\`\`js
+const MODE_CYCLE = ['jshell','java','nodejs','csharp','fsharp','cpp','ruby'];
+const MODE_LABELS = { ..., ruby: 'Ruby' };
+\`\`\`
+
+5. **Add CSS badge colour in \`venus.css\`:**
+\`\`\`css
+.mode-badge.ruby { background: rgba(204,52,45,.15); color: #cc342d; }
+\`\`\`
+
+---
+
+## 5. Adding a New Cell Type
+
+1. **Add to \`CellType.java\`:**
+\`\`\`java
+public enum CellType { CODE, MARKDOWN, PIPELINE, YOUR_TYPE }
+\`\`\`
+
+2. **Add fields to \`Cell.java\`** if needed (Jackson serialises all public getters automatically)
+
+3. **Render in \`notebook.js\` \`renderCell()\`:**
+\`\`\`js
+if (cell.type === 'YOUR_TYPE') buildYourCell(cell, div, bodyWrap);
+\`\`\`
+
+4. **Add CSS in \`venus.css\`:**
+\`\`\`css
+.cell.type-yourtype::before { background: var(--purple); }
+\`\`\`
+
+5. **Add toolbar button in \`index.html\`** and wire it in \`notebook.js bindToolbar()\`
+
+---
+
+## 6. The Dependency / Orchestration System
+
+Two implementations run in parallel — server and browser:
+
+**Server: \`OrchestrationService.java\`** (authoritative):
+- \`parseAnnotations(source)\` — extracts anchor, dependsOn, pipelineSteps from \`//@ lines\`
+- \`buildAnchorMap(notebook)\` — maps anchor names to cells
+- \`expandClosure(anchors, map)\` — transitive dependency set
+- \`topologicalSort(closure, adj)\` — Kahn's algorithm
+- \`detectCycle(adj)\` — DFS 3-color marking, returns cycle path
+- \`loadCrossNotebookModule()\` — resolves \`notebook:id/anchor\` refs, routes by cell mode
+
+**Browser: \`orchestration.js\`** (instant UI feedback):
+- Same parsing and graph algorithms for live dependency badge updates
+- \`depStatus\` map: anchor → {status, count, timestamp}
+- \`markOk()\`, \`markError()\`, \`markStale()\`, \`refreshBadges()\`
+
+**Adding a new \`//@ directive\`:**
+1. Parse it in both \`OrchestrationService.java parseAnnotations()\` and \`orchestration.js parseAnnotations()\`
+2. Add the field to \`Cell.java\` if it needs to be persisted
+3. Handle it in the execution logic on the server side
+
+---
+
+## 7. C# / F# Execution Deep Dive
+
+Both languages use \`DotNetExecutionService\`. The key pattern for pipeline dependency injection:
+
+\`\`\`
+executeCSharp(sessionId, cellId, source):
+  1. Parse //@ anchor and //@ depends from source
+  2. Look up each dep in sessionAnchorSources[sessionId]
+  3. resolveTransitiveDeps(): post-order DFS through the dep chain
+  4. For each ancestor, append:
+       Console.SetOut(TextWriter.Null);
+       [ancestor source, annotation-stripped]
+       Console.SetOut(original);
+  5. Append current cell source (output active)
+  6. Generate temp .csproj with NuGet refs + usings preamble
+  7. Run: dotnet run --project <tempDir> -v q
+  8. Adjust error line numbers (subtract preamble line count)
+  9. On success: store source in sessionAnchorSources[sessionId][anchor]
+\`\`\`
+
+The F# path is similar but uses \`dotnet fsi --exec\` and extracts \`#r "nuget:"\` directives to the top of the script.
+
+---
+
+## 8. Frontend Module Pattern
+
+All JS files use the IIFE pattern — no bundler, no npm for frontend:
+
+\`\`\`js
+const MyModule = (() => {
+    let privateVar = null;
+
+    function privateHelper() { /* ... */ }
+
+    function publicMethod() { /* ... */ }
+
+    return { publicMethod };
+})();
+\`\`\`
+
+**Global modules:**
+- \`Venus\` — root module; \`Venus.api(method, path, body)\`, \`Venus.state\`, \`Venus.setStatus()\`
+- \`NotebookEditor\` — called from HTML onclick attributes
+- \`AIAssistant\` — context injection from notebook.js
+- \`Orchestration\` — dep graph operations called from notebook.js
+- \`DocsPanel\` — docs overlay (this file)
+
+---
+
+## 9. JShell Execution Deep Dive
+
+\`\`\`
+ShellSession.execute(code, cellId):
+  1. captureBuffer.reset()     — clear stdout capture buffer
+  2. jshell.eval(code)         — run in JShell remote subprocess
+  3. proxyStream.flush()       — flush captured output
+  4. Process SnippetEvents:
+     - event.exception()       → runtime error
+     - event.status() REJECTED → compile error (from Diag list)
+     - event.value()           → return value
+  5. Build ExecutionResult
+  6. JShellManager broadcasts via WebSocket /topic/shell/{sessionId}
+\`\`\`
+
+**Key insight — output capture:** JShell runs code in a remote subprocess. \`System.setOut()\` in the main JVM doesn't work. The correct method (used here) is registering a custom \`OutputStream\` with \`JShell.builder().out()\`, which routes all subprocess stdout through our capture buffer.
+
+---
+
+## 10. Contributing to Venus
+
+Venus is open source. To contribute:
+
+1. **Read \`CONTRIBUTING.md\`** — coding standards, commit format, PR process
+2. **Read \`MAINTAINER.md\`** — governance model (Founding Maintainer + Co-Maintainers)
+3. **Open an issue or discussion first** for anything beyond a small bug fix
+4. **Follow the coding rules:**
+   - No Lombok (build compatibility)
+   - No frontend build step (no webpack, no TypeScript, no npm for frontend)
+   - Controllers are thin; business logic is in services
+   - CSS uses \`var(--venus-*)\` custom properties — no hard-coded colours
+
+**Contribution checklist before submitting a PR:**
+- [ ] Java: no Lombok; explicit getters/setters; Builder inner class
+- [ ] JS: IIFE module pattern; no npm for frontend
+- [ ] New endpoints documented in API Reference
+- [ ] New cell types/modes documented in Usage Guide
+- [ ] New \`//@ directives\` implemented in BOTH \`OrchestrationService.java\` AND \`orchestration.js\`
+- [ ] \`CHANGELOG.md\` entry under the current version section
+- [ ] Build passes: \`mvn clean package -DskipTests\`
+- [ ] Manual smoke test: server starts, UI opens, new feature works
+
+---
+
+## 11. Key Files Reference
+
+| File | Purpose |
+|---|---|
+| \`VenusApplication.java\` | Spring Boot entry point |
+| \`shell/ShellSession.java\` | JShell wrapper, output capture |
+| \`shell/JShellManager.java\` | Session map, WebSocket broadcast |
+| \`service/JavaCompilerService.java\` | Full Java compile + run |
+| \`service/NodeJsExecutionService.java\` | Node.js subprocess execution |
+| \`service/DotNetExecutionService.java\` | C# and F# execution + anchor cache |
+| \`service/OrchestrationService.java\` | Dep graph, toposort, pipeline execution, cross-notebook |
+| \`service/NotebookService.java\` | .vnb CRUD, tutorial + example registry |
+| \`service/PackageService.java\` | Maven Central integration |
+| \`service/NuGetService.java\` | NuGet package management |
+| \`service/CppExecutionService.java\` | C++ compilation + execution; compiler auto-detection |
+| \`service/ClaudeService.java\` | Claude CLI integration |
+| \`service/CopilotCliService.java\` | GitHub Copilot CLI integration |
+| \`service/GeminiService.java\` | Gemini CLI integration |
+| \`static/index.html\` | Single-page app entry point |
+| \`static/js/orchestration.js\` | Client-side dep graph + badges |
+| \`static/js/notebook.js\` | Main notebook editor |
+| \`static/js/docs.js\` | This in-app documentation |
+| \`static/css/venus.css\` | All styles (dark/light themes, custom properties) |
+| \`application.properties\` | Server config (port 8585, notebook/data directories) |
+`
+    };  // end DOCS
+
+    let currentDoc = 'usage';
+
+    function init() {
+        document.getElementById('btn-docs-close')?.addEventListener('click', hide);
+
+        document.querySelectorAll('.docs-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.docs-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                showDoc(tab.dataset.doc);
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('docs-overlay');
+                if (!overlay?.classList.contains('hidden')) hide();
+            }
+        });
+    }
+
+    function show(section) {
+        const overlay = document.getElementById('docs-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('hidden');
+        showDoc(section || currentDoc);
+        document.querySelectorAll('.docs-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.doc === (section || currentDoc));
+        });
+    }
+
+    function hide() {
+        document.getElementById('docs-overlay')?.classList.add('hidden');
+    }
+
+    function showDoc(section) {
+        currentDoc = section || 'usage';
+        const content = document.getElementById('docs-content');
+        if (!content) return;
+        const md = DOCS[currentDoc] || DOCS.usage;
+        try {
+            content.innerHTML = marked.parse(md);
+        } catch(e) {
+            content.textContent = md;
+        }
+        content.scrollTop = 0;
+
+        // Render Mermaid diagrams — wrapped in try/catch so a broken diagram never crashes the panel.
+        // marked renders ```mermaid blocks as <pre><code class="language-mermaid">...</code></pre>
+        try {
+            content.querySelectorAll('pre code.language-mermaid').forEach((codeEl, i) => {
+                const pre = codeEl.parentElement;
+                const diagram = codeEl.textContent;
+                const div = document.createElement('div');
+                div.className = 'mermaid';
+                div.id = 'mermaid-' + Date.now() + '-' + i;
+                div.textContent = diagram;
+                pre.replaceWith(div);
+            });
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'dark',
+                    securityLevel: 'loose',
+                    themeVariables: {
+                        background: '#1e2030',
+                        primaryColor: '#313244',
+                        primaryTextColor: '#cdd6f4',
+                        primaryBorderColor: '#45475a',
+                        lineColor: '#6c7086',
+                        secondaryColor: '#181825',
+                        tertiaryColor: '#1e2030'
+                    }
+                });
+                const nodes = content.querySelectorAll('.mermaid');
+                if (nodes.length > 0) {
+                    mermaid.run({ nodes });
+                }
+            }
+        } catch(mermaidErr) {
+            // Mermaid failure is non-fatal — docs text is already visible
+            console.warn('Mermaid render error (non-fatal):', mermaidErr);
+        }
+    }
+
+    return { init, show, hide };
+})();
+
+function showDocsPanel(section) {
+    DocsPanel.show(section);
+}
+
+document.addEventListener('DOMContentLoaded', () => DocsPanel.init());

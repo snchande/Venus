@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venus Notebooks</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="shortcut icon" href="/img/favicon.svg">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/one-dark.min.css">
+
+  <!-- Venus styles -->
+  <link rel="stylesheet" href="/css/venus.css">
+  <style>
+    /* JavaScript cell mode */
+    .cell.mode-nodejs { border-left-color: #22c55e; }
+    .cell-badge.nodejs, .cell-badge.code.mode-nodejs { background: rgba(34,197,94,.15); color: #22c55e; border-color: rgba(34,197,94,.3); }
+
+    /* C# cell mode — purple */
+    .cell.mode-csharp { border-left-color: #a855f7; }
+    .cell-badge.csharp, .cell-badge.code.mode-csharp { background: rgba(168,85,247,.15); color: #a855f7; border-color: rgba(168,85,247,.3); }
+
+    /* F# cell mode — orange */
+    .cell.mode-fsharp { border-left-color: #f97316; }
+    .cell-badge.fsharp, .cell-badge.code.mode-fsharp { background: rgba(249,115,22,.15); color: #f97316; border-color: rgba(249,115,22,.3); }
+
+    /* C++ cell mode — cyan */
+    .cell.mode-cpp { border-left-color: #06b6d4; }
+    .cell-badge.cpp, .cell-badge.code.mode-cpp { background: rgba(6,182,212,.15); color: #06b6d4; border-color: rgba(6,182,212,.3); }
+
+    /* npm sub-tab navigation */
+    .pkg-subtab-nav { display: flex; gap: 4px; padding: 8px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .pkg-subtab { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; }
+    .pkg-subtab:hover { background: var(--bg-3); color: var(--text-1); }
+    .pkg-subtab.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+    /* npm status indicator */
+    .npm-node-status { margin-top: 6px; font-size: 12px; }
+    .npm-status-ok   { color: #22c55e; }
+    .npm-status-warn { color: #f59e0b; }
+
+    /* ── Server reconnect overlay ────────────────────────────────────────── */
+    .reconnect-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.72);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+      transition: opacity .25s;
+    }
+    .reconnect-overlay.hidden { display: none; }
+    .reconnect-box {
+      background: var(--bg-2, #1e1e2e);
+      border: 1px solid var(--border, #333);
+      border-radius: 12px;
+      padding: 36px 48px;
+      text-align: center;
+      min-width: 320px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.6);
+    }
+    .reconnect-spinner {
+      width: 44px; height: 44px;
+      border: 4px solid var(--border, #444);
+      border-top-color: var(--accent, #6366f1);
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .reconnect-title {
+      font-size: 17px; font-weight: 600;
+      color: var(--text, #e0e0e0);
+      margin-bottom: 8px;
+    }
+    .reconnect-sub {
+      font-size: 13px; color: var(--muted, #888);
+      margin-bottom: 16px;
+    }
+    .reconnect-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 20px; }
+    .reconnect-dots span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent, #6366f1);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+    .reconnect-dots span:nth-child(2) { animation-delay: .2s; }
+    .reconnect-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes pulse-dot { 0%,80%,100% { opacity:.2; transform:scale(.8); } 40% { opacity:1; transform:scale(1.1); } }
+
+    /* ── Server lifecycle card ───────────────────────────────────────────── */
+    .lifecycle-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-restart  { background: #2563eb; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .btn-restart:hover  { background: #1d4ed8; }
+    .btn-shutdown { background: transparent; color: var(--text-danger, #ef4444); border: 1px solid var(--text-danger, #ef4444); padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .btn-shutdown:hover { background: rgba(239,68,68,.1); }
+    .lifecycle-note { font-size: 12px; color: var(--muted, #888); margin-top: 10px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Server Reconnect Overlay ══════════════════════════════════════════════
+     Shown while the server is restarting. The page content stays visible
+     underneath so the user can see their work. Dismissed automatically when
+     the health-check passes and the WebSocket reconnects.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="reconnect-overlay" class="reconnect-overlay hidden" role="status" aria-live="polite">
+  <div class="reconnect-box">
+    <div class="reconnect-spinner"></div>
+    <div class="reconnect-title" id="reconnect-title">Restarting Venus…</div>
+    <div class="reconnect-sub"  id="reconnect-sub">Your notebooks are saved. Reconnecting automatically.</div>
+    <div class="reconnect-dots" id="reconnect-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-secondary reconnect-cancel" id="reconnect-cancel" style="display:none"
+              onclick="ServerLifecycle.cancelReconnect()">Cancel</button>
+      <button class="btn-restart" id="reconnect-refresh" style="display:none"
+              onclick="window.location.reload()">Refresh Page</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VENUS SPLASH SCREEN ═══════════════ -->
+<div id="venus-splash" class="splash-visible">
+  <div class="splash-stars" id="splash-stars"></div>
+  <div class="splash-center">
+    <div class="splash-planet-wrap">
+      <div class="splash-ring ring-outer"></div>
+      <div class="splash-ring ring-inner"></div>
+      <div class="splash-planet"><span class="planet-symbol">♀</span></div>
+    </div>
+    <pre class="splash-ascii" aria-hidden="true">
+  ✦  ·  *  ·  ✦  ·  *  ·  ✦
+  ·                         ·
+  *    ·    ✦    ·    ✦    *
+  ·                         ·
+  ✦  ·  *  ·  ✦  ·  *  ·  ✦</pre>
+    <div class="splash-brand">
+      <h1 class="splash-title">Venus Notebooks</h1>
+      <p class="splash-msg" id="splash-msg">Initializing…</p>
+    </div>
+    <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOP BAR ═══════════════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bpg" cx="36%" cy="30%" r="68%">
+            <stop offset="0%"   stop-color="#fff5b0"/>
+            <stop offset="38%"  stop-color="#f5a623"/>
+            <stop offset="68%"  stop-color="#c87518"/>
+            <stop offset="100%" stop-color="#6e3000"/>
+          </radialGradient>
+          <radialGradient id="bsh" cx="65%" cy="70%" r="55%">
+            <stop offset="0%"   stop-color="rgba(0,0,0,0.4)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+          </radialGradient>
+        </defs>
+        <circle cx="16" cy="16" r="13" fill="rgba(245,166,35,0.18)"/>
+        <ellipse cx="16" cy="16" rx="15.5" ry="4.8" fill="none"
+                 stroke="rgba(245,166,35,0.6)" stroke-width="1"
+                 transform="rotate(-22,16,16)"/>
+        <circle cx="16" cy="16" r="11.5" fill="url(#bpg)"/>
+        <circle cx="16" cy="16" r="11.5" fill="url(#bsh)"/>
+        <circle cx="16" cy="12.5" r="4"  fill="none" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="16" y1="16.5" x2="16" y2="21.5" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="13" y1="19.5" x2="19" y2="19.5" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Venus Notebooks</span>
+      <span class="brand-tag">v1.0</span>
+    </div>
+
+    <div class="nb-file-row">
+      <select id="notebook-selector" class="nb-selector" title="Switch notebook">
+        <option value="">— select notebook —</option>
+      </select>
+      <button class="tb-btn" id="btn-browse-notebooks" title="Open Tutorials & Notebooks">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 6h14" stroke="currentColor" stroke-width="1.3"/><circle cx="4" cy="4.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="4.5" r=".8" fill="currentColor"/></svg>
+        Tutorials
+      </button>
+      <button class="tb-btn" id="btn-new" title="New notebook (Ctrl+Alt+N)">
+        <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        New
+      </button>
+      <button class="tb-btn tb-primary" id="btn-save" title="Save (Ctrl+S)">
+        <svg viewBox="0 0 16 16"><path d="M2 2h9l3 3v9H2V2zm4 0v4h6M5 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save
+      </button>
+      <span class="nb-dirty-indicator" id="dirty-dot" title="Unsaved changes"></span>
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="notebook" role="tab">
+        <svg viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Notebook
+      </button>
+      <button class="tab-btn" data-tab="console" role="tab">
+        <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2zM5 6l3 2-3 2M9 10h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        Console
+      </button>
+      <button class="tab-btn" data-tab="packages" role="tab">
+        <svg viewBox="0 0 16 16"><path d="M8 1l6 3v4l-6 3L2 8V4l6-3zM2 8l6 3 6-3M8 11v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        Packages
+      </button>
+      <button class="tab-btn" data-tab="settings" role="tab">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Settings
+      </button>
+    </nav>
+  </div>
+
+  <div class="topbar-right">
+    <button class="tb-btn" id="btn-docs" title="Documentation">
+      <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2zM5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>
+      Docs
+    </button>
+    <button class="tb-btn" id="btn-toggle-ai" title="Toggle AI Assistant (Ctrl+\\)">
+      <svg viewBox="0 0 16 16"><path d="M8 1c3.87 0 7 2.69 7 6s-3.13 6-7 6c-1.08 0-2.1-.23-3-.65L1 14l.65-4C1.23 9.1 1 8.08 1 7c0-3.31 3.13-6 7-6z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      AI
+    </button>
+    <div class="ws-status" id="ws-badge" title="WebSocket">
+      <span class="ws-dot" id="ws-dot"></span>
+      <span id="ws-label">connecting</span>
+    </div>
+
+    <!-- ── User identity widget ── -->
+    <div class="user-widget" id="user-widget">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-details">
+        <span class="user-name" id="user-name">…</span>
+        <span class="user-provider" id="user-provider"></span>
+      </div>
+      <button class="user-chevron" onclick="UserAuth.toggleMenu()" title="Account">▾</button>
+      <div class="user-dropdown" id="user-dropdown" style="display:none">
+        <div class="udd-greeting" id="udd-greeting">Hello!</div>
+        <div class="udd-email" id="udd-email"></div>
+        <hr class="udd-sep">
+        <button class="udd-btn" onclick="UserAuth.showEmailPrompt()">
+          <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5l7 5 7-5" stroke="currentColor" stroke-width="1.3"/></svg>
+          Set notification email
+        </button>
+        <button class="udd-btn udd-switch" id="udd-switch-btn" onclick="UserAuth.switchAccount()" style="display:none">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M2 5h9M2 5l3-3M2 5l3 3M14 11H5M14 11l-3-3M14 11l-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Switch account
+        </button>
+        <button class="udd-btn udd-logout" id="udd-logout-btn" onclick="UserAuth.logout()" style="display:none">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M6 3H3a1 1 0 00-1 1v8a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+        <button class="udd-btn udd-login" id="udd-login-btn" onclick="UserAuth.showLogin()" style="display:none">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3M7 11l3-3-3-3M2 8h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign in
+        </button>
+      </div>
+    </div>
+
+    <button class="tb-btn tb-btn-danger" id="btn-shutdown" title="Shut down Venus Notebooks server">
+      <svg viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M5.1 3.8A5 5 0 1 0 10.9 3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Shutdown
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ NOTEBOOK TOOLBAR ═══════════════ -->
+<div class="nb-toolbar" id="nb-toolbar">
+  <div class="nb-toolbar-left">
+    <button class="nb-tool" id="btn-add-code" title="Add code cell">+ Code</button>
+    <button class="nb-tool" id="btn-add-md"   title="Add markdown cell">+ Markdown</button>
+    <button class="nb-tool nb-tool-pipeline" id="btn-add-pipeline" title="Add pipeline cell — declare a workflow of named cell anchors">
+      <svg viewBox="0 0 16 16"><path d="M1 4h14M1 8h14M1 12h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="4" cy="4" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      + Pipeline
+    </button>
+    <button class="nb-tool" id="btn-paste-cell" title="Paste new cell from clipboard (Ctrl+Shift+V)">
+      <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><rect x="4" y="4" width="9" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/><path d="M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M6 8h5M6 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Paste
+    </button>
+    <div class="sep"></div>
+    <button class="nb-tool nb-tool-run" id="btn-run-all" title="Run all cells">
+      <svg viewBox="0 0 16 16"><path d="M3 2l12 6-12 6V2z" fill="currentColor"/></svg>
+      Run All
+    </button>
+    <button class="nb-tool nb-tool-step" id="btn-step-mode" title="Step through cells one by one" onclick="NotebookEditor.stepStart()">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 2l9 6-9 6V2z" fill="currentColor"/><line x1="13" y1="2" x2="13" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Step
+    </button>
+    <button class="nb-tool" id="btn-restart" title="Restart kernel">
+      <svg viewBox="0 0 16 16"><path d="M13 8A5 5 0 1 1 8 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M8 1l3 2-3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      Restart
+    </button>
+    <button class="nb-tool" id="btn-clear-out" title="Clear all outputs">
+      <svg viewBox="0 0 16 16"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      Clear
+    </button>
+    <button class="nb-tool" id="btn-validate-graph" title="Validate dependency graph — check for unknown anchors and cycles">
+      <svg viewBox="0 0 16 16"><path d="M8 1l1.5 4H14l-3.5 2.5 1.5 4L8 9l-4 2.5 1.5-4L2 5h4.5L8 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
+      Validate
+    </button>
+  </div>
+  <div class="nb-toolbar-right">
+    <button class="nb-tool nb-tool-danger" id="btn-delete-notebook" title="Delete this notebook">
+      <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Delete
+    </button>
+    <span class="kernel-info" id="kernel-info">Kernel ready</span>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN AREA ═══════════════ -->
+<div class="workspace" id="workspace">
+
+  <!-- ── LEFT: TAB CONTENT ── -->
+  <div class="content-pane" id="content-pane">
+
+    <!-- NOTEBOOK TAB -->
+    <div class="tab-panel active" id="panel-notebook">
+      <div id="notebook-tabs-bar" class="notebook-tabs-bar"></div>
+      <div class="cells-scroll" id="cells-scroll">
+        <div id="cells-container" class="cells-container">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 48 48" fill="none">
+                <rect x="8" y="6" width="32" height="36" rx="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 16h16M16 22h16M16 28h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>No notebook open</h3>
+            <p>Select a notebook from the dropdown, or create a new one.</p>
+            <button class="btn-primary" id="btn-create-first">Create New Notebook</button>
+          </div>
+        </div>
+      </div>
+      <!-- Step Navigator — sticky footer inside notebook panel -->
+      <div id="step-nav" class="step-nav" style="display:none">
+        <button class="step-btn step-prev" id="step-prev-btn" onclick="NotebookEditor.stepPrev()" title="Previous cell">
+          <svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          Prev
+        </button>
+        <div class="step-info" id="step-info">
+          <span class="step-num" id="step-num">—</span>
+          <span class="step-sep">·</span>
+          <span class="step-type" id="step-type">—</span>
+        </div>
+        <button class="step-btn step-action" id="step-action-btn" onclick="NotebookEditor.stepAction()">
+          Next →
+        </button>
+        <button class="step-close" onclick="NotebookEditor.stepClose()" title="Close step navigator">✕</button>
+      </div>
+    </div>
+
+    <!-- CONSOLE TAB -->
+    <div class="tab-panel" id="panel-console">
+      <div class="console-wrap">
+        <div class="console-header">
+          <span class="console-title">Interactive Console</span>
+          <div class="console-runtime-bar">
+            <button class="console-runtime-btn active" data-runtime="jshell" title="JShell — Java snippets with shared state">☕ JShell</button>
+            <button class="console-runtime-btn" data-runtime="java" title="Java — compile and run a full class">♨ Java</button>
+            <button class="console-runtime-btn" data-runtime="nodejs" title="JavaScript — Node.js REPL">⬡ JavaScript</button>
+          </div>
+          <div class="console-controls">
+            <span class="console-runtime-badge" id="console-runtime-badge">☕ JShell</span>
+            <button class="nb-tool" id="btn-console-restart">Restart</button>
+            <button class="nb-tool" id="btn-console-clear">Clear</button>
+          </div>
+        </div>
+        <div class="console-output" id="console-output">
+          <div class="console-info">Venus Console ready.  Select a runtime above and start typing.</div>
+        </div>
+        <div class="console-input-row" style="position:relative">
+          <span class="console-prompt">&gt;</span>
+          <textarea id="console-input" class="console-textarea" rows="3"
+            placeholder="Java expression or snippet…  Tab = complete,  ↑↓ = history"></textarea>
+          <button class="btn-primary" id="btn-console-run">Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKAGES TAB -->
+    <div class="tab-panel" id="panel-packages">
+      <div class="tab-scroll">
+
+        <!-- Sub-tab nav: Maven / npm -->
+        <div class="pkg-subtab-nav">
+          <button class="pkg-subtab active" id="pkg-subtab-maven" onclick="PackageTabUI.show('maven')">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M8 1l6 3v4l-6 3L2 8V4l6-3z" stroke="currentColor" stroke-width="1.3"/></svg>
+            Maven (Java)
+          </button>
+          <button class="pkg-subtab" id="pkg-subtab-npm" onclick="PackageTabUI.show('npm')">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><rect x="1" y="5" width="14" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 8.5v2M8 5v7M11 8.5v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            npm (JavaScript)
+          </button>
+          <button class="pkg-subtab" id="pkg-subtab-nuget" onclick="PackageTabUI.show('nuget')">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            NuGet (C# / F#)
+          </button>
+          <button class="pkg-subtab" id="pkg-subtab-cpp" onclick="PackageTabUI.show('cpp')">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M4 3l-3 5 3 5M12 3l3 5-3 5M9 2l-2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            C++ (Built-in)
+          </button>
+        </div>
+
+        <!-- MAVEN SECTION -->
+        <div id="pkg-panel-maven">
+          <div class="section-head">
+            <h2>Maven Packages</h2>
+            <p>Install Maven Central packages into your JShell and Java sessions.</p>
+          </div>
+
+        <div class="card">
+          <div class="card-title">Install Package</div>
+          <div class="card-body">
+            <div class="field-row">
+              <input id="pkg-coord" class="field-input" placeholder="groupId:artifactId:version  e.g. com.google.code.gson:gson:2.10.1">
+              <button class="btn-primary" id="btn-pkg-install">Install</button>
+            </div>
+            <div id="pkg-status" class="pkg-status hidden"></div>
+            <div class="popular-pkgs">
+              <span class="popular-label">Popular:</span>
+              <button class="pill" data-coord="com.google.code.gson:gson:2.10.1">gson</button>
+              <button class="pill" data-coord="org.apache.commons:commons-lang3:3.14.0">commons-lang3</button>
+              <button class="pill" data-coord="com.fasterxml.jackson.core:jackson-databind:2.16.1">jackson</button>
+              <button class="pill" data-coord="org.apache.httpcomponents.client5:httpclient5:5.3">httpclient5</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Search Maven Central</div>
+          <div class="card-body">
+            <div class="field-row">
+              <input id="pkg-search" class="field-input" placeholder="Search packages…">
+              <button class="btn-secondary" id="btn-pkg-search">Search</button>
+            </div>
+            <div id="pkg-results" class="pkg-results hidden"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Installed Packages <span class="badge" id="pkg-count">0</span></div>
+          <div class="card-body" id="pkg-list"><div class="muted">No packages installed yet.</div></div>
+        </div>
+        </div><!-- /pkg-panel-maven -->
+
+        <!-- NPM SECTION -->
+        <div id="pkg-panel-npm" style="display:none">
+          <div class="section-head">
+            <h2>npm Packages</h2>
+            <p>Install npm packages for JavaScript cells. Use <code>require('package')</code> in JS cells.</p>
+            <div id="npm-node-status" class="npm-node-status"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Install Package</div>
+            <div class="card-body">
+              <div class="field-row">
+                <input id="npm-pkg-name" class="field-input" placeholder="package-name  or  package@version  e.g. simple-statistics">
+                <button class="btn-primary" id="btn-npm-install">Install</button>
+              </div>
+              <div id="npm-pkg-status" class="pkg-status hidden"></div>
+              <div class="popular-pkgs">
+                <span class="popular-label">Data Science:</span>
+                <button class="npm-pill pill" data-pkg="simple-statistics">simple-statistics</button>
+                <button class="npm-pill pill" data-pkg="mathjs">mathjs</button>
+                <button class="npm-pill pill" data-pkg="danfojs-node">danfojs</button>
+                <button class="npm-pill pill" data-pkg="d3-array">d3-array</button>
+                <span class="popular-label" style="margin-left:12px">Utilities:</span>
+                <button class="npm-pill pill" data-pkg="lodash">lodash</button>
+                <button class="npm-pill pill" data-pkg="axios">axios</button>
+                <button class="npm-pill pill" data-pkg="dayjs">dayjs</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Search npm</div>
+            <div class="card-body">
+              <div class="field-row">
+                <input id="npm-pkg-search" class="field-input" placeholder="Search npm packages…">
+                <button class="btn-secondary" id="btn-npm-search">Search</button>
+              </div>
+              <div id="npm-pkg-results" class="pkg-results hidden"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Installed npm Packages <span class="badge" id="npm-pkg-count">0</span></div>
+            <div class="card-body" id="npm-pkg-list"><div class="muted">No npm packages installed yet.</div></div>
+          </div>
+        </div><!-- /pkg-panel-npm -->
+
+        <!-- NUGET SECTION -->
+        <div id="pkg-panel-nuget" style="display:none">
+          <div class="section-head">
+            <h2>NuGet Packages</h2>
+            <p>Install NuGet packages for your C# and F# cells. Packages are downloaded automatically by the .NET runtime on first use.</p>
+          </div>
+
+          <div id="nuget-dotnet-status" class="info-box" style="display:none"></div>
+
+          <div class="card">
+            <div class="card-title">Install Package</div>
+            <div class="card-body">
+              <div class="field-row">
+                <input id="nuget-id" class="field-input" placeholder="Package ID  e.g. Newtonsoft.Json" style="flex:2">
+                <input id="nuget-version" class="field-input" placeholder="Version  e.g. 13.0.1" style="flex:1">
+                <button class="btn-primary" id="btn-nuget-install">Install</button>
+              </div>
+              <div id="nuget-status" class="pkg-status hidden"></div>
+              <div class="popular-pkgs" style="margin-top:10px">
+                <span style="font-size:12px;color:var(--text-3)">Popular:</span>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('Newtonsoft.Json','13.0.3')">Newtonsoft.Json</button>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('CsvHelper','33.0.1')">CsvHelper</button>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('Dapper','2.1.35')">Dapper</button>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('Humanizer.Core','2.14.1')">Humanizer</button>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('MathNet.Numerics','5.0.0')">MathNet.Numerics</button>
+                <button class="pkg-pill" onclick="NuGetUI.fillPopular('Spectre.Console','0.49.1')">Spectre.Console</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title">Installed NuGet Packages</div>
+            <div class="card-body">
+              <div id="nuget-list"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title">Setup Requirements</div>
+            <div class="card-body" style="font-size:13px;line-height:1.7">
+              <p><strong>C# and F# cells</strong> require the .NET SDK — no extra tools needed:</p>
+              <pre style="background:var(--bg-3);padding:8px 12px;border-radius:6px;font-size:12px;overflow-x:auto">dotnet --version   # verify SDK is installed
+dotnet fsi --version  # verify F# Interactive</pre>
+              <p style="margin-top:10px">Install the .NET SDK from <strong>https://dot.net</strong> (free), then restart Venus.</p>
+            </div>
+          </div>
+        </div><!-- /pkg-panel-nuget -->
+
+        <!-- C++ SECTION -->
+        <div id="pkg-panel-cpp" style="display:none">
+          <div class="section-head">
+            <h2>C++ Built-in Libraries</h2>
+            <p>C++ cells run with a pre-compiled preamble. The headers below are available in every cell — no installation needed. Third-party package management (vcpkg, Conan) is not yet supported.</p>
+          </div>
+
+          <div id="cpp-compiler-status" class="info-box" style="display:none"></div>
+
+          <div class="card">
+            <div class="card-title">Standard Library Headers — always available</div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 12px;font-size:12px;font-family:monospace">
+                <span class="cpp-header-tag">📦 I/O &amp; Streams</span>
+                <code class="cpp-hdr">&lt;iostream&gt;</code>
+                <code class="cpp-hdr">&lt;sstream&gt;</code>
+                <code class="cpp-hdr">&lt;fstream&gt;</code>
+                <code class="cpp-hdr">&lt;iomanip&gt;</code>
+
+                <span class="cpp-header-tag">📦 Containers</span>
+                <code class="cpp-hdr">&lt;vector&gt;</code>
+                <code class="cpp-hdr">&lt;map&gt;</code>
+                <code class="cpp-hdr">&lt;unordered_map&gt;</code>
+                <code class="cpp-hdr">&lt;set&gt;</code>
+                <code class="cpp-hdr">&lt;list&gt;</code>
+                <code class="cpp-hdr">&lt;deque&gt;</code>
+                <code class="cpp-hdr">&lt;queue&gt;</code>
+                <code class="cpp-hdr">&lt;stack&gt;</code>
+                <code class="cpp-hdr">&lt;array&gt;</code>
+
+                <span class="cpp-header-tag">📦 Algorithms &amp; Math</span>
+                <code class="cpp-hdr">&lt;algorithm&gt;</code>
+                <code class="cpp-hdr">&lt;numeric&gt;</code>
+                <code class="cpp-hdr">&lt;functional&gt;</code>
+                <code class="cpp-hdr">&lt;cmath&gt;</code>
+                <code class="cpp-hdr">&lt;random&gt;</code>
+
+                <span class="cpp-header-tag">📦 Modern C++</span>
+                <code class="cpp-hdr">&lt;optional&gt;</code>
+                <code class="cpp-hdr">&lt;variant&gt;</code>
+                <code class="cpp-hdr">&lt;tuple&gt;</code>
+                <code class="cpp-hdr">&lt;memory&gt;</code>
+                <code class="cpp-hdr">&lt;string&gt;</code>
+                <code class="cpp-hdr">&lt;string_view&gt;</code>
+
+                <span class="cpp-header-tag">📦 Utilities</span>
+                <code class="cpp-hdr">&lt;chrono&gt;</code>
+                <code class="cpp-hdr">&lt;typeinfo&gt;</code>
+                <code class="cpp-hdr">&lt;stdexcept&gt;</code>
+              </div>
+              <p style="margin-top:12px;font-size:12px;color:var(--text-3)">
+                <strong>Also active:</strong> <code>using namespace std;</code> and <code>_USE_MATH_DEFINES</code> (for <code>M_PI</code>, <code>M_E</code> etc. on MSVC)
+              </p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title">Venus Display Helpers</div>
+            <div class="card-body">
+              <table class="status-table" style="font-size:12px">
+                <tr><td><code>venusHtml(string)</code></td><td>Renders HTML output inline in the cell</td></tr>
+                <tr><td><code>venusDisplay(value)</code></td><td>Prints any streamable value</td></tr>
+                <tr><td><code>venusTable(vector&lt;T&gt;)</code></td><td>Shows item count summary</td></tr>
+                <tr><td><code>venusTable(map&lt;K,V&gt;)</code></td><td>Renders a key/value ASCII table</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title">Using Additional Headers</div>
+            <div class="card-body" style="font-size:13px;line-height:1.7">
+              <p>Any system header not listed above can be included at the top of your cell:</p>
+              <pre style="background:var(--bg-3);padding:8px 12px;border-radius:6px;font-size:12px;overflow-x:auto">#include &lt;regex&gt;
+#include &lt;filesystem&gt;   // C++17 — may need -lstdc++fs on older g++
+#include &lt;thread&gt;
+
+// Your cell code follows…</pre>
+              <p style="margin-top:10px;color:var(--text-3);font-size:12px">
+                ⚠ Third-party headers (Boost, Eigen, nlohmann/json, etc.) require manual compiler setup — install the library system-wide so the compiler can find them. Venus does not manage C++ package installation.
+              </p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title">Compiler Status</div>
+            <div class="card-body" id="cpp-compiler-status-body">
+              <div class="muted">Loading…</div>
+            </div>
+          </div>
+        </div><!-- /pkg-panel-cpp -->
+
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="panel-settings">
+      <div class="tab-scroll">
+        <div class="section-head">
+          <h2>Settings</h2>
+          <p>Configure Claude AI, editor preferences, and server options.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AI Assistant</div>
+          <div class="card-body">
+
+            <!-- Provider selector -->
+            <div class="field-group">
+              <label>AI Provider</label>
+              <div class="ai-provider-picker" id="ai-provider-picker">
+                <label class="ai-provider-option" id="ai-opt-claude">
+                  <input type="radio" name="ai-provider" value="claude_cli" checked>
+                  <div class="ai-provider-card">
+                    <div class="ai-provider-logo">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <div>
+                      <div class="ai-provider-name">Claude CLI</div>
+                      <div class="ai-provider-desc">Anthropic Claude via local CLI (no API key required)</div>
+                    </div>
+                  </div>
+                </label>
+                <label class="ai-provider-option" id="ai-opt-copilot">
+                  <input type="radio" name="ai-provider" value="copilot_cli">
+                  <div class="ai-provider-card">
+                    <div class="ai-provider-logo">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+                    </div>
+                    <div>
+                      <div class="ai-provider-name">Copilot CLI</div>
+                      <div class="ai-provider-desc">GitHub Copilot via local CLI (no API key required)</div>
+                    </div>
+                  </div>
+                </label>
+                <label class="ai-provider-option" id="ai-opt-gemini">
+                  <input type="radio" name="ai-provider" value="gemini_cli">
+                  <div class="ai-provider-card">
+                    <div class="ai-provider-logo">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" stroke="currentColor" stroke-width="1.5"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+                    </div>
+                    <div>
+                      <div class="ai-provider-name">Gemini CLI</div>
+                      <div class="ai-provider-desc">Google Gemini via local CLI (no API key required)</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Claude CLI fields -->
+            <div id="ai-claude-fields">
+              <div class="field-group">
+                <label>Model</label>
+                <select id="s-model" class="field-input">
+                  <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — balanced (recommended)</option>
+                  <option value="claude-opus-4-6">Claude Opus 4.6 — most capable</option>
+                  <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Setup</label>
+                <div class="info-box" style="font-size:12.5px;line-height:1.6;padding:8px 12px">
+                  Install <a href="https://claude.ai/code" target="_blank">Claude Code CLI</a>, then run <code>claude auth</code> in a terminal.
+                  No API key required — uses your Claude Pro plan.
+                </div>
+              </div>
+            </div>
+
+            <!-- Copilot CLI fields -->
+            <div id="ai-copilot-fields" style="display:none;">
+              <div class="field-group">
+                <label>CLI Status</label>
+                <div id="gh-cli-status" class="info-box" style="font-size:12.5px;line-height:1.6;padding:8px 12px;display:flex;align-items:center;gap:8px">
+                  <span id="gh-cli-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-3);flex-shrink:0"></span>
+                  <span id="gh-cli-status-text">Checking copilot CLI…</span>
+                </div>
+                <div class="field-hint">
+                  Install the Copilot CLI so that <code>copilot</code> is available on your PATH, then authenticate it.
+                </div>
+              </div>
+            </div>
+
+            <!-- Gemini CLI fields -->
+            <div id="ai-gemini-fields" style="display:none;">
+              <div class="field-group">
+                <label>CLI Status</label>
+                <div id="gemini-cli-status" class="info-box" style="font-size:12.5px;line-height:1.6;padding:8px 12px;display:flex;align-items:center;gap:8px">
+                  <span id="gemini-cli-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-3);flex-shrink:0"></span>
+                  <span id="gemini-cli-status-text">Checking gemini CLI…</span>
+                </div>
+                <div class="field-hint">
+                  Install via <code>npm install -g @google/gemini-cli</code>, then run <code>gemini auth</code> once.
+                  <a href="https://github.com/google-gemini/gemini-cli" target="_blank">Learn more →</a>
+                </div>
+              </div>
+              <div class="field-group">
+                <label>Model</label>
+                <select id="s-gemini-model" class="field-input">
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash — fast (recommended)</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro — most capable</option>
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Max Tokens</label>
+              <input id="s-tokens" type="number" class="field-input" min="256" max="8192" value="4096" style="width:120px">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Editor</div>
+          <div class="card-body">
+            <div class="field-group">
+              <label>Theme</label>
+              <div class="theme-picker" id="theme-picker">
+                <div class="theme-swatch active" data-theme="dark" title="Dark (default)">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#0f0f17 50%,#7c8ef7 50%)"></div>
+                  <span>Dark</span>
+                </div>
+                <div class="theme-swatch" data-theme="light" title="Light">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#f0f0f8 50%,#4a6cf7 50%)"></div>
+                  <span>Light</span>
+                </div>
+                <div class="theme-swatch" data-theme="ocean" title="Ocean">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#080f18 50%,#29b6d4 50%)"></div>
+                  <span>Ocean</span>
+                </div>
+                <div class="theme-swatch" data-theme="forest" title="Forest">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#080f0a 50%,#4caf6e 50%)"></div>
+                  <span>Forest</span>
+                </div>
+                <div class="theme-swatch" data-theme="monokai" title="Monokai">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#272822 50%,#a6e22e 50%)"></div>
+                  <span>Monokai</span>
+                </div>
+                <div class="theme-swatch" data-theme="sunset" title="Sunset">
+                  <div class="swatch-preview" style="background:linear-gradient(135deg,#180e10 50%,#f4845f 50%)"></div>
+                  <span>Sunset</span>
+                </div>
+              </div>
+              <input type="hidden" id="s-theme" value="dark">
+            </div>
+            <div class="field-group">
+              <label>Font Size (px)</label>
+              <input id="s-fontsize" type="number" class="field-input" min="10" max="24" value="14" style="width:80px">
+            </div>
+            <div class="field-group inline-field">
+              <label>Line Numbers</label>
+              <label class="toggle"><input type="checkbox" id="s-linenums" checked><span class="slider"></span></label>
+            </div>
+            <div class="field-group inline-field">
+              <label>Focus executing cell <span class="hint">Auto-scroll to the cell being run</span></label>
+              <label class="toggle"><input type="checkbox" id="s-focus-cell" checked><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Authentication ── -->
+        <div class="card" id="auth-card">
+          <div class="card-title">Authentication</div>
+          <div class="card-body">
+
+            <!-- Current user info banner -->
+            <div class="auth-user-banner" id="auth-user-banner">
+              <div class="auth-user-avatar" id="auth-banner-avatar">?</div>
+              <div class="auth-user-details">
+                <div class="auth-user-name" id="auth-banner-name">Loading…</div>
+                <div class="auth-user-sub"  id="auth-banner-sub"></div>
+              </div>
+            </div>
+
+            <!-- Auth mode selector -->
+            <div class="field-group">
+              <label>Auth Mode
+                <span class="hint">Restart required when changing</span>
+              </label>
+              <div class="auth-mode-row">
+                <label class="auth-mode-option">
+                  <input type="radio" name="auth-mode" id="auth-mode-local" value="local">
+                  <span class="auth-mode-label">
+                    <strong>Local</strong>
+                    <span class="hint">OS username, no sign-in required</span>
+                  </span>
+                </label>
+                <label class="auth-mode-option">
+                  <input type="radio" name="auth-mode" id="auth-mode-oauth" value="oauth">
+                  <span class="auth-mode-label">
+                    <strong>OAuth</strong>
+                    <span class="hint">Google / Microsoft / Facebook sign-in</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- OAuth provider credentials (shown when oauth mode selected or when any creds exist) -->
+            <div id="oauth-providers-section">
+
+              <div class="auth-provider-block">
+                <div class="auth-provider-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  Google
+                  <span class="auth-provider-status" id="google-status"></span>
+                  <a class="auth-setup-link" href="https://console.cloud.google.com/apis/credentials" target="_blank" title="Google Cloud Console">Set up →</a>
+                </div>
+                <div class="field-group" style="margin-bottom:8px">
+                  <label style="font-size:12px">Client ID</label>
+                  <input id="oauth-google-id" type="text" class="field-input" placeholder="…apps.googleusercontent.com">
+                </div>
+                <div class="field-group" style="margin-bottom:0">
+                  <label style="font-size:12px">Client Secret</label>
+                  <div class="field-row">
+                    <input id="oauth-google-secret" type="password" class="field-input" placeholder="GOCSPX-…">
+                    <button class="btn-secondary" onclick="toggleSecret('oauth-google-secret',this)">Show</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="auth-provider-block">
+                <div class="auth-provider-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path d="M11.4 11.4H0V0h11.4v11.4z" fill="#F35325"/><path d="M24 11.4H12.6V0H24v11.4z" fill="#81BC06"/><path d="M11.4 24H0V12.6h11.4V24z" fill="#05A6F0"/><path d="M24 24H12.6V12.6H24V24z" fill="#FFBA08"/></svg>
+                  Microsoft
+                  <span class="auth-provider-status" id="microsoft-status"></span>
+                  <a class="auth-setup-link" href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" title="Azure App Registrations">Set up →</a>
+                </div>
+                <div class="field-group" style="margin-bottom:8px">
+                  <label style="font-size:12px">Client (Application) ID</label>
+                  <input id="oauth-ms-id" type="text" class="field-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                </div>
+                <div class="field-group" style="margin-bottom:8px">
+                  <label style="font-size:12px">Client Secret</label>
+                  <div class="field-row">
+                    <input id="oauth-ms-secret" type="password" class="field-input" placeholder="Value from Certificates &amp; Secrets">
+                    <button class="btn-secondary" onclick="toggleSecret('oauth-ms-secret',this)">Show</button>
+                  </div>
+                </div>
+                <div class="field-group" style="margin-bottom:0">
+                  <label style="font-size:12px">Tenant ID <span class="hint">"common" allows any Microsoft account</span></label>
+                  <input id="oauth-ms-tenant" type="text" class="field-input" placeholder="common" style="max-width:260px">
+                </div>
+              </div>
+
+              <div class="auth-provider-block">
+                <div class="auth-provider-header">
+                  <svg viewBox="0 0 24 24" width="18" height="18"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.023 4.388 11.017 10.125 11.927V15.563H7.078v-3.49h3.047V9.43c0-3.016 1.792-4.681 4.533-4.681 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.927-1.956 1.874v2.25h3.328l-.532 3.49h-2.796v8.437C19.612 23.09 24 18.096 24 12.073z" fill="#1877F2"/></svg>
+                  Facebook
+                  <span class="auth-provider-status" id="facebook-status"></span>
+                  <a class="auth-setup-link" href="https://developers.facebook.com/apps/" target="_blank" title="Meta for Developers">Set up →</a>
+                </div>
+                <div class="field-group" style="margin-bottom:8px">
+                  <label style="font-size:12px">App ID</label>
+                  <input id="oauth-fb-id" type="text" class="field-input" placeholder="1234567890…">
+                </div>
+                <div class="field-group" style="margin-bottom:0">
+                  <label style="font-size:12px">App Secret</label>
+                  <div class="field-row">
+                    <input id="oauth-fb-secret" type="password" class="field-input" placeholder="Your Facebook app secret">
+                    <button class="btn-secondary" onclick="toggleSecret('oauth-fb-secret',this)">Show</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="auth-restart-notice hidden" id="auth-restart-notice">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 3v3l2 2" stroke="#f5a623" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Restart Venus Notebooks to apply changes.
+              </div>
+
+              <div class="auth-actions">
+                <button class="btn-primary" id="btn-save-auth" onclick="SettingsPanel.saveAuthSettings()">Save Auth Settings</button>
+                <span class="saved-flash hidden" id="auth-saved-flash">Saved!</span>
+              </div>
+
+            </div><!-- /oauth-providers-section -->
+
+          </div>
+        </div>
+
+        <!-- Server Lifecycle -->
+        <div class="card">
+          <div class="card-title">Server Lifecycle</div>
+          <div class="card-body">
+            <div class="lifecycle-buttons">
+              <button class="btn-restart" id="btn-lifecycle-restart">
+                ↺ Restart Server
+              </button>
+              <button class="btn-shutdown" id="btn-lifecycle-shutdown">
+                ⏻ Shutdown Server
+              </button>
+            </div>
+            <p class="lifecycle-note">
+              <strong>Restart</strong> saves your notebooks then relaunches Venus automatically —
+              your cell outputs will still be visible when it comes back.<br>
+              Use <code>start.sh</code> / <code>start.bat</code> to launch Venus so the watchdog
+              can handle restarts. Running via <code>mvn spring-boot:run</code> supports shutdown only.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" id="status-card">
+          <div class="card-title">Server Status</div>
+          <div class="card-body" id="s-status-body">
+            <button class="btn-secondary" id="btn-refresh-status">Load Status</button>
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <button class="btn-primary" id="btn-save-settings">Save Settings</button>
+          <span class="saved-flash hidden" id="saved-flash">Saved!</span>
+        </div>
+
+        <div class="card docs-card">
+          <div class="card-title">Documentation</div>
+          <div class="card-body docs-links">
+            <a class="doc-link" href="#" onclick="showDocsPanel('usage')">
+              <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2z" stroke="currentColor" stroke-width="1.3" fill="none" rx="1"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              User Manual
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('pipeline')">
+              <svg viewBox="0 0 16 16"><path d="M1 4h14M1 8h14M1 12h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="4" cy="4" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+              Cell Pipelines &amp; Orchestration
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('mcp')">
+              <svg viewBox="0 0 16 16"><path d="M8 1c3.87 0 7 2.69 7 6s-3.13 6-7 6c-1.08 0-2.1-.23-3-.65L1 14l.65-4C1.23 9.1 1 8.08 1 7c0-3.31 3.13-6 7-6z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              MCP &amp; Agent Integration
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('api')">
+              <svg viewBox="0 0 16 16"><path d="M4 2h8l2 2v10H2V4l2-2z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M4 6h8M4 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              REST API Reference
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('arch')">
+              <svg viewBox="0 0 16 16"><rect x="1" y="4" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="10" y="4" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5.5" y="10" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M3.5 7v2h9V7M8 9v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              Architecture
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('setup')">
+              <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              Setup &amp; Troubleshooting
+            </a>
+            <a class="doc-link" href="#" onclick="showDocsPanel('dev')">
+              <svg viewBox="0 0 16 16"><path d="M5 4l-3 4 3 4M11 4l3 4-3 4M8 2l-2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Developer Guide
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: AI SIDEBAR ── -->
+  <aside class="ai-sidebar" id="ai-sidebar">
+    <!-- Drag-to-resize handle (left edge) -->
+    <div class="ai-resize-handle" id="ai-resize-handle" title="Drag to resize"></div>
+
+    <div class="ai-sidebar-header">
+      <div class="ai-title">
+        <span class="ai-prov-icon" id="ai-prov-icon">🤖</span>
+        <span id="ai-provider-title">AI Assistant</span>
+        <span class="ai-model-badge" id="ai-model-badge">CLI</span>
+      </div>
+      <div class="ai-header-actions">
+        <button class="ai-edit-toggle" id="btn-ai-direct-edit" title="When ON, AI responses are written directly into the focused cell">
+          <span class="dot"></span> Edit cell
+        </button>
+        <button class="icon-btn" id="btn-ai-expand" title="Expand / collapse AI panel">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M6 3H3v3M3 3l4 4M10 13h3v-3M13 13l-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-ai-clear" title="Clear chat">
+          <svg viewBox="0 0 16 16"><path d="M2 4h12M5 4V2h6v2M3 4l1 10h8l1-10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-ai-gen-nb" title="Generate notebook from prompt">
+          <svg viewBox="0 0 16 16"><path d="M8 1l1.5 4H14l-3.5 2.5 1.5 4L8 9l-4 2.5 1.5-4L2 5h4.5L8 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-ai-close" title="Hide AI">
+          <svg viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Provider switcher bar -->
+    <div class="ai-provider-bar" id="ai-provider-bar">
+      <button class="ai-prov-btn" data-provider="claude_cli" id="ai-prov-claude" title="Switch to Claude CLI">
+        <span class="prov-dot"></span>Claude
+      </button>
+      <button class="ai-prov-btn" data-provider="copilot_cli" id="ai-prov-copilot" title="Switch to Copilot CLI">
+        <span class="prov-dot"></span>Copilot
+      </button>
+      <button class="ai-prov-btn" data-provider="gemini_cli" id="ai-prov-gemini" title="Switch to Gemini CLI">
+        <span class="prov-dot"></span>Gemini
+      </button>
+    </div>
+
+    <!-- Direct-edit mode banner -->
+    <div class="ai-direct-edit-banner" id="ai-direct-edit-banner">
+      <svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M11 2l3 3-9 9H2v-3L11 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      <strong>Direct Edit ON</strong> — AI responses will be written into the focused cell automatically.
+    </div>
+
+    <!-- Quick action chips -->
+    <div class="ai-chips">
+      <button class="chip" data-prompt="Explain the currently selected Java code to me">Explain code</button>
+      <button class="chip" data-prompt="What Java packages from Maven Central would be most useful for data processing and analysis?">Suggest packages</button>
+      <button class="chip" data-prompt="Show me a Java 21+ feature (records, pattern matching, or sealed classes) with a working example I can run in JShell">Modern Java</button>
+      <button class="chip" data-prompt="Write a Java stream pipeline that reads a list of strings, filters, transforms and collects them">Streams example</button>
+    </div>
+
+    <!-- Chat messages -->
+    <div class="ai-messages" id="ai-messages">
+      <div class="ai-msg assistant" id="ai-intro-msg">
+        <div class="ai-msg-avatar">AI</div>
+        <div class="ai-msg-body" id="ai-intro-body">
+          <p>Hi! I'm your Venus AI assistant — I help you write, explain, fix, and generate code across <strong>Java, JavaScript, C++, C#, and F#</strong>.</p>
+          <p>I work through your local AI CLI — no separate API key needed. Switch providers anytime in <strong>Settings → AI Assistant</strong>.</p>
+          <p id="ai-intro-provider-line">Try a quick action above or ask anything!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="ai-input-area">
+      <!-- Live cell context bar — auto-populated when a cell gets focus -->
+      <div class="ai-ctx-bar" id="ai-ctx-bar" style="display:none"></div>
+      <div class="ai-input-row">
+        <textarea id="ai-input" class="ai-textarea" rows="3"
+          placeholder="Ask anything — I already see the focused cell's code…"></textarea>
+        <button class="btn-send" id="btn-ai-send" title="Send (Enter)">
+          <svg viewBox="0 0 16 16"><path d="M14 8L2 2l3 6-3 6 12-6z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="ai-input-hint">Enter to send · Shift+Enter for newline · Focused cell is included automatically</div>
+    </div>
+
+    <!-- Notebook action buttons — type a prompt then click to auto-execute -->
+    <div class="ai-action-section">
+      <button class="ai-nb-action-btn create" id="btn-ai-create-cell" title="Type a description, then click — AI will create a new cell automatically">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Create cell
+      </button>
+      <button class="ai-nb-action-btn update" id="btn-ai-update-cell" title="Click a cell, type instructions, then click — AI will update the cell automatically">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Update cell
+      </button>
+      <button class="ai-nb-action-btn" id="btn-ai-new-notebook" title="Generate a complete new notebook with AI">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><rect x="2" y="1" width="10" height="13" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 5h6M5 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="13" cy="13" r="3" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.3"/><path d="M13 11.5v3M11.5 13h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        New notebook
+      </button>
+    </div>
+
+    <!-- Generate notebook modal -->
+    <div class="gen-modal hidden" id="gen-modal">
+      <div class="gen-modal-box">
+        <div class="gen-modal-title">Generate Notebook with AI</div>
+        <textarea id="gen-prompt" class="field-input" rows="4"
+          placeholder="Describe what you want… e.g. 'A tutorial on Java streams with filtering, mapping and collecting examples'"></textarea>
+        <div class="gen-modal-actions">
+          <button class="btn-secondary" id="btn-gen-cancel">Cancel</button>
+          <button class="btn-primary" id="btn-gen-confirm">Generate</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ═══════════════ NOTEBOOK BROWSER ═══════════════ -->
+<div id="notebook-browser" role="dialog" aria-modal="true" aria-label="Tutorials & Notebooks">
+  <div class="nb-browser-modal">
+    <div class="nb-browser-header">
+      <h3>
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" style="vertical-align:middle;margin-right:6px">
+          <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M1 6h14" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+        Tutorials &amp; Notebooks
+      </h3>
+      <input type="search" class="nb-browser-search" id="nb-browser-search" placeholder="Filter notebooks…">
+      <button class="nb-browser-close" id="nb-browser-close" title="Close">&times;</button>
+    </div>
+    <div class="nb-browser-list" id="nb-browser-list">
+      <div class="nb-browser-empty">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DOCS OVERLAY ═══════════════ -->
+<div class="docs-overlay hidden" id="docs-overlay">
+  <div class="docs-panel">
+
+    <!-- Top bar -->
+    <div class="docs-topbar">
+      <div class="docs-topbar-brand">
+        <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="flex-shrink:0">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span>Venus Notebooks — Documentation</span>
+      </div>
+      <button class="docs-close-btn" id="btn-docs-close" title="Close (Esc)">
+        <svg viewBox="0 0 16 16" width="16" height="16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Close
+      </button>
+    </div>
+
+    <!-- Body: sidebar + content -->
+    <div class="docs-body">
+      <nav class="docs-nav">
+        <div class="docs-nav-section">Getting Started</div>
+        <button class="docs-tab active" data-doc="usage">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Usage Guide
+        </button>
+        <button class="docs-tab" data-doc="setup">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Setup &amp; Install
+        </button>
+        <button class="docs-tab" data-doc="tutorials">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h10v2H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Tutorials
+        </button>
+
+        <div class="docs-nav-section">Features</div>
+        <button class="docs-tab" data-doc="pipeline">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><circle cx="3" cy="4" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="12" r="1.5" fill="currentColor"/><path d="M3 5.5v1a2 2 0 0 0 2 2h2M8 9.5v1a2 2 0 0 0 2 2h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Pipelines
+        </button>
+        <button class="docs-tab" data-doc="mcp">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M8 1c3.87 0 7 2.69 7 6s-3.13 6-7 6c-1.08 0-2.1-.23-3-.65L1 14l.65-4C1.23 9.1 1 8.08 1 7c0-3.31 3.13-6 7-6z" stroke="currentColor" stroke-width="1.3"/></svg>
+          MCP &amp; Agents
+        </button>
+
+        <div class="docs-nav-section">Reference</div>
+        <button class="docs-tab" data-doc="api">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M4 2h8l2 2v10H2V4l2-2z" stroke="currentColor" stroke-width="1.3"/><path d="M4 6h8M4 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          API Reference
+        </button>
+        <button class="docs-tab" data-doc="arch">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><rect x="1" y="4" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="4" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="5.5" y="10" width="5" height="3" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 7v2h9V7M8 9v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Architecture
+        </button>
+        <button class="docs-tab" data-doc="dev">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 4l-3 4 3 4M11 4l3 4-3 4M8 2l-2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Developer Guide
+        </button>
+      </nav>
+
+      <div class="docs-content" id="docs-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ STATUS BAR ═══════════════ -->
+<footer class="statusbar">
+  <span id="sb-msg">Ready</span>
+  <div class="sb-right">
+    <button id="sb-err-btn" class="sb-err-btn" style="display:none" onclick="ErrorLog.toggle()" title="Show error log">
+      <span id="sb-err-count">0</span> errors
+    </button>
+    <span class="sb-sep">|</span>
+    <span id="sb-session">Session: —</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-java">Java 25</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-version" title="Build date" style="cursor:default">v1.0.0</span>
+    <span id="sb-build-date" class="sb-build-date" title="Build timestamp"></span>
+    <span class="sb-sep">|</span>
+    <span id="sb-time"></span>
+  </div>
+</footer>
+
+<!-- Error log panel -->
+<div id="error-log-panel" class="error-log-panel" style="display:none">
+  <div class="elp-header">
+    <span class="elp-title">⚠ Execution Error Log</span>
+    <span class="elp-count" id="elp-count">0 errors</span>
+    <button class="elp-clear" onclick="ErrorLog.clear()">Clear</button>
+    <button class="elp-close" onclick="ErrorLog.toggle()">✕</button>
+  </div>
+  <div class="elp-body" id="elp-body"></div>
+</div>
+
+<!-- ═══════════════ LOGIN MODAL ═══════════════ -->
+<div id="login-modal" class="login-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Sign in">
+  <div class="login-card">
+    <!-- Planet icon -->
+    <div class="login-planet">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lp-grad" cx="38%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#fff5b0"/>
+            <stop offset="35%" stop-color="#f5a623"/>
+            <stop offset="70%" stop-color="#c87518"/>
+            <stop offset="100%" stop-color="#6e3000"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="3" transform="rotate(-22,32,32)"/>
+        <circle cx="32" cy="32" r="18" fill="url(#lp-grad)"/>
+        <circle cx="27" cy="27" r="9" fill="rgba(255,255,255,.08)"/>
+        <text x="32" y="38" text-anchor="middle" font-size="16" fill="rgba(255,255,255,.55)" font-family="serif">♀</text>
+      </svg>
+    </div>
+    <h2 class="login-title">Welcome to Venus Notebooks</h2>
+    <p class="login-sub">Sign in to access your personal notebooks</p>
+
+    <div class="login-providers" id="login-providers">
+      <!-- Populated by UserAuth.renderProviders() -->
+      <p class="login-loading">Loading providers…</p>
+    </div>
+
+    <div class="login-divider"><span>or</span></div>
+    <button class="login-local-btn" onclick="UserAuth.continueLocal()">
+      Continue without signing in &nbsp;(local only)
+    </button>
+    <p class="login-local-note">Your notebooks are saved on this machine only.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ EMAIL PROMPT ═══════════════ -->
+<div id="email-prompt" class="login-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Set email">
+  <div class="login-card email-card">
+    <div class="email-icon">
+      <svg viewBox="0 0 40 40" fill="none"><rect x="3" y="8" width="34" height="24" rx="3" stroke="#7c8ef7" stroke-width="2"/><path d="M3 12l17 11 17-11" stroke="#7c8ef7" stroke-width="2"/></svg>
+    </div>
+    <h3 class="login-title" style="font-size:1.1rem">Notification Email</h3>
+    <p class="login-sub">Optional — receive an email when a long-running notebook finishes.</p>
+    <input type="email" id="email-input" class="email-input" placeholder="you@example.com" autocomplete="email"/>
+    <div class="email-actions">
+      <button class="login-local-btn" onclick="UserAuth.saveEmail()">Save</button>
+      <button class="udd-btn" onclick="UserAuth.hideEmailPrompt()" style="margin-top:0">Skip for now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6/bundles/stomp.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+<script src="/js/app.js"></script>
+<script src="/js/orchestration.js"></script>
+<script src="/js/notebook.js"></script>
+<script src="/js/console-tab.js"></script>
+<script src="/js/packages.js"></script>
+<script src="/js/settings.js"></script>
+<script src="/js/server-lifecycle.js"></script>
+<script src="/js/ai-assistant.js"></script>
+<script src="/js/docs.js"></script>
+<script src="/js/npm-packages.js"></script>
+<script src="/js/nuget.js"></script>
+<script>
+const PackageTabUI = {
+  show(tab) {
+    document.getElementById('pkg-panel-maven').style.display  = tab === 'maven'  ? '' : 'none';
+    document.getElementById('pkg-panel-npm').style.display    = tab === 'npm'    ? '' : 'none';
+    document.getElementById('pkg-panel-nuget').style.display  = tab === 'nuget'  ? '' : 'none';
+    document.getElementById('pkg-panel-cpp').style.display    = tab === 'cpp'    ? '' : 'none';
+    document.getElementById('pkg-subtab-maven').classList.toggle('active', tab === 'maven');
+    document.getElementById('pkg-subtab-npm').classList.toggle('active', tab === 'npm');
+    document.getElementById('pkg-subtab-nuget').classList.toggle('active', tab === 'nuget');
+    document.getElementById('pkg-subtab-cpp').classList.toggle('active', tab === 'cpp');
+    if (tab === 'nuget') NuGetUI.load();
+    if (tab === 'cpp') PackageTabUI._loadCppStatus();
+  },
+  async _loadCppStatus() {
+    const el = document.getElementById('cpp-compiler-status-body');
+    if (!el || el.dataset.loaded) return;
+    try {
+      const s = await Venus.api('GET', '/settings/status');
+      const cppAvail  = s.cppAvailable;
+      const cppDetail = s.cppCompilerDetail || s.cppStatus || '';
+      el.innerHTML = cppAvail
+        ? `<span style="color:#22c55e">✓ ${escHtmlPkg(cppDetail || 'Compiler found')}</span>
+           <p style="font-size:12px;color:var(--text-3);margin-top:6px">C++ cells are ready to run.</p>`
+        : `<span style="color:#ef4444">✗ No C++ compiler found.</span>
+           <p style="font-size:12px;color:var(--text-3);margin-top:6px">Install g++, clang++, or Visual Studio Build Tools (see <em>Settings → Server Status</em> for instructions).</p>`;
+      el.dataset.loaded = '1';
+    } catch(e) {
+      el.innerHTML = '<span class="muted">Could not load compiler status.</span>';
+    }
+    function escHtmlPkg(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  }
+};
+</script>
+
+<!-- Cross-Notebook Dependency Picker Modal -->
+<div id="cross-nb-picker" class="cross-nb-picker hidden" role="dialog" aria-modal="true">
+  <div class="cross-nb-picker-inner">
+    <div class="cross-nb-picker-head">
+      <span>Add Cross-Notebook Reference</span>
+      <button class="cross-nb-close" onclick="NotebookEditor._closeCrossNbPicker()" title="Close">✕</button>
+    </div>
+    <div class="cross-nb-picker-body">
+      <p class="cross-nb-hint">Pick a notebook and cell anchor to insert a <code>//@ depends: notebook:id/anchor</code> line into the cell.</p>
+      <label class="cross-nb-label">Notebook</label>
+      <select id="cross-nb-nb-sel" class="cross-nb-sel" onchange="NotebookEditor._onCrossNbNotebookChange()">
+        <option value="">Select notebook…</option>
+      </select>
+      <label class="cross-nb-label" style="margin-top:12px">Cell Anchor</label>
+      <select id="cross-nb-anchor-sel" class="cross-nb-sel" disabled onchange="NotebookEditor._onCrossNbAnchorChange()">
+        <option value="">Select cell anchor…</option>
+      </select>
+      <div id="cross-nb-preview" class="cross-nb-preview"></div>
+      <div class="cross-nb-actions">
+        <button class="btn-secondary" onclick="NotebookEditor._closeCrossNbPicker()">Cancel</button>
+        <button class="btn-primary" id="cross-nb-insert-btn" disabled onclick="NotebookEditor._insertCrossNbRef()">Insert Reference</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
