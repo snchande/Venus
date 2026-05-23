@@ -60,6 +60,7 @@ data/settings.json
 data/packages.json
 data/npm-packages.json
 data/nuget-packages.json
+data/oauth-config.json
 data/packages/
 data/npm-modules/
 data/users/
