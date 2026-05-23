@@ -3,7 +3,9 @@
 ## Project Overview
 Venus Notebooks is a Java-based interactive notebook environment (similar to Jupyter) powered by
 JShell (Java's interactive REPL). It runs as a local Spring Boot web server with a single-page
-web UI for writing and executing Java code, managing Maven packages, and using Claude AI assistance.
+web UI for writing and executing code in **seven languages** — Java/JShell, JavaScript (Node.js),
+TypeScript (Node.js type-stripping + optional `tsc`), C# / F# (.NET SDK), and C++ (MSVC/GCC/Clang) —
+managing Maven, npm, and NuGet packages, and using Claude/Copilot/Gemini AI assistance.
 
 ## Technology Stack
 - **Backend**: Java 21 + Spring Boot 3.2.x
@@ -113,6 +115,10 @@ venus/
 
 ## Important Files
 - `src/main/java/com/venus/shell/JShellManager.java` - Core JShell execution engine
+- `src/main/java/com/venus/service/NodeJsExecutionService.java` - JavaScript subprocess executor
+- `src/main/java/com/venus/service/TypeScriptExecutionService.java` - TypeScript executor (Node type-stripping + optional `tsc`)
+- `src/main/java/com/venus/service/DotNetExecutionService.java` - C# + F# executor
+- `src/main/java/com/venus/service/CppExecutionService.java` - C++ executor (auto-detects MSVC/GCC/Clang)
 - `src/main/java/com/venus/service/ClaudeService.java` - Claude API integration
 - `src/main/resources/static/index.html` - The entire frontend UI
 - `src/main/resources/application.properties` - Server config (port 8585)

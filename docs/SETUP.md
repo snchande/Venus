@@ -14,7 +14,8 @@
 ### Optional
 | Requirement | Minimum | Purpose |
 |-------------|---------|---------|
-| Node.js | 18 LTS | JavaScript cells (`◈ JS` mode) and npm packages |
+| Node.js | 18 LTS (22.6+ for TS) | JavaScript cells (`◈ JS` mode), TypeScript cells (`◆ TS` mode), and npm packages |
+| TypeScript (`tsc`) | 5.0 | Pre-execution type-check for TS cells (optional — TS cells still run without it) |
 | .NET SDK | 6.0 | C# and F# cells (no extra tools needed) |
 | g++ or clang++ | g++ 9 / clang++ 9 | C++ cells (`⚙ C++` mode), C++17 required |
 | Claude CLI | Latest | AI Assistant (Claude provider) — `claude auth` |
@@ -22,8 +23,16 @@
 | Gemini CLI | Latest | AI Assistant (Gemini provider) — `gemini auth` |
 | Internet access | — | Maven Central, npm registry, NuGet |
 
-> **Node.js**: Install from [nodejs.org](https://nodejs.org) to use JavaScript cells and npm packages.
+> **Node.js**: Install from [nodejs.org](https://nodejs.org) to use JavaScript and TypeScript cells (plus npm packages).
+> JavaScript cells work on Node 18+; **TypeScript cells require Node 22.6+** (recommended: Node 24 LTS) for the built-in type-stripping runtime.
 > Without Node.js, Java and JShell cells work normally.
+
+> **TypeScript compiler (tsc)**: To get pre-execution type-check diagnostics in TS cells (e.g. *"Type 'string' is not assignable to type 'number'"*), install the official TypeScript compiler globally:
+> ```bash
+> npm install -g typescript
+> tsc --version   # verify
+> ```
+> Without `tsc`, TS cells still run — Node strips the type annotations and trusts the code. With `tsc` on the PATH, Venus also runs `tsc --noEmit` before each cell and folds the diagnostics into the cell's error stream.
 
 > **.NET SDK**: Install from [dot.net](https://dot.net) to use C# **and** F# cells. The SDK is free for all platforms.
 > Both C# and F# cells require only the standard .NET SDK — no extra tools like `dotnet-script` are needed.
@@ -40,6 +49,7 @@ Venus supports multiple cell execution modes. Each language is **optional** — 
 | JShell (Java REPL) | `jshell` | Built-in (JDK) | — |
 | Java (compile+run) | `java` | Built-in (JDK) | — |
 | JavaScript | `nodejs` | Node.js 18+ | [nodejs.org](https://nodejs.org) |
+| TypeScript | `typescript` | Node.js 22.6+ (Node 24 recommended); optional `tsc` for type-check | [nodejs.org](https://nodejs.org) + `npm install -g typescript` |
 | C# | `csharp` | .NET SDK 6+ | [dot.net](https://dot.net) |
 | F# | `fsharp` | .NET SDK 6+ | [dot.net](https://dot.net) |
 | **C++** | `cpp` | **g++ 9+, clang++ 9+, or MSVC 2017+** | See C++ section below |

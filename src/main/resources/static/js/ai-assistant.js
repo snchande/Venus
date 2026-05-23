@@ -25,8 +25,10 @@ const AIAssistant = (() => {
         document.getElementById('btn-gen-cancel')?.addEventListener('click', () =>
             document.getElementById('gen-modal')?.classList.add('hidden'));
         document.getElementById('btn-gen-confirm')?.addEventListener('click', generateNotebook);
+        // Close button now routes through Venus.closeAi so the FAB + backdrop
+        // stay in sync. app.js also wires this handler; both call setOpen(false).
         document.getElementById('btn-ai-close')?.addEventListener('click', () =>
-            document.getElementById('ai-sidebar')?.classList.add('hidden'));
+            Venus.closeAi?.());
 
         document.getElementById('ai-input')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -239,7 +241,7 @@ const AIAssistant = (() => {
         const bar = document.getElementById('ai-ctx-bar');
         if (!bar) return;
         if (cellContext) {
-            const modeIcon = { jshell: '☕', java: '♨', nodejs: '⬡' }[cellContext.mode] || '◈';
+            const modeIcon = { jshell: '☕', java: '♨', nodejs: '⬡', typescript: '◆', cpp: '⚙' }[cellContext.mode] || '◈';
             bar.innerHTML = `
               <span class="ai-ctx-icon">${modeIcon}</span>
               <span class="ai-ctx-label">${nbContext?.notebookName || 'Notebook'}</span>
@@ -262,7 +264,7 @@ const AIAssistant = (() => {
         if (ctx?.cell) { cellContext = ctx.cell; nbContext = ctx; }
         else cellContext = { source: code, mode: 'jshell' };
         renderContextBadge();
-        document.getElementById('ai-sidebar')?.classList.remove('hidden');
+        Venus.openAi?.();
         const input = document.getElementById('ai-input');
         if (input) { input.value = prompt || ''; input.focus(); }
     }
@@ -270,11 +272,13 @@ const AIAssistant = (() => {
     // ── Build system prompt with full notebook context ────────────────────
     function buildSystemPrompt() {
         const LANG = {
-            jshell: 'JShell (Java snippet — no class wrapper)',
-            java:   'Java (full class compile — must have public class Main { public static void main })',
-            nodejs: 'JavaScript (Node.js)',
-            csharp: 'C# (top-level program via dotnet run)',
-            fsharp: 'F# (script via dotnet fsi)',
+            jshell:     'JShell (Java snippet — no class wrapper)',
+            java:       'Java (full class compile — must have public class Main { public static void main })',
+            nodejs:     'JavaScript (Node.js)',
+            typescript: 'TypeScript (Node.js with built-in type-stripping; optional tsc type-check)',
+            csharp:     'C# (top-level program via dotnet run)',
+            fsharp:     'F# (script via dotnet fsi)',
+            cpp:        'C++ (MSVC / GCC / Clang subprocess)',
         };
 
         let sys = `You are the AI assistant embedded in **Venus Notebooks** — an interactive multi-language notebook environment.
@@ -285,6 +289,7 @@ const AIAssistant = (() => {
 | jshell | Java 21 | Snippets at top-level, shared session state, pre-imported java.util.*/java.io.* |
 | java | Java 21 | Full \`public class Main\` compilation, independent per cell |
 | nodejs | JavaScript (Node.js 18+) | CommonJS + ESM, full Node APIs |
+| typescript | TypeScript (Node.js 22.6+) | Built-in type-stripping; \`tsc --noEmit\` for type-check; uses same npm modules as JS |
 | csharp | C# 9+ | Top-level program, no class wrapper needed |
 | fsharp | F# | \`dotnet fsi\` script, functional style |
 
@@ -347,7 +352,10 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
                 sys += `\n- Last run: ${ago}`;
                 if (cellContext.lastExecutionTimeMs) sys += ` (${cellContext.lastExecutionTimeMs}ms)`;
             }
-            sys += `\n\n**Source:**\n\`\`\`${cellContext.mode === 'nodejs' ? 'js' : cellContext.mode === 'csharp' ? 'csharp' : cellContext.mode === 'fsharp' ? 'fsharp' : 'java'}\n${cellContext.source || '(empty)'}\n\`\`\``;
+            const fenceLang = ({
+                nodejs:'js', typescript:'ts', csharp:'csharp', fsharp:'fsharp', cpp:'cpp'
+            })[cellContext.mode] || 'java';
+            sys += `\n\n**Source:**\n\`\`\`${fenceLang}\n${cellContext.source || '(empty)'}\n\`\`\``;
             if (cellContext.output?.trim())
                 sys += `\n\n**Last output:**\n\`\`\`\n${cellContext.output.slice(0, 1200)}\n\`\`\``;
             if (cellContext.error?.trim())
@@ -356,7 +364,7 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
 
         sys += `\n\n---
 ## Responding with code
-- Wrap ALL code in fenced code blocks with the correct language tag (\`\`\`java, \`\`\`jshell, \`\`\`csharp, \`\`\`fsharp, \`\`\`js)
+- Wrap ALL code in fenced code blocks with the correct language tag (\`\`\`java, \`\`\`jshell, \`\`\`csharp, \`\`\`fsharp, \`\`\`js, \`\`\`ts, \`\`\`cpp)
 - Match the language/mode of the focused cell unless the user explicitly asks to change it
 - Venus shows **Apply to cell**, **Apply & Run**, and **Insert as new cell** buttons under every code block
 - Keep each block complete and immediately runnable as a Venus cell`;

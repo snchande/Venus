@@ -1,6 +1,24 @@
 package com.venus.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ExecutionResult {
+
+    /** A single observed variable — name, declared type, and current value. */
+    public static class Variable {
+        private String name;
+        private String type;
+        private String value;
+
+        public Variable() {}
+        public Variable(String name, String type, String value) {
+            this.name = name; this.type = type; this.value = value;
+        }
+        public String getName()  { return name;  }  public void setName(String v)  { this.name  = v; }
+        public String getType()  { return type;  }  public void setType(String v)  { this.type  = v; }
+        public String getValue() { return value; }  public void setValue(String v) { this.value = v; }
+    }
 
     private String sessionId;
     private String cellId;
@@ -14,6 +32,11 @@ public class ExecutionResult {
     private String notebookId;
     /** True when this result was served from the notebook's saved output (not freshly executed). */
     private boolean cached;
+
+    /** Variables declared by THIS cell during this execution. */
+    private List<Variable> localVariables = new ArrayList<>();
+    /** Session-wide variables NOT declared by this cell (carried in from earlier cells). */
+    private List<Variable> globalVariables = new ArrayList<>();
 
     public ExecutionResult() {}
 
@@ -47,6 +70,8 @@ public class ExecutionResult {
         public Builder executionCount(int v)    { r.executionCount = v; return this; }
         public Builder notebookId(String v)     { r.notebookId = v; return this; }
         public Builder cached(boolean v)        { r.cached = v; return this; }
+        public Builder localVariables(List<Variable> v)  { r.localVariables  = v != null ? v : new ArrayList<>(); return this; }
+        public Builder globalVariables(List<Variable> v) { r.globalVariables = v != null ? v : new ArrayList<>(); return this; }
         public ExecutionResult build()          { return r; }
     }
 
@@ -82,4 +107,14 @@ public class ExecutionResult {
 
     public boolean isCached() { return cached; }
     public void setCached(boolean cached) { this.cached = cached; }
+
+    public List<Variable> getLocalVariables() { return localVariables; }
+    public void setLocalVariables(List<Variable> localVariables) {
+        this.localVariables = localVariables != null ? localVariables : new ArrayList<>();
+    }
+
+    public List<Variable> getGlobalVariables() { return globalVariables; }
+    public void setGlobalVariables(List<Variable> globalVariables) {
+        this.globalVariables = globalVariables != null ? globalVariables : new ArrayList<>();
+    }
 }

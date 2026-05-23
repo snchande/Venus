@@ -10,6 +10,7 @@ import com.venus.service.NodeJsExecutionService;
 import com.venus.service.NotebookService;
 import com.venus.service.OrchestrationService;
 import com.venus.service.PackageService;
+import com.venus.service.TypeScriptExecutionService;
 import com.venus.service.UserService;
 import com.venus.shell.JShellManager;
 import com.venus.shell.ShellSession;
@@ -52,6 +53,7 @@ public class ShellController {
     private final PackageService packageService;
     private final JavaCompilerService javaCompilerService;
     private final NodeJsExecutionService nodeJsExecutionService;
+    private final TypeScriptExecutionService typeScriptExecutionService;
     private final DotNetExecutionService dotNetExecutionService;
     private final CppExecutionService cppExecutionService;
     private final OrchestrationService orchestrationService;
@@ -63,6 +65,7 @@ public class ShellController {
                            PackageService packageService,
                            JavaCompilerService javaCompilerService,
                            NodeJsExecutionService nodeJsExecutionService,
+                           TypeScriptExecutionService typeScriptExecutionService,
                            DotNetExecutionService dotNetExecutionService,
                            CppExecutionService cppExecutionService,
                            OrchestrationService orchestrationService,
@@ -73,6 +76,7 @@ public class ShellController {
         this.packageService = packageService;
         this.javaCompilerService = javaCompilerService;
         this.nodeJsExecutionService = nodeJsExecutionService;
+        this.typeScriptExecutionService = typeScriptExecutionService;
         this.dotNetExecutionService = dotNetExecutionService;
         this.cppExecutionService = cppExecutionService;
         this.orchestrationService = orchestrationService;
@@ -105,6 +109,8 @@ public class ShellController {
                 result = javaCompilerService.execute(sessionId, cellId, code, classpath);
             } else if ("nodejs".equals(mode)) {
                 result = nodeJsExecutionService.execute(sessionId, cellId, code);
+            } else if ("typescript".equals(mode)) {
+                result = typeScriptExecutionService.execute(sessionId, cellId, code);
             } else if ("csharp".equals(mode)) {
                 result = dotNetExecutionService.executeCSharp(sessionId, cellId, code);
             } else if ("fsharp".equals(mode)) {
@@ -378,6 +384,8 @@ public class ShellController {
             javaCompilerService.execute(sessionId, cellId, code, classpath);
         } else if ("nodejs".equals(mode)) {
             nodeJsExecutionService.execute(sessionId, cellId, code);
+        } else if ("typescript".equals(mode)) {
+            typeScriptExecutionService.execute(sessionId, cellId, code);
         } else if ("csharp".equals(mode)) {
             dotNetExecutionService.executeCSharp(sessionId, cellId, code);
         } else if ("fsharp".equals(mode)) {

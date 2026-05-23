@@ -6,6 +6,7 @@ import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 import jdk.jshell.SourceCodeAnalysis;
+import jdk.jshell.VarSnippet;
 
 import com.venus.util.VenusInput;
 import java.io.ByteArrayOutputStream;
@@ -15,7 +16,10 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -177,6 +181,11 @@ public class ShellSession {
         boolean hasError = false;
         String status = "VALID";
 
+        // Track names of variables declared (or overwritten) by THIS cell's snippets.
+        // Used after execution to split the session's variables into "local" (this
+        // cell) vs. "global" (carried in from earlier cells).
+        Set<String> localVarNames = new LinkedHashSet<>();
+
         while (!remaining.isBlank()) {
             SourceCodeAnalysis.CompletionInfo info = sca.analyzeCompletion(remaining);
             String snippet = info.source();
@@ -211,6 +220,12 @@ public class ShellSession {
                 } else if (!hasError && event.status() != null) {
                     status = event.status().name();
                 }
+
+                // Note any variable this cell declared / redeclared — used below
+                // to classify it as a "local" variable for the debug panel.
+                if (event.snippet() instanceof VarSnippet vs) {
+                    localVarNames.add(vs.name());
+                }
             }
 
             // Stop splitting if the remainder looks incomplete
@@ -221,6 +236,24 @@ public class ShellSession {
                 break;
             }
         }
+
+        // Walk the full JShell variable table once and partition into local
+        // (declared in this cell) vs. global (carried over from earlier cells).
+        // Only VALID snippets are reported; overwritten / rejected ones are skipped.
+        List<ExecutionResult.Variable> locals  = new ArrayList<>();
+        List<ExecutionResult.Variable> globals = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        try {
+            jshell.variables().forEach(vs -> {
+                if (jshell.status(vs) != Snippet.Status.VALID) return;
+                String name = vs.name();
+                if (!seen.add(name)) return;   // skip earlier (overwritten) snippets with same name
+                ExecutionResult.Variable v = new ExecutionResult.Variable(
+                        name, vs.typeName(), safeVarValue(vs));
+                if (localVarNames.contains(name)) locals.add(v);
+                else                              globals.add(v);
+            });
+        } catch (Exception ignore) { /* don't fail the cell if introspection errors */ }
 
         // Flush and capture all stdout/stderr from this cell's execution
         proxyStream.flush();
@@ -239,7 +272,19 @@ public class ShellSession {
                 .success(!hasError)
                 .executionTimeMs(elapsed)
                 .executionCount(count)
+                .localVariables(locals)
+                .globalVariables(globals)
                 .build();
+    }
+
+    /** Read a variable's value as a string, defensively — JShell can throw if the value reference is stale. */
+    private String safeVarValue(VarSnippet vs) {
+        try {
+            String v = jshell.varValue(vs);
+            return v == null ? "null" : v;
+        } catch (Exception e) {
+            return "<unavailable>";
+        }
     }
 
     /** Convenience overload (no cell binding). */

@@ -22,6 +22,10 @@
     .cell.mode-nodejs { border-left-color: #22c55e; }
     .cell-badge.nodejs, .cell-badge.code.mode-nodejs { background: rgba(34,197,94,.15); color: #22c55e; border-color: rgba(34,197,94,.3); }
 
+    /* TypeScript cell mode — TS blue (#3178c6) */
+    .cell.mode-typescript { border-left-color: #3178c6; }
+    .cell-badge.typescript, .cell-badge.code.mode-typescript { background: rgba(49,120,198,.15); color: #3178c6; border-color: rgba(49,120,198,.3); }
+
     /* C# cell mode — purple */
     .cell.mode-csharp { border-left-color: #a855f7; }
     .cell-badge.csharp, .cell-badge.code.mode-csharp { background: rgba(168,85,247,.15); color: #a855f7; border-color: rgba(168,85,247,.3); }
@@ -224,10 +228,6 @@
       <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2zM5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>
       Docs
     </button>
-    <button class="tb-btn" id="btn-toggle-ai" title="Toggle AI Assistant (Ctrl+\\)">
-      <svg viewBox="0 0 16 16"><path d="M8 1c3.87 0 7 2.69 7 6s-3.13 6-7 6c-1.08 0-2.1-.23-3-.65L1 14l.65-4C1.23 9.1 1 8.08 1 7c0-3.31 3.13-6 7-6z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      AI
-    </button>
     <div class="ws-status" id="ws-badge" title="WebSocket">
       <span class="ws-dot" id="ws-dot"></span>
       <span id="ws-label">connecting</span>
@@ -369,6 +369,7 @@
             <button class="console-runtime-btn active" data-runtime="jshell" title="JShell — Java snippets with shared state">☕ JShell</button>
             <button class="console-runtime-btn" data-runtime="java" title="Java — compile and run a full class">♨ Java</button>
             <button class="console-runtime-btn" data-runtime="nodejs" title="JavaScript — Node.js REPL">⬡ JavaScript</button>
+            <button class="console-runtime-btn" data-runtime="typescript" title="TypeScript — Node.js with type-stripping">◆ TypeScript</button>
           </div>
           <div class="console-controls">
             <span class="console-runtime-badge" id="console-runtime-badge">☕ JShell</span>
@@ -400,7 +401,7 @@
           </button>
           <button class="pkg-subtab" id="pkg-subtab-npm" onclick="PackageTabUI.show('npm')">
             <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><rect x="1" y="5" width="14" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 8.5v2M8 5v7M11 8.5v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            npm (JavaScript)
+            npm (JavaScript / TypeScript)
           </button>
           <button class="pkg-subtab" id="pkg-subtab-nuget" onclick="PackageTabUI.show('nuget')">
             <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -458,7 +459,7 @@
         <div id="pkg-panel-npm" style="display:none">
           <div class="section-head">
             <h2>npm Packages</h2>
-            <p>Install npm packages for JavaScript cells. Use <code>require('package')</code> in JS cells.</p>
+            <p>Install npm packages for JavaScript <em>and</em> TypeScript cells. Use <code>require('package')</code> in JS cells or <code>import * as x from 'package'</code> in TS cells.</p>
             <div id="npm-node-status" class="npm-node-status"></div>
           </div>
 
@@ -1000,8 +1001,8 @@ dotnet fsi --version  # verify F# Interactive</pre>
     </div>
   </div>
 
-  <!-- ── RIGHT: AI SIDEBAR ── -->
-  <aside class="ai-sidebar" id="ai-sidebar">
+  <!-- ── RIGHT: AI SIDEBAR (slide-out overlay, hidden by default) ── -->
+  <aside class="ai-sidebar hidden" id="ai-sidebar">
     <!-- Drag-to-resize handle (left edge) -->
     <div class="ai-resize-handle" id="ai-resize-handle" title="Drag to resize"></div>
 
@@ -1113,6 +1114,77 @@ dotnet fsi --version  # verify F# Interactive</pre>
     </div>
   </aside>
 </div>
+
+<!-- ═══════════════ VARIABLE INSPECTOR (slide-out + persistent vertical tab) ═══
+     After a code cell runs the vertical "Variables" tab appears on the
+     right edge — it remains visible (offset left of the AI panel when AI
+     is open) and serves as the entry point to re-open the drawer.
+     Clicking the tab slides the drawer in; clicking the backdrop slides
+     it back out (the tab stays). The tab's × button dismisses it until
+     the next cell run. Inside the drawer, clicking the cell tag scrolls
+     to and focuses that cell. ────────────────────────────────────────── -->
+<button class="var-tab hidden" id="var-tab" type="button"
+        title="Show runtime variables (drag to reposition)"
+        aria-label="Show runtime variables">
+  <span class="vt-dot" aria-hidden="true"></span>
+  <span class="vt-text">
+    <span class="vt-text-label">Variables</span>
+    <span class="vt-text-cell" id="vt-cell-label"></span>
+  </span>
+  <span class="vt-close" id="vt-close" title="Dismiss" aria-label="Dismiss">×</span>
+</button>
+
+<aside class="var-inspector hidden" id="var-inspector" aria-label="Variable Inspector">
+  <div class="vi-header">
+    <div class="vi-title">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M5 6h6M5 9h6M5 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <span>Variables</span>
+      <button class="vi-cell-tag" id="vi-cell-tag" type="button"
+              title="Click to scroll to & focus this cell"></button>
+    </div>
+    <button class="icon-btn" id="btn-vi-close" title="Close (Esc)" aria-label="Close">
+      <svg viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="vi-body" id="vi-body">
+    <section class="vi-section" id="vi-local-section">
+      <h4 class="vi-section-title">
+        <span class="vi-dot local"></span>
+        Local <span class="vi-count" id="vi-local-count">0</span>
+        <span class="vi-section-hint">declared in this cell</span>
+      </h4>
+      <div class="vi-table-wrap"><table class="vi-table" id="vi-local-table"></table></div>
+    </section>
+    <section class="vi-section" id="vi-global-section">
+      <h4 class="vi-section-title">
+        <span class="vi-dot global"></span>
+        Global <span class="vi-count" id="vi-global-count">0</span>
+        <span class="vi-section-hint">live in the JShell session</span>
+      </h4>
+      <div class="vi-table-wrap"><table class="vi-table" id="vi-global-table"></table></div>
+    </section>
+    <div class="vi-empty hidden" id="vi-empty">No variables in scope yet.</div>
+  </div>
+</aside>
+
+<!-- ═══════════════ AI BACKDROP + FLOATING LAUNCHER ═══════════════ -->
+<!-- Click-outside backdrop: visible only when AI panel or var inspector is open. -->
+<div class="ai-backdrop" id="ai-backdrop" aria-hidden="true"></div>
+
+<!-- Draggable floating launcher — click to open AI, drag to reposition. -->
+<button class="ai-fab" id="ai-fab" type="button"
+        title="Open AI Assistant (drag to move · Ctrl+\\)" aria-label="Open AI Assistant">
+  <span class="ai-fab-pulse" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 2.5c5.25 0 9.5 3.55 9.5 7.93 0 4.38-4.25 7.93-9.5 7.93-1.16 0-2.27-.18-3.3-.51l-4.7 1.65.86-4.36C3.65 14 2.5 12.05 2.5 10.43c0-4.38 4.25-7.93 9.5-7.93z"
+          stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M8 9.6h8M8 12.6h5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    <circle cx="17.5" cy="6" r="2.2" fill="#ffd166" stroke="#fff" stroke-width="1"/>
+  </svg>
+</button>
 
 <!-- ═══════════════ NOTEBOOK BROWSER ═══════════════ -->
 <div id="notebook-browser" role="dialog" aria-modal="true" aria-label="Tutorials & Notebooks">

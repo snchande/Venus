@@ -49,7 +49,10 @@ public class OrchestrationService {
     private final JShellManager jShellManager;
     private final PackageService packageService;
     private final JavaCompilerService javaCompilerService;
+    private final NodeJsExecutionService nodeJsExecutionService;
+    private final TypeScriptExecutionService typeScriptExecutionService;
     private final DotNetExecutionService dotNetExecutionService;
+    private final CppExecutionService cppExecutionService;
     private final NotebookService notebookService;
     private final UserService userService;
 
@@ -69,13 +72,19 @@ public class OrchestrationService {
     public OrchestrationService(JShellManager jShellManager,
                                  PackageService packageService,
                                  JavaCompilerService javaCompilerService,
+                                 NodeJsExecutionService nodeJsExecutionService,
+                                 TypeScriptExecutionService typeScriptExecutionService,
                                  DotNetExecutionService dotNetExecutionService,
+                                 CppExecutionService cppExecutionService,
                                  NotebookService notebookService,
                                  UserService userService) {
         this.jShellManager = jShellManager;
         this.packageService = packageService;
         this.javaCompilerService = javaCompilerService;
+        this.nodeJsExecutionService = nodeJsExecutionService;
+        this.typeScriptExecutionService = typeScriptExecutionService;
         this.dotNetExecutionService = dotNetExecutionService;
+        this.cppExecutionService = cppExecutionService;
         this.notebookService = notebookService;
         this.userService = userService;
     }
@@ -599,10 +608,16 @@ public class OrchestrationService {
             List<String> cp = packageService.getInstalledPackages().stream()
                     .map(p -> p.getJarPath()).collect(Collectors.toList());
             return javaCompilerService.execute(sessionId, cell.getId(), cell.getSource(), cp);
+        } else if ("nodejs".equals(mode)) {
+            return nodeJsExecutionService.execute(sessionId, cell.getId(), cell.getSource());
+        } else if ("typescript".equals(mode)) {
+            return typeScriptExecutionService.execute(sessionId, cell.getId(), cell.getSource());
         } else if ("csharp".equals(mode)) {
             return dotNetExecutionService.executeCSharp(sessionId, cell.getId(), cell.getSource());
         } else if ("fsharp".equals(mode)) {
             return dotNetExecutionService.executeFSharp(sessionId, cell.getId(), cell.getSource());
+        } else if ("cpp".equals(mode)) {
+            return cppExecutionService.execute(sessionId, cell.getId(), cell.getSource());
         } else {
             return jShellManager.execute(sessionId, cell.getSource(), cell.getId());
         }

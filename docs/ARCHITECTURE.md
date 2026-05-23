@@ -24,8 +24,8 @@ Browser                          Venus Server (Spring Boot 3.2, Java 21)
                       │              Execution Services                      │
                       │                                                      │
                       │  JShellManager  ·  JavaCompilerService               │
-                      │  NodeJsExecutionService  ·  DotNetExecutionService   │
-                      │  CppExecutionService                                 │
+                      │  NodeJsExecutionService  ·  TypeScriptExecutionService│
+                      │  DotNetExecutionService  ·  CppExecutionService      │
                       └──────────────────────────────────────────────────────┘
 
                       ┌──────────────────────────────────────────────────────┐
@@ -71,6 +71,7 @@ com.venus/
 │   ├── PackageService        Maven Central download + classpath injection into JShell
 │   ├── JavaCompilerService   javax.tools compile + subprocess run for Java-mode cells
 │   ├── NodeJsExecutionService Node.js subprocess for JS cells; npm module resolution
+│   ├── TypeScriptExecutionService TS cells via `node --experimental-strip-types`; optional `tsc --noEmit` type-check
 │   ├── DotNetExecutionService C# (dotnet run) + F# (dotnet fsi) — see §DotNet below
 │   ├── CppExecutionService   C++ compile (g++/clang++) + run; anchor/depends injection
 │   ├── NuGetService          NuGet package list management (data/nuget-packages.json)
@@ -332,7 +333,7 @@ venus/
 }
 ```
 
-Cell `mode` values: `jshell` · `java` · `nodejs` · `csharp` · `fsharp` · `cpp`
+Cell `mode` values: `jshell` · `java` · `nodejs` · `typescript` · `csharp` · `fsharp` · `cpp`
 
 ---
 

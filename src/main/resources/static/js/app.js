@@ -30,15 +30,136 @@ const Venus = (() => {
     });
   }
 
-  /* ── AI sidebar toggle ──────────────────────────── */
+  /* ── Right-edge slide-out overlays (AI panel + Variable Inspector) ──
+     Both panels share a single backdrop. The FAB launches the AI panel
+     and is itself draggable. Opening one panel closes the other so they
+     never overlap. Click on the backdrop, press Esc, or click the
+     panel's × button to dismiss. */
   function initAiToggle() {
-    const sidebar = document.getElementById('ai-sidebar');
-    document.getElementById('btn-toggle-ai')?.addEventListener('click', () => {
-      sidebar.classList.toggle('hidden');
+    const aiSidebar = document.getElementById('ai-sidebar');
+    const inspector = document.getElementById('var-inspector');
+    const fab       = document.getElementById('ai-fab');
+    const backdrop  = document.getElementById('ai-backdrop');
+    if (!aiSidebar || !fab || !backdrop) return;
+
+    // ── Refresh the shared backdrop + FAB based on what's open ──────────
+    function refreshOverlayUI() {
+      const aiOpen = !aiSidebar.classList.contains('hidden');
+      const inspectorOpen = inspector && !inspector.classList.contains('hidden');
+      backdrop.classList.toggle('visible', aiOpen || inspectorOpen);
+      fab.classList.toggle('hidden', aiOpen);
+    }
+
+    function setAiOpen(open) {
+      // Opening AI displaces the inspector — only one right-side panel
+      // is visible at a time.
+      if (open && inspector) inspector.classList.add('hidden');
+      aiSidebar.classList.toggle('hidden', !open);
+      refreshOverlayUI();
+    }
+
+    function setInspectorOpen(open) {
+      if (!inspector) return;
+      if (open) aiSidebar.classList.add('hidden');
+      inspector.classList.toggle('hidden', !open);
+      refreshOverlayUI();
+    }
+
+    fab.addEventListener('click', () => {
+      // Suppress click that immediately follows a drag
+      if (fab.dataset.justDragged === '1') {
+        fab.dataset.justDragged = '0';
+        return;
+      }
+      setAiOpen(true);
     });
-    document.getElementById('btn-ai-close')?.addEventListener('click', () => {
-      sidebar.classList.add('hidden');
+
+    backdrop.addEventListener('click', () => {
+      setAiOpen(false);
+      setInspectorOpen(false);
     });
+
+    document.getElementById('btn-ai-close')?.addEventListener('click', () => setAiOpen(false));
+    document.getElementById('btn-vi-close')?.addEventListener('click', () => setInspectorOpen(false));
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (!aiSidebar.classList.contains('hidden')) { setAiOpen(false); return; }
+      if (inspector && !inspector.classList.contains('hidden')) { setInspectorOpen(false); return; }
+    });
+
+    // Public API — other modules drive the overlays through these.
+    Venus.openAi          = () => setAiOpen(true);
+    Venus.closeAi         = () => setAiOpen(false);
+    Venus.openInspector   = () => setInspectorOpen(true);
+    Venus.closeInspector  = () => setInspectorOpen(false);
+
+    initFabDrag(fab);
+  }
+
+  /** Make the AI FAB draggable. Position is persisted to localStorage. */
+  function initFabDrag(fab) {
+    // Restore saved position
+    try {
+      const saved = JSON.parse(localStorage.getItem('ai-fab-pos') || 'null');
+      if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
+        applyFabPos(fab, saved.x, saved.y);
+      }
+    } catch { /* ignore corrupt saved value */ }
+
+    let dragging = false;
+    let moved    = false;
+    let startX = 0, startY = 0;
+    let offsetX = 0, offsetY = 0;
+    const DRAG_THRESHOLD = 4;  // px of motion before we count it as a drag
+
+    fab.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      const rect = fab.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      startX  = e.clientX;
+      startY  = e.clientY;
+      dragging = true;
+      moved    = false;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      if (!moved) { moved = true; fab.classList.add('dragging'); }
+      const x = e.clientX - offsetX;
+      const y = e.clientY - offsetY;
+      applyFabPos(fab, x, y);
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      if (moved) {
+        fab.classList.remove('dragging');
+        fab.dataset.justDragged = '1';   // suppress the trailing click
+        // Persist position
+        const rect = fab.getBoundingClientRect();
+        localStorage.setItem('ai-fab-pos', JSON.stringify({ x: rect.left, y: rect.top }));
+      }
+    });
+  }
+
+  function applyFabPos(fab, x, y) {
+    // Clamp within viewport so the FAB never escapes off-screen on resize
+    const w = fab.offsetWidth  || 58;
+    const h = fab.offsetHeight || 58;
+    const maxX = window.innerWidth  - w - 4;
+    const maxY = window.innerHeight - h - 4;
+    const cx = Math.max(4, Math.min(maxX, x));
+    const cy = Math.max(56, Math.min(maxY, y));  // keep below topbar
+    fab.style.left   = cx + 'px';
+    fab.style.top    = cy + 'px';
+    fab.style.right  = 'auto';
+    fab.style.bottom = 'auto';
   }
 
   /* ── WebSocket (STOMP / SockJS) ─────────────────── */
@@ -132,7 +253,8 @@ const Venus = (() => {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
         e.preventDefault();
-        document.getElementById('btn-toggle-ai')?.click();
+        const open = !document.getElementById('ai-sidebar')?.classList.contains('hidden');
+        open ? Venus.closeAi?.() : Venus.openAi?.();
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
         e.preventDefault();
@@ -341,6 +463,70 @@ if (document.readyState === 'loading') {
 } else {
   Venus.init();
 }
+
+/* ── Variable Inspector ────────────────────────────────────────────
+   Renders local + global variables for the last executed cell into
+   the #var-inspector slide-out. The panel's open/close lifecycle is
+   managed in Venus.initAiToggle (shared backdrop, Esc handling). */
+const VarInspector = (() => {
+  function escapeHtml(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function _renderTable(tableEl, rows) {
+    if (!tableEl) return;
+    if (!rows || rows.length === 0) {
+      tableEl.innerHTML = `<tr><td colspan="3" class="vi-empty-cell" style="text-align:center;color:var(--text-3);padding:14px">—</td></tr>`;
+      return;
+    }
+    const head = `<tr><th>Name</th><th>Type</th><th>Value</th></tr>`;
+    const body = rows.map(v => {
+      const value = v.value;
+      const valClass = value === 'null' ? 'vi-value null'
+                     : value === '<unavailable>' ? 'vi-value unavailable'
+                     : 'vi-value';
+      return `<tr>
+        <td class="vi-name">${escapeHtml(v.name)}</td>
+        <td class="vi-type">${escapeHtml(v.type)}</td>
+        <td><div class="${valClass}">${escapeHtml(value)}</div></td>
+      </tr>`;
+    }).join('');
+    tableEl.innerHTML = head + body;
+  }
+
+  /**
+   * Show variables for a cell and slide the inspector in.
+   * @param {{cellAnchor?:string, cellId?:string, locals:Array, globals:Array}} payload
+   */
+  function show(payload) {
+    const locals  = payload.locals  || [];
+    const globals = payload.globals || [];
+
+    const tag = document.getElementById('vi-cell-tag');
+    if (tag) tag.textContent = payload.cellAnchor
+        ? '#' + payload.cellAnchor
+        : (payload.cellId || '');
+
+    document.getElementById('vi-local-count').textContent  = locals.length;
+    document.getElementById('vi-global-count').textContent = globals.length;
+    _renderTable(document.getElementById('vi-local-table'),  locals);
+    _renderTable(document.getElementById('vi-global-table'), globals);
+
+    // Hide section headers entirely when both lists are empty
+    const empty = locals.length === 0 && globals.length === 0;
+    document.getElementById('vi-empty')?.classList.toggle('hidden', !empty);
+    document.getElementById('vi-local-section') ?.classList.toggle('empty', empty);
+    document.getElementById('vi-global-section')?.classList.toggle('empty', empty);
+
+    Venus.openInspector?.();
+  }
+
+  function hide() { Venus.closeInspector?.(); }
+
+  return { show, hide };
+})();
+window.VarInspector = VarInspector;
 
 /* ── Error Log ─────────────────────────────────────────────────────── */
 const ErrorLog = (() => {

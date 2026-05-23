@@ -13,7 +13,7 @@ const DocsPanel = (() => {
 usage: `
 # Venus Notebooks — User Guide
 
-Venus is a multi-language interactive notebook environment. Write and run code across six languages — JShell, Java, JavaScript, C#, F#, and C++ — in cells that live alongside Markdown documentation. Organise work with named Workflows, get AI assistance from Claude, GitHub Copilot, or Gemini, and expose everything as an API.
+Venus is a multi-language interactive notebook environment. Write and run code across **seven languages** — JShell, Java, JavaScript, **TypeScript**, C#, F#, and C++ — in cells that live alongside Markdown documentation. Organise work with named Workflows, get AI assistance from Claude, GitHub Copilot, or Gemini, and expose everything as an API.
 
 ---
 
@@ -39,6 +39,7 @@ Every code cell has an **execution mode** badge in its header. Click it to cycle
 | **JShell** | Java (REPL) | Built-in JDK | ✓ Shared across cells |
 | **Java** | Java (compile+run) | \`javax.tools\` + subprocess | ✗ Per-cell |
 | **JS** | JavaScript | Node.js subprocess | ✗ Per-cell |
+| **TS** | TypeScript 5+ | Node.js type-stripping (+ optional \`tsc\` check) | ✗ Per-cell |
 | **C#** | C# 9+ top-level | \`dotnet run\` | ✗ Per-cell (pipeline injection) |
 | **F#** | F# Script | \`dotnet fsi\` | ✗ Per-cell (pipeline injection) |
 | **C++** | C++ 17/20 | MSVC / GCC / Clang subprocess | ✗ Per-cell |
@@ -101,7 +102,43 @@ Install npm packages via the **Packages → npm** tab. Modules are available via
 
 ---
 
-### 2.4 C# Mode — dotnet run
+### 2.4 TypeScript Mode — Node.js with type-stripping
+
+TypeScript cells run as **TypeScript 5+** via Node.js 22.6's built-in type-stripping runtime — no separate compile step, no project setup. If \`tsc\` is on your PATH, Venus also runs a quick \`tsc --noEmit\` pass before execution so you see type errors with proper line numbers.
+
+\`\`\`typescript
+type Sale = { region: string; amount: number };
+
+const data: Sale[] = [
+    { region: "North", amount: 120 },
+    { region: "South", amount: 95  },
+    { region: "East",  amount: 142 },
+];
+
+const total: number = data.reduce((sum, r) => sum + r.amount, 0);
+venus.table([{ metric: "Total",   value: total },
+             { metric: "Avg/row", value: (total / data.length).toFixed(2) }]);
+\`\`\`
+
+**Built-in helpers (typed):** \`venus.table(rows: Record<string, unknown>[])\`, \`venus.display(value: unknown)\`, \`venus.html(content: string)\`, \`venus.stats(arr: number[])\`
+
+**npm packages** installed via the **Packages → npm** tab work in TS cells too — the same \`data/npm-modules/\` directory is shared:
+
+\`\`\`typescript
+import * as ss from "simple-statistics";
+
+const samples: number[] = [10, 25, 37, 42, 18, 65, 22];
+console.log("median:", ss.median(samples));
+console.log("stddev:", ss.standardDeviation(samples).toFixed(3));
+\`\`\`
+
+**Type-check vs runtime:** Type errors (e.g. \`Type 'string' is not assignable to type 'number'\`) are reported from \`tsc --noEmit\` when available. Runtime exceptions are reported as usual.
+
+> **Tip — Node version:** TypeScript cells require Node.js ≥ 22.6 (Node 24 LTS is recommended). The **Settings → Server Status** panel shows the detected version.
+
+---
+
+### 2.5 C# Mode — dotnet run
 
 Each C# cell runs as a **C# 9+ top-level program** compiled and executed via \`dotnet run\`. No project file setup required — Venus generates everything automatically.
 
@@ -128,7 +165,7 @@ Use the **Packages → NuGet** tab to install NuGet packages. They are automatic
 
 ---
 
-### 2.5 F# Mode — dotnet fsi
+### 2.6 F# Mode — dotnet fsi
 
 Each F# cell runs as an \`.fsx\` script via F# Interactive. No installation beyond the .NET SDK.
 
@@ -155,7 +192,7 @@ Inline \`#r "nuget: PackageId, Version"\` directives are supported and automatic
 
 ---
 
-### 2.6 C++ Mode — Native Compilation
+### 2.7 C++ Mode — Native Compilation
 
 Each C++ cell is compiled and run as a standalone program using the best available compiler: **MSVC** on Windows (Visual Studio Build Tools), **GCC** or **Clang** on macOS/Linux. No project setup required — Venus generates a temp source file, compiles it, and runs it.
 
@@ -184,11 +221,11 @@ See **Packages → C++ (Built-in)** for the full header reference grouped by cat
 
 ---
 
-### 2.7 Cell Output
+### 2.8 Cell Output
 
 | Output type | Shown as |
 |---|---|
-| \`System.out.println\` / \`Console.WriteLine\` / \`console.log\` / \`printfn\` / \`std::cout\` | Plain text below the cell |
+| \`System.out.println\` / \`Console.WriteLine\` / \`console.log\` (JS/TS) / \`printfn\` / \`std::cout\` | Plain text below the cell |
 | Return value expression (JShell) | Green ⟹ value display |
 | \`VenusHtml()\` / \`venus.html()\` / \`venusHtml\` | Rendered inline HTML block |
 | \`VenusDisplay(chart)\` (XChart) | Inline PNG chart image |
@@ -228,13 +265,13 @@ Go to **Packages → Maven** to install Maven Central packages.
 2. Click **Install** — the JAR is downloaded and added to all JShell sessions
 3. Use it in any JShell or Java cell — no import step required for pre-installed libs
 
-### npm (JavaScript)
+### npm (JavaScript / TypeScript)
 
-Go to **Packages → npm** to install npm packages.
+Go to **Packages → npm** to install npm packages — they are shared between JS and TS cells.
 
-1. Enter a package name (e.g. \`lodash\`, \`mathjs\`)
+1. Enter a package name (e.g. \`lodash\`, \`mathjs\`, \`simple-statistics\`)
 2. Click **Install** — the package is downloaded to \`data/npm-modules/\`
-3. Use via \`require('lodash')\` in JS cells
+3. Use via \`require('lodash')\` in JS cells, or \`import * as _ from 'lodash'\` in TS cells
 
 ### NuGet (C# / F#)
 
@@ -258,7 +295,7 @@ For third-party libraries (Boost, Eigen, nlohmann/json, etc.) install them syste
 
 ## 6. Cell Workflows (Pipelines)
 
-Venus includes a named-cell dependency system that works across all five languages. See the **Pipelines** tab for the full reference.
+Venus includes a named-cell dependency system that works across all seven languages. See the **Pipelines** tab for the full reference.
 
 **Quick start:**
 1. Click the **+ anchor** badge in a cell header to name a cell (e.g. \`loadData\`)
@@ -272,7 +309,7 @@ Venus includes a named-cell dependency system that works across all five languag
 
 Open with **Ctrl+\\** or the **AI** button.
 
-- **Chat** — ask anything about code in any of the six languages; attach cell context with the 🤖 button
+- **Chat** — ask anything about code in any of the seven languages; attach cell context with the 🤖 button
 - **Generate notebook** — click ★, describe your goal, get a full multi-cell notebook
 - **Explain / Fix** — right-click on a cell or use the 🤖 button to explain or fix errors
 - **Insert code** — code blocks in AI responses include **+ Insert into notebook**
@@ -285,11 +322,12 @@ All three providers run as **local CLI subprocesses** — no API key or cloud ac
 
 ## 8. Interactive Console
 
-The Console tab is a live REPL for JShell, Java, and JavaScript — separate from notebooks.
+The Console tab is a live REPL for JShell, Java, JavaScript, and TypeScript — separate from notebooks.
 
 - **JShell** — stateful; use the Session field to share a notebook's session (\`nb-{notebookId}\`)
 - **Java** — compile-and-run per command
 - **JavaScript** — Node.js per command
+- **TypeScript** — Node.js with type-stripping per command
 - **Tab** — auto-complete in JShell mode
 - **↑ / ↓** — navigate history (up to 500 entries)
 
@@ -306,7 +344,7 @@ The Console tab is a live REPL for JShell, Java, and JavaScript — separate fro
 | Line Numbers | Show/hide in code cells |
 | Focus executing cell | Scroll to the cell being run during pipeline execution |
 
-The **Server Status** panel shows which runtimes are detected: Java, Node.js, .NET SDK, C++ Compiler, Claude CLI, Copilot CLI, Gemini CLI.
+The **Server Status** panel shows which runtimes are detected: Java, Node.js (JS + TS), TypeScript compiler, .NET SDK, C++ Compiler, Claude CLI, Copilot CLI, Gemini CLI.
 
 ---
 
@@ -351,15 +389,28 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 ---
 
-## Optional: Node.js (JavaScript cells)
+## Optional: Node.js (JavaScript & TypeScript cells)
 
-| Requirement | Minimum |
-|---|---|
-| Node.js | 18 LTS |
+| Requirement | Minimum | Notes |
+|---|---|---|
+| Node.js (JS only)   | 18 LTS  | Older Node runs JS but not TS |
+| Node.js (JS + TS)   | 22.6+   | Built-in TypeScript type-stripping is required |
+| Node.js (recommended) | 24 LTS | Runs \`.ts\` files natively |
 
 Download from [nodejs.org](https://nodejs.org). After install, verify: \`node --version\`
 
-Without Node.js, JavaScript cells will fail. All other languages (JShell, Java, C#, F#) work normally.
+Without Node.js, JavaScript and TypeScript cells will fail. All other languages (JShell, Java, C#, F#, C++) work normally.
+
+### Optional: TypeScript compiler (\`tsc\`) for type-checking
+
+TypeScript **runtime** does not require any install beyond Node 22.6+ — Venus uses Node's built-in type-stripping. But to get full **type-check** diagnostics (e.g. *"Type 'string' is not assignable to type 'number'"*) install the official compiler globally:
+
+\`\`\`bash
+npm install -g typescript
+tsc --version   # verify
+\`\`\`
+
+When \`tsc\` is on the PATH, Venus automatically runs \`tsc --noEmit\` before each TS cell and folds any diagnostics into the cell's error stream. Without \`tsc\`, TS cells still run — you just lose the pre-execution type-check pass.
 
 ---
 
@@ -496,7 +547,9 @@ Navigate to: **http://localhost:8585**
 |---|---|---|
 | Java JDK | \`javac -version\` | \`javac 17\` or higher |
 | Maven | \`mvn -version\` | \`Apache Maven 3.8\` or higher |
-| Node.js | \`node --version\` | \`v18\` or higher |
+| Node.js (JS) | \`node --version\` | \`v18\` or higher |
+| Node.js (TS) | \`node --version\` | \`v22.6\` or higher |
+| TypeScript (optional) | \`tsc --version\` | any 5.x or 6.x |
 | .NET SDK (C#) | \`dotnet --version\` | \`6.0\` or higher |
 | F# Interactive | \`dotnet fsi --version\` | \`F# ...\` line |
 | C++ (Windows) | \`cl\` | MSVC version line |
@@ -573,6 +626,12 @@ In \`.vscode/launch.json\`:
 ### JShell not starting / InaccessibleObjectException
 Missing JVM flags or JRE instead of JDK. Ensure you use all three \`--add-opens\` flags and that \`javac -version\` works.
 
+### TypeScript cells fail — "Node.js too old for TypeScript cells"
+Your Node version is below 22.6. Upgrade to Node 22.6+ (recommended: 24 LTS) from [nodejs.org](https://nodejs.org). Verify with \`node --version\`. JavaScript cells continue to work on older Node versions.
+
+### TypeScript type errors are not reported (only runtime errors)
+\`tsc\` is not on your PATH. Install with \`npm install -g typescript\`, then restart Venus. The **Settings → Server Status** panel should show *"+ tsc"*.
+
 ### C# cells fail — ".NET SDK not found"
 Install the .NET SDK from [dot.net](https://dot.net). Verify: \`dotnet --version\`. Restart Venus.
 
@@ -609,7 +668,7 @@ Verify internet access to \`repo1.maven.org\`. Check the coordinate format: \`gr
 tutorials: `
 # Tutorial Notebooks
 
-Venus ships with **built-in tutorial notebooks** covering all five languages, from beginner to expert. Open them from the **Browse** button in the toolbar.
+Venus ships with **built-in tutorial notebooks** covering all seven languages, from beginner to expert. Open them from the **Browse** button in the toolbar.
 
 ---
 
@@ -647,6 +706,18 @@ Venus ships with **built-in tutorial notebooks** covering all five languages, fr
 | **JS 301** | Advanced | Functional patterns, generators |
 | **JS 401** | Expert | Data analysis with mathjs |
 | **JS 501** | Expert | D3.js visualization |
+
+---
+
+## TypeScript Tutorials
+
+| Notebook | Level | Topics |
+|---|---|---|
+| **TS 101** | Beginner | Types, type inference, interfaces, functions, arrays, tuples |
+| **TS 201** | Intermediate | Generics, classes, modules, union & intersection types |
+| **TS 301** | Advanced | Conditional types, mapped types, \`infer\`, template literal types |
+| **TS 401** | Expert | Async patterns, decorators, ES2024 features, error handling |
+| **TS 501** | Expert | Data analysis & stats with typed records and npm packages |
 
 ---
 
@@ -715,7 +786,7 @@ pipeline: `
 
 Venus introduces **named cell orchestration** — a system for naming cells, declaring dependencies between them, and building deterministic, reusable execution workflows.
 
-Workflows work the same way in **all six execution modes**: JShell, Java, JavaScript, C#, F#, and C++. They also extend **across notebooks**, enabling modular code libraries shared across your entire workspace.
+Workflows work the same way in **all seven execution modes**: JShell, Java, JavaScript, TypeScript, C#, F#, and C++. They also extend **across notebooks**, enabling modular code libraries shared across your entire workspace.
 
 ---
 
@@ -733,7 +804,7 @@ Traditional notebooks number cells by execution order (\`[3]\`). This creates hi
 | Cycle detection | None | Built-in, with full error path |
 | Minimum execution | "Run All Above" (everything) | Transitive closure only |
 | Cross-notebook sharing | None | \`notebook:{id}/{anchor}\` refs |
-| Language support | Single language | All 5 languages |
+| Language support | Single language | All 7 languages |
 
 ---
 
@@ -924,7 +995,7 @@ Most MCP servers provide read-only data sources: search results, database querie
 
 When an AI agent connects to Venus, it gains the ability to:
 
-- **Write and execute code** across five languages (JShell, Java, JavaScript, C#, F#) and see real output
+- **Write and execute code** across seven languages (JShell, Java, JavaScript, TypeScript, C#, F#, C++) and see real output
 - **Create, read, and organise notebooks** — persistent, structured documents with cells, anchors, and dependencies
 - **Trigger named workflows** (pipelines) that execute entire analysis chains in a single tool call
 - **Build cumulative sessions** — load a module once, use it across many code executions
@@ -1125,7 +1196,7 @@ This means Venus is not just a notebook tool for humans. It is a **programmable 
 - **Automated** — run recurring analysis notebooks on a schedule
 - **Tested** — validate notebook behaviour from automated test suites
 
-Every execution engine (JShell, Java, JavaScript, C#, F#), every pipeline workflow, every package manager, and every AI endpoint is accessible via the same REST API the browser uses.
+Every execution engine (JShell, Java, JavaScript, TypeScript, C#, F#, C++), every pipeline workflow, every package manager, and every AI endpoint is accessible via the same REST API the browser uses.
 
 ---
 
@@ -1175,7 +1246,7 @@ All requests and responses use JSON. No authentication required (local use only)
 }
 \`\`\`
 
-**mode values:** \`jshell\` · \`java\` · \`nodejs\` · \`csharp\` · \`fsharp\` · \`cpp\`
+**mode values:** \`jshell\` · \`java\` · \`nodejs\` · \`typescript\` · \`csharp\` · \`fsharp\` · \`cpp\`
 
 **Execute response:**
 \`\`\`json
@@ -1280,7 +1351,7 @@ Venus routes all AI calls through the active provider (Claude, Copilot, or Gemin
 | PUT | /settings | Update settings |
 | GET | /settings/status | Server status (runtimes, versions) |
 
-The status endpoint reports which runtimes are detected: \`javaAvailable\`, \`nodeAvailable\`, \`dotnetAvailable\`, \`cppAvailable\`, \`cppCompilerDetail\`, \`claudeCliAvailable\`, \`copilotCliAvailable\`, \`geminiCliAvailable\`.
+The status endpoint reports which runtimes are detected: \`javaAvailable\`, \`nodeAvailable\`, \`typescriptAvailable\`, \`tscAvailable\`, \`typescriptDetail\`, \`dotnetAvailable\`, \`cppAvailable\`, \`cppCompilerDetail\`, \`claudeCliAvailable\`, \`copilotCliAvailable\`, \`geminiCliAvailable\`.
 
 ---
 
@@ -1313,7 +1384,7 @@ No special API parameter is needed — the cross-notebook resolution is automati
 arch: `
 # Architecture
 
-Venus is a **single-server application** — one Spring Boot process serves the static frontend and provides all APIs. There is no separate frontend build, no microservices, no message queue. Everything communicates over HTTP REST and STOMP WebSocket.
+Venus is a **single-server application** — one Spring Boot process serves the static frontend and provides all APIs. There is no separate frontend build, no microservices, no message queue. Everything communicates over HTTP REST and STOMP WebSocket. Seven execution engines (JShell, Java, JavaScript, TypeScript, C#, F#, C++) plug into a single \`ShellController\` route, all reporting back through one unified \`ExecutionResult\`.
 
 ---
 
@@ -1331,10 +1402,11 @@ graph LR
         Storage["File Storage (.vnb)"]
     end
 
-    subgraph Engines["Execution Engines (6 languages)"]
+    subgraph Engines["Execution Engines (7 languages)"]
         JShell["JShell (in-process)"]
         Java["javac + subprocess"]
-        Node["node subprocess"]
+        Node["node subprocess (JS)"]
+        TS["node --experimental-strip-types (TS)\n+ optional tsc --noEmit"]
         DotNet["dotnet run / fsi"]
         CPP["cl.exe / g++ / clang++"]
     end
@@ -1351,6 +1423,7 @@ graph LR
     Services --> JShell
     Services --> Java
     Services --> Node
+    Services --> TS
     Services --> DotNet
     Services --> CPP
     Services --> Claude
@@ -1371,6 +1444,7 @@ graph TD
     Controller --> Shell["JShellManager\nShellSession (one per notebook)"]
     Controller --> Compiler["JavaCompilerService\njavax.tools + subprocess"]
     Controller --> NodeSvc["NodeJsExecutionService\nnode -e subprocess"]
+    Controller --> TsSvc["TypeScriptExecutionService\nnode --experimental-strip-types\n+ optional tsc --noEmit"]
     Controller --> DotNetSvc["DotNetExecutionService\ndotnet run (C#) · dotnet fsi (F#)\nSession anchor cache"]
     Controller --> CppSvc["CppExecutionService\ncl.exe / g++ / clang++\nAuto-detects MSVC · GCC · Clang"]
     Controller --> NbSvc["NotebookService\n.vnb CRUD · tutorial registry"]
@@ -1385,6 +1459,7 @@ graph TD
     Orchestration --> Shell
     Orchestration --> Compiler
     Orchestration --> NodeSvc
+    Orchestration --> TsSvc
     Orchestration --> DotNetSvc
     Orchestration --> CppSvc
 \`\`\`
@@ -1400,6 +1475,7 @@ graph TD
     R -- "jshell" --> JS["JShellManager.execute()\nShared in-process JShell session\nVariables persist across cells"]
     R -- "java" --> JC["JavaCompilerService\nCompile via javax.tools\nRun as subprocess\nPer-cell isolation"]
     R -- "nodejs" --> ND["NodeJsExecutionService\nnode -e subprocess\nrequire() from data/npm-modules"]
+    R -- "typescript" --> TS2["TypeScriptExecutionService\nOptional tsc --noEmit type-check\nnode --experimental-strip-types\nShared NODE_PATH with JS cells"]
     R -- "csharp" --> CS["DotNetExecutionService.executeCSharp()\nGenerate temp .csproj\ndotnet run\nInject dep context if //@ depends:"]
     R -- "fsharp" --> FS["DotNetExecutionService.executeFSharp()\nWrite .fsx script\ndotnet fsi --exec\nExtract #r nuget: to top of file"]
     R -- "cpp" --> CPP["CppExecutionService.execute()\nDetect: MSVC / GCC / Clang\nWrite temp .cpp file\nCompile + run subprocess\nPer-cell isolation"]
@@ -1407,6 +1483,7 @@ graph TD
     JS --> Result["ExecutionResult"]
     JC --> Result
     ND --> Result
+    TS2 --> Result
     CS --> Result
     FS --> Result
     CPP --> Result
@@ -1497,7 +1574,7 @@ erDiagram
 
 **Cell types:** \`CODE\` · \`MARKDOWN\` · \`PIPELINE\`
 
-**Cell modes:** \`jshell\` · \`java\` · \`nodejs\` · \`csharp\` · \`fsharp\` · \`cpp\`
+**Cell modes:** \`jshell\` · \`java\` · \`nodejs\` · \`typescript\` · \`csharp\` · \`fsharp\` · \`cpp\`
 
 **Storage format:** Pretty-printed JSON in \`notebooks/{userId}/{id}.vnb\`
 
@@ -1638,7 +1715,8 @@ The frontend has no build step — change a JS/CSS file and refresh the browser.
 | \`JShellManager\` | Session map; creates, manages, and broadcasts from JShell sessions |
 | \`ShellSession\` | Wraps one JShell instance; synchronized execute(); stdout capture via proxy OutputStream |
 | \`JavaCompilerService\` | javax.tools compile → temp dir → subprocess run; auto-wraps bare statements |
-| \`NodeJsExecutionService\` | node -e subprocess; require() resolves from data/npm-modules/ |
+| \`NodeJsExecutionService\` | node subprocess; require() resolves from data/npm-modules/ |
+| \`TypeScriptExecutionService\` | node \`--experimental-strip-types\` subprocess; optional \`tsc --noEmit\` type-check; shares NODE_PATH with JS |
 | \`DotNetExecutionService\` | dotnet run (C#) + dotnet fsi (F#); session anchor cache; dep injection |
 | \`CppExecutionService\` | Auto-detects MSVC/GCC/Clang; writes temp .cpp; compiles + runs; exposes isAvailable() / getCompilerDetail() |
 | \`OrchestrationService\` | Anchor parsing; dep graph; toposort (Kahn's); cycle detection (DFS); cross-notebook resolution |
@@ -1687,7 +1765,7 @@ case "ruby" -> rubyExecutionService.execute(sessionId, req.getCellId(), req.getC
 
 4. **Add the mode to \`notebook.js\` mode cycle:**
 \`\`\`js
-const MODE_CYCLE = ['jshell','java','nodejs','csharp','fsharp','cpp','ruby'];
+const MODE_CYCLE = ['jshell','java','nodejs','typescript','csharp','fsharp','cpp','ruby'];
 const MODE_LABELS = { ..., ruby: 'Ruby' };
 \`\`\`
 
@@ -1846,7 +1924,8 @@ Venus is open source. To contribute:
 | \`shell/ShellSession.java\` | JShell wrapper, output capture |
 | \`shell/JShellManager.java\` | Session map, WebSocket broadcast |
 | \`service/JavaCompilerService.java\` | Full Java compile + run |
-| \`service/NodeJsExecutionService.java\` | Node.js subprocess execution |
+| \`service/NodeJsExecutionService.java\` | Node.js subprocess execution (JS) |
+| \`service/TypeScriptExecutionService.java\` | TypeScript execution via Node type-stripping + optional tsc |
 | \`service/DotNetExecutionService.java\` | C# and F# execution + anchor cache |
 | \`service/OrchestrationService.java\` | Dep graph, toposort, pipeline execution, cross-notebook |
 | \`service/NotebookService.java\` | .vnb CRUD, tutorial + example registry |

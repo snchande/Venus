@@ -120,6 +120,7 @@ POST /api/shell/execute
   - `"jshell"` (default) — shared JShell REPL session
   - `"java"` — compiles and runs a full `public class Main` via `javax.tools`
   - `"nodejs"` — runs code via Node.js subprocess
+  - `"typescript"` — runs code via Node.js with `--experimental-strip-types` (Node 22.6+); if `tsc` is available, also runs `tsc --noEmit` for type-check diagnostics
   - `"csharp"` — runs code as a C# 9+ top-level program via `dotnet run`
   - `"fsharp"` — runs code as an F# script via `dotnet fsi --exec`
   - `"cpp"` — compiles and runs C++17 via `g++` or `clang++`
@@ -602,9 +603,17 @@ GET /api/settings/status
   "geminiCliAvailable": false,
   "geminiCliStatus": "✗ gemini CLI not found",
   "geminiModel": "gemini-2.5-flash",
-  "theme": "dark"
+  "theme": "dark",
+  "dotnetAvailable": true,
+  "cppAvailable": true,
+  "cppCompilerDetail": "MSVC 19.40 (Visual Studio 2022)",
+  "typescriptAvailable": true,
+  "typescriptDetail": "Node v24.13.0 (built-in TS strip) + tsc Version 6.0.3 (type-check)",
+  "tscAvailable": true
 }
 ```
+
+The `typescriptAvailable` flag reports whether Node ≥ 22.6 is on the PATH (required for the built-in type-stripping runtime). The optional `tscAvailable` flag indicates whether the `tsc` compiler is also present — if so, TS cells receive a pre-execution `tsc --noEmit` type-check pass.
 
 ---
 

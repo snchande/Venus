@@ -22,9 +22,9 @@ Venus Notebooks has five main tabs:
 
 | Tab | Purpose |
 |-----|---------|
-| **Notebook** | Write and execute Java, JavaScript, C#, F#, or C++ code in cells |
-| **Console** | Multi-runtime REPL — JShell, Java, or JavaScript with Tab completion |
-| **Packages** | Install Maven packages (Java), npm packages (JavaScript), and NuGet packages (C#/F#) |
+| **Notebook** | Write and execute Java, JavaScript, TypeScript, C#, F#, or C++ code in cells |
+| **Console** | Multi-runtime REPL — JShell, Java, JavaScript, or TypeScript with Tab completion |
+| **Packages** | Install Maven packages (Java), npm packages (JavaScript / TypeScript), and NuGet packages (C#/F#) |
 | **Settings** | Configure AI provider (Claude/Copilot/Gemini), theme, and preferences |
 | **AI** | Chat with the active AI provider; generate notebooks; switch providers inline |
 
@@ -43,7 +43,7 @@ The browser has two sections:
 - Click any card to open it in a new tab
 
 **Venus Tutorials** — built-in read-only notebooks organized by language and level.
-- Tutorials are grouped by: `JShell` / `Java` / `JavaScript`
+- Tutorials are grouped by: `JShell` / `Java` / `JavaScript` / `TypeScript` / `C#` / `F#` / `C++`
 - Each group is sub-divided: **Basics & Foundations** → **Advanced** → **Data Science & Analytics**
 - Level badges (`101` → `601`) indicate progression within each language track
 - Tutorial notebooks open in a **read-only** tab (auto-save is disabled)
@@ -61,7 +61,7 @@ Use the **search box** at the top of the browser to filter across both sections 
 | 501 | Design patterns, architecture, idiomatic code |
 | 601 | Data science, statistics, visualization |
 
-Tutorial tracks available: **JShell**, **Java**, **JavaScript**, **C#**, **F#**, **C++**
+Tutorial tracks available: **JShell**, **Java**, **JavaScript**, **TypeScript**, **C#**, **F#**, **C++**
 
 ### Working with Cells
 
@@ -72,6 +72,7 @@ Venus has four cell types, each visually distinct:
 | **JShell** (default) | Indigo | `☕ JShell` | Java snippets with shared session state |
 | **Java** | Teal | `♨ Java` | Full class compile-and-run, isolated per cell |
 | **JavaScript** | Green | `⬡ JS` | Node.js execution, isolated per cell |
+| **TypeScript** | TS Blue | `◆ TS` | TypeScript via Node.js type-stripping + optional `tsc --noEmit` type-check, isolated per cell |
 | **C#** | Purple | `◈ C#` | C# script via dotnet run, isolated per cell |
 | **F#** | Orange | `◈ F#` | F# Interactive (dotnet fsi), isolated per cell |
 | **C++** | Cyan | `⚙ C++` | g++/clang++ compile+run, C++17, isolated per cell |
@@ -79,7 +80,7 @@ Venus has four cell types, each visually distinct:
 | **Pipeline** | Gold | `⬡ Pipeline` | Orchestrate other cells with dependency steps |
 
 **Code cells** contain executable code. Click the mode button to cycle through languages:
-`JShell → Java → JS → C# → F# → C++ → JShell`
+`JShell → Java → JS → TS → C# → F# → C++ → JShell`
 
 > C# and F# cells require the .NET SDK (install from [dot.net](https://dot.net)).
 > C++ cells require `g++`, `clang++`, or MSVC — see [docs/SETUP.md](SETUP.md#setting-up-c-support) for install instructions.
@@ -110,6 +111,7 @@ Every code cell has a **mode button** on its header. Click it to **cycle through
 | **JShell** | `☕ JShell` | Java snippets; variables shared across all cells in session |
 | **Java** | `♨ Java` | Full `public class Main { ... }` compile + subprocess; cell is independent |
 | **JavaScript** | `⬡ JS` | Node.js subprocess; cell is independent; `require()` loads npm packages |
+| **TypeScript** | `◆ TS` | Node.js `--experimental-strip-types` subprocess + optional `tsc --noEmit` type-check; shares NODE_PATH with JS; cell is independent |
 | **C#** | `◈ C#` | C# top-level program via `dotnet run`; isolated per cell (with dep injection for `//@ depends:`) |
 | **F#** | `◈ F#` | F# script via `dotnet fsi`; isolated per cell (with dep injection for `//@ depends:`) |
 | **C++** | `⚙ C++` | g++/clang++/MSVC compile+run, C++17; auto-wraps in `main()`; isolated per cell |
@@ -696,6 +698,7 @@ The Console tab is a multi-runtime interactive REPL. Select a language runtime u
 | `☕ JShell` | JShell (default) | Java snippets; shared session state; all variables persist |
 | `♨ Java` | Full Java | Compiles and runs a complete Java class per command |
 | `⬡ JavaScript` | Node.js | Executes JavaScript; `require()` loads installed npm packages |
+| `◆ TypeScript` | Node.js (`--experimental-strip-types`) | Executes TypeScript expressions; `import` and types supported; shares NODE_PATH with JS |
 
 The active runtime badge in the header shows which runtime is currently selected.
 
@@ -716,7 +719,7 @@ The active runtime badge in the header shows which runtime is currently selected
 
 **JShell** — completion is server-side using JShell's `SourceCodeAnalysis` API (knows your declared variables and imports).
 
-**Java / JavaScript** — completion is client-side keyword hints (common snippets like `System.out.println(`, `console.log(`, `require(`, etc.).
+**Java / JavaScript / TypeScript** — completion is client-side keyword hints (common snippets like `System.out.println(`, `console.log(`, `require(`, `import * as`, `interface`, etc.).
 
 ### History Navigation
 
@@ -747,7 +750,7 @@ Click **Restart** to clear all variables for the current runtime session and sta
 
 ## Packages Tab
 
-The Packages tab has two sections — **Maven** for Java, **npm** for JavaScript.
+The Packages tab has four sections — **Maven** for Java, **npm** for JavaScript / TypeScript, **NuGet** for C# / F#, and **C++** for the standard library reference.
 
 ### Maven Packages (Java / JShell)
 
@@ -767,34 +770,37 @@ The JAR is downloaded from Maven Central and added to all active JShell sessions
 
 Use the **Search Maven Central** section to find package coordinates.
 
-### npm Packages (JavaScript)
+### npm Packages (JavaScript / TypeScript)
 
-1. Click the **npm (JavaScript)** sub-tab
+1. Click the **npm (JavaScript / TypeScript)** sub-tab
 2. Enter a package name (or `name@version`)
 3. Click **Install** — or click a **popular package pill** for one-click install
 
+npm packages are stored under `data/npm-modules/` and shared between JS and TS cells via `NODE_PATH`. Use them with `require('package')` in JavaScript or `import * as x from 'package'` in TypeScript.
+
 **Popular data science packages:**
 
-| Package | Description | Usage |
-|---------|-------------|-------|
-| `simple-statistics` | Descriptive stats, regression, hypothesis tests | `require('simple-statistics')` |
-| `mathjs` | Full math library — algebra, matrices, units | `require('mathjs')` |
-| `danfojs-node` | Pandas-like DataFrames for Node.js | `require('danfojs-node')` |
-| `d3-array` | Array statistics and histogram utilities | `require('d3-array')` |
-| `lodash` | Utility functions (arrays, objects, strings) | `require('lodash')` |
-| `axios` | HTTP client for fetching data | `require('axios')` |
-| `dayjs` | Date/time manipulation | `require('dayjs')` |
+| Package | Description | JS usage | TS usage |
+|---------|-------------|----------|----------|
+| `simple-statistics` | Descriptive stats, regression, hypothesis tests | `require('simple-statistics')` | `import * as ss from 'simple-statistics'` |
+| `mathjs` | Full math library — algebra, matrices, units | `require('mathjs')` | `import * as math from 'mathjs'` |
+| `danfojs-node` | Pandas-like DataFrames for Node.js | `require('danfojs-node')` | `import * as dfd from 'danfojs-node'` |
+| `d3-array` | Array statistics and histogram utilities | `require('d3-array')` | `import * as d3a from 'd3-array'` |
+| `lodash` | Utility functions (arrays, objects, strings) | `require('lodash')` | `import * as _ from 'lodash'` |
+| `axios` | HTTP client for fetching data | `require('axios')` | `import axios from 'axios'` |
+| `dayjs` | Date/time manipulation | `require('dayjs')` | `import dayjs from 'dayjs'` |
 
-**Example — using simple-statistics in a JS cell:**
-```javascript
-const ss = require('simple-statistics');
-const data = [12, 45, 23, 67, 34, 56, 78, 29];
+**Example — using simple-statistics in a TS cell:**
+```typescript
+import * as ss from 'simple-statistics';
+const data: number[] = [12, 45, 23, 67, 34, 56, 78, 29];
 console.log('Mean:', ss.mean(data).toFixed(2));
 console.log('Std:', ss.standardDeviation(data).toFixed(2));
 ```
 
-> **Requires Node.js**: JavaScript cells and npm packages require Node.js to be installed.
+> **Requires Node.js**: JavaScript cells need Node 18+, TypeScript cells need Node 22.6+.
 > Install from [nodejs.org](https://nodejs.org) — the npm sub-tab shows a status indicator.
+> For TypeScript type-check diagnostics, also install `typescript` globally: `npm install -g typescript`.
 
 ### NuGet Packages (C# / F#)
 

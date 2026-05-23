@@ -6,6 +6,7 @@ import com.venus.service.CppExecutionService;
 import com.venus.service.DotNetExecutionService;
 import com.venus.service.GeminiService;
 import com.venus.service.SettingsService;
+import com.venus.service.TypeScriptExecutionService;
 import com.venus.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,6 +35,7 @@ public class SettingsController {
     private final CopilotCliService copilotCliService;
     private final GeminiService geminiService;
     private final CppExecutionService cppExecutionService;
+    private final TypeScriptExecutionService typeScriptExecutionService;
     private final ConfigurableApplicationContext applicationContext;
 
     @Value("${venus.auth.mode:local}")
@@ -51,6 +53,7 @@ public class SettingsController {
                               CopilotCliService copilotCliService,
                               GeminiService geminiService,
                               CppExecutionService cppExecutionService,
+                              TypeScriptExecutionService typeScriptExecutionService,
                               ConfigurableApplicationContext applicationContext) {
         this.settingsService = settingsService;
         this.userService = userService;
@@ -58,6 +61,7 @@ public class SettingsController {
         this.copilotCliService = copilotCliService;
         this.geminiService = geminiService;
         this.cppExecutionService = cppExecutionService;
+        this.typeScriptExecutionService = typeScriptExecutionService;
         this.applicationContext = applicationContext;
     }
 
@@ -101,6 +105,9 @@ public class SettingsController {
         status.put("dotnetScriptAvailable", dotNetExecutionService.isDotNetScriptAvailable());
         status.put("cppAvailable", cppExecutionService.isAvailable());
         status.put("cppCompilerDetail", cppExecutionService.getCompilerDetail());
+        status.put("typescriptAvailable", typeScriptExecutionService.isAvailable());
+        status.put("typescriptDetail", typeScriptExecutionService.getStatusDetail());
+        status.put("tscAvailable", typeScriptExecutionService.isTscAvailable());
         return ResponseEntity.ok(status);
     }
 

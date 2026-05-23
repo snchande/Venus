@@ -16,9 +16,10 @@ const ConsoleTab = (() => {
     let lastCompSource = '';
 
     const RUNTIME_CFG = {
-        jshell: { label: 'JShell',       icon: '☕', placeholder: 'Java expression or snippet…  Tab = complete,  ↑↓ = history' },
-        java:   { label: 'Java',          icon: '♨',  placeholder: 'Full Java class or static method body…  ↑↓ = history' },
-        nodejs: { label: 'JavaScript',    icon: '⬡',  placeholder: 'JavaScript expression or require(…)…  Tab = hints,  ↑↓ = history' }
+        jshell:     { label: 'JShell',     icon: '☕', placeholder: 'Java expression or snippet…  Tab = complete,  ↑↓ = history' },
+        java:       { label: 'Java',       icon: '♨',  placeholder: 'Full Java class or static method body…  ↑↓ = history' },
+        nodejs:     { label: 'JavaScript', icon: '⬡',  placeholder: 'JavaScript expression or require(…)…  Tab = hints,  ↑↓ = history' },
+        typescript: { label: 'TypeScript', icon: '◆',  placeholder: 'TypeScript expression — types and modules supported…  Tab = hints,  ↑↓ = history' }
     };
 
     const STATIC_HINTS = {
@@ -27,7 +28,11 @@ const ConsoleTab = (() => {
                'var ', 'record ', 'interface ', 'import '],
         nodejs: ['console.log(', 'console.error(', 'require(', 'process.env.', 'JSON.stringify(',
                  'JSON.parse(', 'Array.from(', 'Object.keys(', 'Object.values(', 'Promise.all(',
-                 'async function ', 'const ', 'let ', 'module.exports =']
+                 'async function ', 'const ', 'let ', 'module.exports ='],
+        typescript: ['console.log(', 'const ', 'let ', 'interface ', 'type ', 'enum ', 'async function ',
+                     'import * as ', 'import { ', 'export const ', 'export function ',
+                     ': string', ': number', ': boolean', ': void', ': unknown', ': any',
+                     'Array<', 'Record<', 'Promise<', 'Partial<', 'Readonly<']
     };
 
     // ── Init ──────────────────────────────────────────────────────

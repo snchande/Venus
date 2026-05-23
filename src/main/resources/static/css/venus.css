@@ -1631,20 +1631,331 @@ input:checked + .slider::before { transform: translateX(16px); background: #fff;
 /* ══════════════════════════════════════════════════════
    AI SIDEBAR
    ══════════════════════════════════════════════════════ */
-/* ── AI sidebar — resizable ───────────────────────────────────────── */
+/* ── AI sidebar — floating slide-out overlay ──────────────────────────
+   The sidebar is no longer in the workspace flex flow. It floats fixed
+   to the right edge and slides in/out so the notebook always gets full
+   width. The launcher FAB (further down) opens it. ─────────────────── */
 .ai-sidebar {
+  position: fixed;
+  top: var(--topbar-h, 52px);
+  right: 0;
+  bottom: 0;
   width: var(--ai-w);
   min-width: 280px;
   max-width: 75vw;
   border-left: 1px solid var(--border);
   background: var(--surface-1);
   display: flex; flex-direction: column;
-  flex-shrink: 0;
-  position: relative;
-  /* width transition only when not resizing */
+  z-index: 200;
+  transform: translateX(0);
+  box-shadow: -10px 0 28px rgba(0,0,0,.4);
+  transition: transform .35s cubic-bezier(.2,.85,.25,1), opacity .25s;
   overflow: hidden;
 }
-.ai-sidebar.hidden { width: 0 !important; opacity: 0; border-left-color: transparent; overflow: hidden; }
+.ai-sidebar.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Backdrop dims the workspace and catches click-outside. */
+.ai-backdrop {
+  position: fixed;
+  inset: var(--topbar-h, 52px) 0 0 0;
+  background: rgba(0,0,0,.32);
+  backdrop-filter: blur(1.5px);
+  z-index: 180;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.ai-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+/* ── Floating AI launcher (FAB) ──────────────────────────────────────
+   Visible whenever the AI panel is hidden. Draggable to any position on
+   the viewport; position persists via localStorage. Click opens AI. */
+.ai-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+  border: 2px solid rgba(255,255,255,.18);
+  color: #fff;
+  box-shadow:
+    0 10px 28px rgba(99,102,241,.45),
+    0 3px 8px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab;
+  z-index: 190;
+  user-select: none;
+  padding: 0;
+  transition: transform .18s ease, box-shadow .2s, opacity .25s;
+}
+.ai-fab:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 14px 36px rgba(124,142,247,.6),
+    0 4px 10px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.ai-fab:active,
+.ai-fab.dragging { cursor: grabbing; transition: none; }
+.ai-fab.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(.4);
+}
+.ai-fab svg { width: 28px; height: 28px; position: relative; z-index: 1; }
+
+/* Soft pulsing halo behind the FAB to draw attention */
+.ai-fab-pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: .35;
+  animation: ai-fab-pulse 2.6s ease-out infinite;
+  z-index: 0;
+}
+@keyframes ai-fab-pulse {
+  0%   { transform: scale(.9);  opacity: .35; }
+  70%  { transform: scale(1.45); opacity: 0;   }
+  100% { transform: scale(1.45); opacity: 0;   }
+}
+.ai-fab.dragging .ai-fab-pulse { animation: none; opacity: 0; }
+
+/* ══════════════════════════════════════════════════════
+   VARIABLE INSPECTOR (right slide-out)
+   Auto-opens after a cell executes; shares the AI backdrop.
+   ══════════════════════════════════════════════════════ */
+.var-inspector {
+  position: fixed;
+  top: var(--topbar-h, 52px);
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 200;
+  transform: translateX(0);
+  box-shadow: -10px 0 28px rgba(0,0,0,.4);
+  transition: transform .35s cubic-bezier(.2,.85,.25,1), opacity .25s;
+  overflow: hidden;
+}
+.var-inspector.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.vi-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.vi-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: var(--text-1);
+}
+.vi-title svg { color: var(--accent); }
+.vi-cell-tag {
+  font-family: var(--font-code); font-size: 11px;
+  color: var(--accent); font-weight: 500;
+  background: var(--accent-dim);
+  padding: 2px 8px; border-radius: 10px;
+  border: 1px solid rgba(124,142,247,.3);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.vi-cell-tag:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.vi-cell-tag:empty { display: none; }
+
+.vi-body {
+  flex: 1; overflow-y: auto;
+  padding: 12px 14px 24px;
+}
+
+.vi-section { margin-bottom: 18px; }
+.vi-section.empty { display: none; }
+
+.vi-section-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 8px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-2);
+}
+.vi-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.vi-dot.local  { background: var(--green); box-shadow: 0 0 6px rgba(107,207,143,.55); }
+.vi-dot.global { background: var(--accent); box-shadow: 0 0 6px rgba(124,142,247,.55); }
+.vi-count {
+  font-family: var(--font-code); font-weight: 600;
+  color: var(--text-1);
+  background: var(--surface-3);
+  padding: 0 7px; border-radius: 10px;
+  font-size: 10.5px; letter-spacing: 0;
+}
+.vi-section-hint {
+  margin-left: auto;
+  font-size: 10px; font-weight: 500;
+  color: var(--text-3);
+  text-transform: none; letter-spacing: 0;
+}
+
+.vi-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-0);
+}
+.vi-table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--font-code); font-size: 12px;
+}
+.vi-table th {
+  text-align: left;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-weight: 600; font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.vi-table td {
+  padding: 6px 10px;
+  border-top: 1px solid rgba(255,255,255,.04);
+  vertical-align: top;
+  word-break: break-word;
+}
+.vi-table tr:first-child td { border-top: none; }
+.vi-table tr:hover td { background: rgba(124,142,247,.05); }
+
+.vi-name  { color: var(--text-1); font-weight: 600; }
+.vi-type  { color: var(--accent); white-space: nowrap; }
+.vi-value {
+  color: var(--green);
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 6.5em; overflow-y: auto;
+}
+.vi-value.null      { color: var(--text-3); font-style: italic; }
+.vi-value.unavailable { color: var(--yellow); font-style: italic; }
+
+.vi-empty {
+  text-align: center;
+  color: var(--text-3);
+  font-size: 12.5px;
+  padding: 32px 12px;
+}
+.vi-empty.hidden { display: none; }
+
+/* ── Persistent vertical "Variables" tab on the right edge ──────────
+   Appears as a slim vertical pill that stays parked on the right edge
+   so the user can re-open the inspector any time after running a cell.
+   When the AI panel is open the tab automatically shifts left by the
+   AI panel's current width (--ai-w-current is updated from JS). */
+.var-tab {
+  position: fixed;
+  right: var(--ai-w-current, 0px);
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 195;
+  width: 34px;
+  min-height: 150px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0 8px;
+  background: linear-gradient(180deg, var(--accent) 0%, color-mix(in srgb, var(--purple) 75%, var(--accent)) 100%);
+  color: #fff;
+  border: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: -4px 0 14px rgba(0,0,0,.35);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-ui);
+  transition: transform .3s cubic-bezier(.2,.85,.25,1), right .3s ease, opacity .25s, box-shadow .2s;
+}
+.var-tab.hidden {
+  transform: translate(100%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: none;
+}
+.var-tab:hover {
+  box-shadow: -6px 0 20px rgba(124,142,247,.55);
+}
+.vt-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255,255,255,.7);
+  animation: vt-dot-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes vt-dot-pulse {
+  0%, 100% { opacity: .55; transform: scale(.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+.vt-text {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);   /* read top-to-bottom */
+  font-size: 11.5px;
+  letter-spacing: .12em;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex: 1;
+  justify-content: center;
+}
+.vt-text-cell {
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .03em;
+  text-transform: none;
+  opacity: .9;
+  background: rgba(255,255,255,.18);
+  padding: 6px 3px;
+  border-radius: 6px;
+}
+.vt-text-cell:empty { display: none; }
+.vt-close {
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  color: #fff; font-size: 14px; font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.vt-close:hover { background: rgba(255,255,255,.35); }
+
+/* Flash a cell when it's focused from the inspector */
+.cell.focus-flash {
+  animation: cell-focus-flash 1.4s ease-out;
+}
+@keyframes cell-focus-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(124,142,247,.85); }
+  40%  { box-shadow: 0 0 0 6px rgba(124,142,247,.45); }
+  100% { box-shadow: 0 0 0 0 rgba(124,142,247,0);    }
+}
 
 /* Drag handle on the left edge */
 .ai-resize-handle {

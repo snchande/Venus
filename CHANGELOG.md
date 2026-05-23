@@ -5,6 +5,61 @@ Dates are in `YYYY-MM-DD` format.
 
 ---
 
+## [2.1.0] — 2026-05-10
+
+Venus 2.1 adds **TypeScript** as a full first-class language — bringing the total to **seven execution modes** (JShell · Java · JavaScript · TypeScript · C# · F# · C++). The integration leverages Node.js's built-in type-stripping (Node 22.6+), so no additional runtime is required beyond the existing Node.js dependency.
+
+### TypeScript Language Support
+
+- **TypeScript cells** — new `typescript` mode using Node.js's built-in type-stripping
+  - Each cell runs as a per-cell isolated `node --experimental-strip-types script.ts` subprocess (Node 22.6+; Node 24+ runs `.ts` files natively)
+  - Built-in **typed** Venus preamble: `venus.table(rows)`, `venus.display(value)`, `venus.html(content)`, `venus.stats(arr)` — full TS signatures injected at the top of every cell
+  - Shares `data/npm-modules/` with JavaScript cells — `import * as ss from "simple-statistics"` works without any extra setup
+  - Line-number correction on errors (preamble offset removed)
+  - CodeMirror syntax highlighting uses `text/typescript`
+  - TS blue (`#3178c6`) cell badge and `◆` icon
+
+- **Optional `tsc` type-check** — if the TypeScript compiler is on the PATH, Venus runs `tsc --noEmit` before each cell with relaxed-strict settings:
+  - Type errors (e.g. `Type 'string' is not assignable to type 'number'`) reported **before** execution starts
+  - Type-check failures are folded into the cell's error stream alongside runtime errors
+  - Without `tsc`, cells still run — only the type-check pass is skipped
+  - Install with `npm install -g typescript` to enable
+
+- **Console TypeScript runtime** — Interactive Console adds a `◆ TypeScript` button alongside JShell/Java/JS for ad-hoc TS expressions
+
+- **AI integration** — the AI Assistant recognises `typescript` mode and emits `` ```ts `` fenced blocks in its responses; the language-conversion banner offers TS targets when cycling cell modes
+
+### Tutorials & Examples
+
+- **5 new tutorial notebooks** — full TS 101 → 501 series matching the JS coverage:
+  - `ts-101` — Types, inference, interfaces, functions, arrays, tuples
+  - `ts-201` — Generics, classes, modules, union/intersection types
+  - `ts-301` — Conditional types, mapped types, `infer`, template literal types
+  - `ts-401` — Async patterns, Result types, branded types, builder pattern, ES2024 features
+  - `ts-501` — Typed data analysis with stats, HTML reports, and defensive parsing
+- **New example notebook** — `typescript-intro` — five-minute TS tour
+- Tutorial total goes from **23 → 28**
+
+### REST API & Status
+
+- `POST /api/shell/execute` accepts `"mode": "typescript"`
+- `GET /api/settings/status` now reports `typescriptAvailable`, `tscAvailable`, and `typescriptDetail`
+- TypeScript cells participate in pipelines via the existing `//@ depends:` system (per-cell isolation, same model as JavaScript and C++)
+
+### Documentation
+
+- In-app docs (Usage Guide, Setup, Tutorials, API Reference, Architecture, Developer Guide) updated with TypeScript sections
+- README, `docs/USAGE.md`, `docs/API.md`, `docs/ARCHITECTURE.md`, `docs/SETUP.md`, and `docs/cheatsheet.html` extended
+- Mode cycle in mode-toggle tooltip: **JShell → Java → JS → TS → C# → F# → C++ → JShell**
+
+### Internal
+
+- New `service/TypeScriptExecutionService.java` — mirrors `NodeJsExecutionService` with TS type-stripping + optional `tsc` integration
+- Wired into `ShellController`, `OrchestrationService`, and `SettingsController`
+- No new dependencies in `pom.xml` — TypeScript support is delivered purely through Node.js subprocesses
+
+---
+
 ## [2.0.0] — 2026-04-17
 
 Venus 2.0 adds **C# and F#** as full first-class languages — including pipeline dependency injection, NuGet package management, and cross-notebook cell references across all five execution modes. This is a **major feature release**.

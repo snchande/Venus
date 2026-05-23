@@ -1,0 +1,60 @@
+{
+  "id": "typescript-intro",
+  "name": "TypeScript Quick Tour",
+  "description": "Short example: types, generics, async, and Venus helpers — a five-minute TypeScript tour",
+  "cells": [
+    {
+      "id": "ts-tour-md-1",
+      "type": "MARKDOWN",
+      "source": "# TypeScript Quick Tour\n\nA five-minute tour of TypeScript in Venus. For the full tutorial series, open the **Tutorials** browser and choose **TS 101 → 501**.",
+      "output": "",
+      "executed": false
+    },
+    {
+      "id": "ts-tour-1",
+      "type": "CODE",
+      "mode": "typescript",
+      "source": "//@ anchor: types-and-inference\n//@ description: Types & inference\n\nconst greeting: string = \"Hello, TypeScript!\";\nconst counts = [1, 2, 3, 4]; // inferred as number[]\nconst total: number = counts.reduce((a, b) => a + b, 0);\nconsole.log(`${greeting}  sum=${total}`);",
+      "output": "",
+      "executed": false,
+      "anchor": "types-and-inference",
+      "description": "Types & inference"
+    },
+    {
+      "id": "ts-tour-2",
+      "type": "CODE",
+      "mode": "typescript",
+      "source": "//@ anchor: generics-quick\n//@ description: Generics in a one-liner\n\nfunction last<T>(arr: T[]): T | undefined { return arr.at(-1); }\n\nconsole.log(last([\"a\", \"b\", \"c\"]));   // \"c\"\nconsole.log(last([10, 20, 30]));      // 30\nconsole.log(last<number>([]));        // undefined",
+      "output": "",
+      "executed": false,
+      "anchor": "generics-quick",
+      "description": "Generics in a one-liner"
+    },
+    {
+      "id": "ts-tour-3",
+      "type": "CODE",
+      "mode": "typescript",
+      "source": "//@ anchor: typed-records-table\n//@ description: Typed records rendered with venus.table\n\ninterface Planet { name: string; au: number; moons: number; }\n\nconst planets: Planet[] = [\n  { name: \"Mercury\", au: 0.39, moons: 0  },\n  { name: \"Venus\",   au: 0.72, moons: 0  },\n  { name: \"Earth\",   au: 1.00, moons: 1  },\n  { name: \"Mars\",    au: 1.52, moons: 2  },\n  { name: \"Jupiter\", au: 5.20, moons: 95 },\n];\n\nvenus.table(planets as unknown as Record<string, unknown>[]);\nvenus.stats(planets.map(p => p.au));",
+      "output": "",
+      "executed": false,
+      "anchor": "typed-records-table",
+      "description": "Typed records rendered with venus.table"
+    },
+    {
+      "id": "ts-tour-4",
+      "type": "CODE",
+      "mode": "typescript",
+      "source": "//@ anchor: async-typed\n//@ description: Typed async/await\n\ninterface Probe { id: number; tempC: number; }\n\nasync function readProbe(id: number): Promise<Probe> {\n  await new Promise(r => setTimeout(r, 5));\n  return { id, tempC: Math.round((400 + Math.random() * 60) * 10) / 10 };\n}\n\nasync function main(): Promise<void> {\n  const probes: Probe[] = await Promise.all([1, 2, 3, 4].map(readProbe));\n  venus.table(probes.map(p => ({ Probe: `#${p.id}`, \"Temp °C\": p.tempC })));\n}\n\nmain();",
+      "output": "",
+      "executed": false,
+      "anchor": "async-typed",
+      "description": "Typed async/await"
+    }
+  ],
+  "metadata": {
+    "category": "example",
+    "language": "typescript",
+    "level": 0,
+    "subcategory": "Examples & Demos"
+  }
+}

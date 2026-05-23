@@ -26,13 +26,14 @@ const NotebookEditor = (() => {
 
   /* ── Mode helpers ─────────────────────────────────── */
   function modeLabelFor(mode) {
-    return { jshell:'JShell', java:'Java', nodejs:'JS', csharp:'C#', fsharp:'F#', cpp:'C++' }[mode] || 'JShell';
+    return { jshell:'JShell', java:'Java', nodejs:'JS', typescript:'TS', csharp:'C#', fsharp:'F#', cpp:'C++' }[mode] || 'JShell';
   }
   function _baseCmMode(mode) {
-    if (mode === 'nodejs') return 'text/javascript';
-    if (mode === 'csharp') return 'text/x-csharp';
-    if (mode === 'fsharp') return 'text/x-fsharp';
-    if (mode === 'cpp')    return 'text/x-c++src';
+    if (mode === 'nodejs')     return 'text/javascript';
+    if (mode === 'typescript') return 'text/typescript';
+    if (mode === 'csharp')     return 'text/x-csharp';
+    if (mode === 'fsharp')     return 'text/x-fsharp';
+    if (mode === 'cpp')        return 'text/x-c++src';
     return 'text/x-java';
   }
   function cmModeFor(mode) {
@@ -117,8 +118,8 @@ const NotebookEditor = (() => {
     let activeFolder = null; // null = All, or a folder name string
     let activeTag    = null; // null = All, or a tag string
 
-    const LANG_LABEL = { jshell:'JShell', java:'Java', javascript:'JavaScript', nodejs:'JS', csharp:'C#', fsharp:'F#', cpp:'C++' };
-    const LANG_ICON  = { jshell:'☕', java:'♨', javascript:'⬡', nodejs:'⬡', csharp:'◈', fsharp:'◈', cpp:'⚙' };
+    const LANG_LABEL = { jshell:'JShell', java:'Java', javascript:'JavaScript', nodejs:'JS', typescript:'TypeScript', csharp:'C#', fsharp:'F#', cpp:'C++' };
+    const LANG_ICON  = { jshell:'☕', java:'♨', javascript:'⬡', nodejs:'⬡', typescript:'◆', csharp:'◈', fsharp:'◈', cpp:'⚙' };
     const SUBCAT_ORDER = ['Basics & Foundations', 'Advanced', 'Data Science & Analytics', 'Examples & Demos'];
 
     document.getElementById('btn-browse-notebooks')?.addEventListener('click', async () => {
@@ -235,7 +236,7 @@ const NotebookEditor = (() => {
           </div>
           <div class="nbb-anchor-grid">`;
         openAnchors.forEach(a => {
-          const icon = { jshell: '☕', java: '♨', nodejs: '⬡', csharp: '◈', fsharp: '◈', cpp: '⚙' }[a.mode] || '◈';
+          const icon = { jshell: '☕', java: '♨', nodejs: '⬡', typescript: '◆', csharp: '◈', fsharp: '◈', cpp: '⚙' }[a.mode] || '◈';
           html += `<div class="nbb-anchor-item" title="From notebook: ${a.nb}">
             <span class="nbb-anchor-icon">${icon}</span>
             <code class="nbb-anchor-code">${a.anchor}</code>
@@ -272,7 +273,7 @@ const NotebookEditor = (() => {
           byLang[lang][sub].push(nb);
         });
 
-        ['jshell','java','javascript','csharp','fsharp','cpp'].forEach(lang => {
+        ['jshell','java','javascript','typescript','csharp','fsharp','cpp'].forEach(lang => {
           if (!byLang[lang]) return;
           html += `<div class="nbb-lang-group">
             <div class="nbb-lang-hdr">${LANG_ICON[lang]||''} ${LANG_LABEL[lang]||lang}</div>`;
@@ -668,13 +669,13 @@ const NotebookEditor = (() => {
     div.innerHTML = `
       <div class="cell-header">
         <span class="cell-badge ${cell.type.toLowerCase()}${isCode ? ' mode-'+cell.mode : ''}" id="badge-${cell.id}">${
-          isPipeline ? '⬡ Pipeline' : isCode ? (({ cpp:'⚙', nodejs:'⬡', jshell:'☕', java:'♨' }[cell.mode] || '◈') + ' ' + modeLabelFor(cell.mode)) : '✎ Markdown'}</span>
+          isPipeline ? '⬡ Pipeline' : isCode ? (({ cpp:'⚙', nodejs:'⬡', typescript:'◆', jshell:'☕', java:'♨' }[cell.mode] || '◈') + ' ' + modeLabelFor(cell.mode)) : '✎ Markdown'}</span>
         <span class="cell-count" id="cnt-${cell.id}">${cell.executionCount ? `[${cell.executionCount}]` : '[ ]'}</span>
         <span class="cell-timing" id="timing-${cell.id}">${cell.executionTimeMs ? `✓ ${cell.executionTimeMs}ms` : ''}</span>
         ${(isCode || isPipeline) ? anchorBadge : ''}
         <div class="cell-actions">
           ${isCode ? `
-          <button class="mode-toggle-btn" id="mode-btn-${cell.id}" title="Cycle mode: JShell → Java → JS → C# → F# → C++ → JShell">
+          <button class="mode-toggle-btn" id="mode-btn-${cell.id}" title="Cycle mode: JShell → Java → JS → TS → C# → F# → C++ → JShell">
             <span class="mode-label">${modeLabelFor(cell.mode)}</span>
           </button>
           <button class="cell-btn run-to-deps-btn" id="run-deps-btn-${cell.id}" title="Run with dependencies — uses cached output for already-run deps" style="display:none">
@@ -980,7 +981,7 @@ const NotebookEditor = (() => {
     const modeBtn = div.querySelector(`#mode-btn-${cell.id}`);
     modeBtn?.addEventListener('click', e => {
       e.stopPropagation();
-      const modeOrder = ['jshell', 'java', 'nodejs', 'csharp', 'fsharp', 'cpp'];
+      const modeOrder = ['jshell', 'java', 'nodejs', 'typescript', 'csharp', 'fsharp', 'cpp'];
       const oldMode = cell.mode;
       const idx = modeOrder.indexOf(cell.mode);
       cell.mode = modeOrder[(idx + 1) % modeOrder.length];
@@ -989,7 +990,7 @@ const NotebookEditor = (() => {
 
       const badge = document.getElementById(`badge-${cell.id}`);
       if (badge) {
-        badge.textContent = ({ cpp:'⚙', nodejs:'⬡', jshell:'☕', java:'♨' }[cell.mode] || '◈') + ' ' + modeLabelFor(cell.mode);
+        badge.textContent = ({ cpp:'⚙', nodejs:'⬡', typescript:'◆', jshell:'☕', java:'♨' }[cell.mode] || '◈') + ' ' + modeLabelFor(cell.mode);
         badge.className = `cell-badge code mode-${cell.mode}`;
       }
       const cellDiv = document.getElementById(`cell-${cell.id}`);
@@ -1757,6 +1758,18 @@ const NotebookEditor = (() => {
       }
     }
     setTimeout(() => { scrollCellToTop(cell.id); flashOutput(cell.id); }, 60);
+
+    // Slide the Variable Inspector in for interactive runs too.
+    const locals  = result.localVariables  || [];
+    const globals = result.globalVariables || [];
+    if ((locals.length || globals.length) && window.VarInspector) {
+      VarInspector.show({
+        cellId: cell.id,
+        cellAnchor: cell.anchor,
+        locals, globals,
+      });
+    }
+
     save().catch(() => Venus.markDirty(true));
   }
 
@@ -2143,6 +2156,20 @@ const NotebookEditor = (() => {
       scrollCellToTop(cell.id);
       flashOutput(cell.id);
     }, 60);
+
+    // Surface the runtime variables. We don't auto-open the panel — we just
+    // pop the persistent "Variables" tab on the right edge, labeled with this
+    // cell. The user clicks the tab to slide the panel out. Clicking the cell
+    // label inside the panel scrolls back to & focuses this cell.
+    const locals  = result.localVariables  || [];
+    const globals = result.globalVariables || [];
+    if ((locals.length || globals.length) && window.VarInspector) {
+      VarInspector.update({
+        cellId: cell.id,
+        cellAnchor: cell.anchor,
+        locals, globals,
+      });
+    }
 
     // Save immediately so output persists if the user closes the notebook
     save().catch(() => Venus.markDirty(true));
@@ -2764,9 +2791,25 @@ const NotebookEditor = (() => {
   function _escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function _escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  /** Scroll to and focus a cell. Triggered by the Variable Inspector
+   *  cell-tag click so users can jump from "vars belong to cell X" to
+   *  the cell itself. Plays a soft pulse animation around the cell. */
+  function focusCell(cellId) {
+    if (!cellId) return;
+    const el = document.getElementById(`cell-${cellId}`);
+    if (!el) return;
+    scrollCellIntoCenter(cellId);
+    _setFocusedCell(cellId);
+    el.classList.remove('focus-flash');
+    // Force reflow so the animation restarts even if class was just removed
+    void el.offsetWidth;
+    el.classList.add('focus-flash');
+    setTimeout(() => el.classList.remove('focus-flash'), 1500);
+  }
+
   return {
     init, loadNotebook, save, deleteCell, deleteNotebook, moveUp, moveDown, addCell, addCellWithSource,
-    insertCodeFromAI, applyCodeToCell, executeCell, getContext,
+    insertCodeFromAI, applyCodeToCell, executeCell, getContext, focusCell,
     runToHere, runPipeline, runWithDeps, switchTab, closeTab,
     stepStart, stepClose, stepAction, stepPrev,
     _openCrossNbPicker, _closeCrossNbPicker, _insertCrossNbRef,
