@@ -76,8 +76,8 @@ Java developers have always been second-class citizens in the notebook world. Ju
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/snchande/Venus.git
+cd venus
 ```
 
 ### Step 2 — Start Venus
