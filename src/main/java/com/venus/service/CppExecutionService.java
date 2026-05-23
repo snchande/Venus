@@ -1,6 +1,7 @@
 package com.venus.service;
 
 import com.venus.model.ExecutionResult;
+import com.venus.util.VariableInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -149,6 +150,8 @@ public class CppExecutionService {
             boolean completeProgram = hasMainFunction(cleanCode) && depends.isEmpty();
             String programSource;
             int prefixLines;
+            // Trailer captured for the retry-on-compile-failure fallback.
+            String injectedTrailer = "";
 
             if (completeProgram) {
                 String[] userSplit = extractIncludes(cleanCode);
@@ -193,6 +196,17 @@ public class CppExecutionService {
                     prog.append("    cout.rdbuf(__venus_old_buf);\n");
                 }
                 prog.append(indent(userStmts, "    "));
+
+                // Variable-dump trailer for the auto-wrap path. We only emit
+                // scalar/string declarations our parser recognised — if the
+                // compiler still rejects (e.g. shadowed name or non-ostreamable
+                // template type) we retry without the trailer below.
+                List<VariableInspector.CppDecl> cppDecls =
+                        VariableInspector.parseCppStatementDeclarations(userStmts);
+                String cppTrailer = VariableInspector.buildCppTrailer(cppDecls);
+                if (!cppTrailer.isEmpty()) prog.append(cppTrailer);
+                injectedTrailer = cppTrailer;
+
                 prog.append("    return 0;\n");
                 prog.append("}\n");
 
@@ -222,16 +236,45 @@ public class CppExecutionService {
             }
 
             if (compileProc.exitValue() != 0) {
-                String errMsg = compileStdout.toString() + compileStderr.toString();
-                errMsg = cleanPaths(errMsg, sourceFile);
-                errMsg = adjustLineNumbers(errMsg, prefixLines, compiler.type);
-                return ExecutionResult.builder()
-                        .sessionId(sessionId).cellId(cellId)
-                        .output("").error(errMsg.trim())
-                        .status("COMPILE_ERROR").success(false)
-                        .executionTimeMs(System.currentTimeMillis() - start)
-                        .executionCount(execCounter.incrementAndGet())
-                        .build();
+                // Did our injected variable-dump trailer cause this? Re-try once
+                // without it so the user's actual code still compiles+runs.
+                if (!injectedTrailer.isEmpty()) {
+                    String noTrailer = programSource.replace(injectedTrailer, "");
+                    Files.writeString(sourceFile, noTrailer);
+                    Process retryProc = startCompile(compiler, sourceFile, exeFile);
+                    StringBuilder rOut = new StringBuilder();
+                    StringBuilder rErr = new StringBuilder();
+                    Thread r1 = captureStream(retryProc.getInputStream(), rOut);
+                    Thread r2 = captureStream(retryProc.getErrorStream(), rErr);
+                    r1.start(); r2.start();
+                    boolean rOk = retryProc.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    r1.join(2000); r2.join(2000);
+                    if (rOk && retryProc.exitValue() == 0) {
+                        injectedTrailer = ""; // mark trailer absent for the run/parse step
+                    } else {
+                        String errMsg = compileStdout.toString() + compileStderr.toString();
+                        errMsg = cleanPaths(errMsg, sourceFile);
+                        errMsg = adjustLineNumbers(errMsg, prefixLines, compiler.type);
+                        return ExecutionResult.builder()
+                                .sessionId(sessionId).cellId(cellId)
+                                .output("").error(errMsg.trim())
+                                .status("COMPILE_ERROR").success(false)
+                                .executionTimeMs(System.currentTimeMillis() - start)
+                                .executionCount(execCounter.incrementAndGet())
+                                .build();
+                    }
+                } else {
+                    String errMsg = compileStdout.toString() + compileStderr.toString();
+                    errMsg = cleanPaths(errMsg, sourceFile);
+                    errMsg = adjustLineNumbers(errMsg, prefixLines, compiler.type);
+                    return ExecutionResult.builder()
+                            .sessionId(sessionId).cellId(cellId)
+                            .output("").error(errMsg.trim())
+                            .status("COMPILE_ERROR").success(false)
+                            .executionTimeMs(System.currentTimeMillis() - start)
+                            .executionCount(execCounter.incrementAndGet())
+                            .build();
+                }
             }
 
             // ── Run ──────────────────────────────────────────────────────────
@@ -267,14 +310,19 @@ public class CppExecutionService {
                     ? "Process exited with code " + exitCode
                     : runErrStr;
 
+            // Strip the dump sentinels from stdout and attach the parsed vars.
+            VariableInspector.ParsedOutput parsed =
+                    VariableInspector.parseDumpFromOutput(runOut.toString());
+
             return ExecutionResult.builder()
                     .sessionId(sessionId).cellId(cellId)
-                    .output(runOut.toString())
+                    .output(parsed.cleanedStdout)
                     .error(errorOutput)
                     .status(success ? "OK" : "RUNTIME_ERROR")
                     .success(success)
                     .executionTimeMs(elapsed)
                     .executionCount(execCounter.incrementAndGet())
+                    .localVariables(parsed.variables)
                     .build();
 
         } catch (Exception e) {

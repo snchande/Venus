@@ -1,6 +1,7 @@
 package com.venus.service;
 
 import com.venus.model.ExecutionResult;
+import com.venus.util.VariableInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -216,6 +217,12 @@ public class DotNetExecutionService {
             // Add current cell's executable code
             String[] parts = splitTypesAndStatements(cleanCode);
             programContent.append(parts[0]);
+
+            // Append a variable-dump trailer (best-effort — see retry block below).
+            List<String> csVarNames = VariableInspector.parseCSharpDeclarations(parts[0]);
+            String trailer = VariableInspector.buildCSharpTrailer(csVarNames);
+            if (!trailer.isEmpty()) programContent.append(trailer);
+
             if (!parts[1].isBlank()) typeDeclarations.append(parts[1]);
 
             // All type declarations at the end (C# 9+ top-level program rule)
@@ -234,6 +241,26 @@ public class DotNetExecutionService {
 
             ExecutionResult result = runProcess(pb, programCs, sessionId, cellId, start,
                     prefixLineCount, "Program.cs");
+
+            // If the trailer broke compilation (e.g. our parser invented a name
+            // that doesn't actually exist in scope), retry once without the
+            // trailer so the user still gets their original program's result.
+            if (!result.isSuccess() && !trailer.isEmpty() && shouldRetryWithoutTrailer(result.getError())) {
+                String programNoTrailer = programContent.toString().replace(trailer, "");
+                Files.writeString(programCs, programNoTrailer);
+                ProcessBuilder pb2 = new ProcessBuilder(
+                        dotnet, "run", "--project", tempDir.toString(), "-v", "q");
+                pb2.redirectErrorStream(false);
+                injectDotNetEnv(pb2, dotnet);
+                result = runProcess(pb2, programCs, sessionId, cellId, start,
+                        prefixLineCount, "Program.cs");
+            } else {
+                // Strip the dump sentinels out of stdout and attach the parsed vars.
+                VariableInspector.ParsedOutput parsed =
+                        VariableInspector.parseDumpFromOutput(result.getOutput());
+                result.setOutput(parsed.cleanedStdout);
+                result.setLocalVariables(parsed.variables);
+            }
 
             // On success, cache source so dependent cells can inject it as context
             if (result.isSuccess() && anchor != null && !anchor.isBlank()) {
@@ -346,6 +373,14 @@ public class DotNetExecutionService {
             }
 
             scriptContent.append(codeBody);
+
+            // Append a variable-dump trailer — emit names of top-level `let`
+            // bindings. F# (like C#) won't compile if we reference a name that
+            // doesn't exist, so we retry without the trailer on failure.
+            List<String> fsNames = VariableInspector.parseFSharpDeclarations(codeBody);
+            String trailer = VariableInspector.buildFSharpTrailer(fsNames);
+            if (!trailer.isEmpty()) scriptContent.append(trailer);
+
             Files.writeString(scriptFile, scriptContent.toString());
 
             ProcessBuilder pb = new ProcessBuilder(dotnet, "fsi", "--nologo", "--exec", scriptFile.toString());
@@ -354,6 +389,22 @@ public class DotNetExecutionService {
 
             ExecutionResult result = runProcess(pb, scriptFile, sessionId, cellId, start,
                     prefixLineCount, "script.fsx");
+
+            // Retry without the trailer if it caused a compile error.
+            if (!result.isSuccess() && !trailer.isEmpty() && shouldRetryWithoutTrailer(result.getError())) {
+                String scriptNoTrailer = scriptContent.toString().replace(trailer, "");
+                Files.writeString(scriptFile, scriptNoTrailer);
+                ProcessBuilder pb2 = new ProcessBuilder(dotnet, "fsi", "--nologo", "--exec", scriptFile.toString());
+                pb2.redirectErrorStream(false);
+                injectDotNetEnv(pb2, dotnet);
+                result = runProcess(pb2, scriptFile, sessionId, cellId, start,
+                        prefixLineCount, "script.fsx");
+            } else {
+                VariableInspector.ParsedOutput parsed =
+                        VariableInspector.parseDumpFromOutput(result.getOutput());
+                result.setOutput(parsed.cleanedStdout);
+                result.setLocalVariables(parsed.variables);
+            }
 
             // On success, cache source for dependency injection
             if (result.isSuccess() && anchor != null && !anchor.isBlank()) {
@@ -551,6 +602,23 @@ public class DotNetExecutionService {
                 .executionTimeMs(elapsed)
                 .executionCount(execCounter.incrementAndGet())
                 .build();
+    }
+
+    /**
+     * Decide whether a failed C#/F# run is likely caused by our injected
+     * variable-dump trailer (parser invented a name that doesn't exist).
+     * Triggered by CS0103 / FS0039 (undefined identifier) and CS1002/CS1003
+     * (parse errors in our injected block).
+     */
+    private boolean shouldRetryWithoutTrailer(String error) {
+        if (error == null) return false;
+        return error.contains("CS0103")           // C#: "The name '...' does not exist"
+            || error.contains("CS1002")           // C#: missing ;
+            || error.contains("CS1003")           // C#: syntax error
+            || error.contains("CS0246")           // C#: type/namespace not found (rare in trailer)
+            || error.contains("FS0039")           // F#: value/constructor/namespace not defined
+            || error.contains("FS0589")           // F#: unexpected end of input
+            || error.contains("__venus_emit");    // our trailer's helper name
     }
 
     /** Shift line numbers in compiler/runtime error messages by subtracting preamble offset. */

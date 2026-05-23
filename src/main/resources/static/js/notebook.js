@@ -1759,11 +1759,11 @@ const NotebookEditor = (() => {
     }
     setTimeout(() => { scrollCellToTop(cell.id); flashOutput(cell.id); }, 60);
 
-    // Slide the Variable Inspector in for interactive runs too.
+    // Surface variables via the persistent tab (interactive run path).
     const locals  = result.localVariables  || [];
     const globals = result.globalVariables || [];
     if ((locals.length || globals.length) && window.VarInspector) {
-      VarInspector.show({
+      VarInspector.update({
         cellId: cell.id,
         cellAnchor: cell.anchor,
         locals, globals,

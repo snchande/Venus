@@ -1,6 +1,7 @@
 package com.venus.service;
 
 import com.venus.model.ExecutionResult;
+import com.venus.util.VariableInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -140,7 +142,13 @@ public class TypeScriptExecutionService {
                 tempDir = Files.createTempDirectory("venus-ts-");
             }
             Path scriptFile = tempDir.resolve("script.ts");
-            Files.writeString(scriptFile, VENUS_PREAMBLE + code);
+
+            // Append a variable-dump trailer so the runtime emits its
+            // top-level let/const/function/class state via stdout sentinels.
+            Map<String, String> tsDecls = VariableInspector.parseTsDeclarations(code);
+            String trailer = VariableInspector.buildTsTrailer(tsDecls);
+
+            Files.writeString(scriptFile, VENUS_PREAMBLE + code + trailer);
 
             // Optional type-check via tsc --noEmit (only if available).
             // We deliberately keep this best-effort: a tsc misconfiguration must
@@ -171,6 +179,7 @@ public class TypeScriptExecutionService {
                         .success(success)
                         .executionTimeMs(runResult.getExecutionTimeMs())
                         .executionCount(runResult.getExecutionCount())
+                        .localVariables(runResult.getLocalVariables())
                         .build();
             }
             return runResult;
@@ -230,14 +239,19 @@ public class TypeScriptExecutionService {
 
         boolean success = exitCode == 0 && errStr.isEmpty();
 
+        // Pull the variable dump out of stdout (if the trailer ran).
+        VariableInspector.ParsedOutput parsed =
+                VariableInspector.parseDumpFromOutput(stdout.toString());
+
         return ExecutionResult.builder()
                 .sessionId(sessionId).cellId(cellId)
-                .output(stdout.toString())
+                .output(parsed.cleanedStdout)
                 .error(cleanErr)
                 .status(success ? "OK" : "RUNTIME_ERROR")
                 .success(success)
                 .executionTimeMs(elapsed)
                 .executionCount(execCounter.incrementAndGet())
+                .localVariables(parsed.variables)
                 .build();
     }
 

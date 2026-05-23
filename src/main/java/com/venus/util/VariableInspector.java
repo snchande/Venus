@@ -139,6 +139,49 @@ public final class VariableInspector {
         return names;
     }
 
+    /**
+     * Find scalar/string declarations in a block of C++ statements (no enclosing
+     * {@code int main()}). Used by the auto-wrap path of the C++ executor where
+     * the user's code is just statements that we splice into a generated main.
+     * Only emits decls at the top of the block (brace depth 0).
+     */
+    public static List<CppDecl> parseCppStatementDeclarations(String stmts) {
+        List<CppDecl> decls = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        if (stmts == null) return decls;
+        String stripped = stripCStyleComments(stmts);
+        int depth = 0, parenDepth = 0;
+        StringBuilder buf = new StringBuilder();
+        boolean inString = false; char strQuote = 0;
+        for (int i = 0; i < stripped.length(); i++) {
+            char c = stripped.charAt(i);
+            if (inString) {
+                buf.append(c);
+                if (c == '\\' && i + 1 < stripped.length()) { buf.append(stripped.charAt(++i)); continue; }
+                if (c == strQuote) inString = false;
+                continue;
+            }
+            if (c == '"' || c == '\'') { inString = true; strQuote = c; buf.append(c); continue; }
+            if (c == '{') depth++;
+            else if (c == '}') depth = Math.max(0, depth - 1);
+            else if (c == '(') parenDepth++;
+            else if (c == ')') parenDepth = Math.max(0, parenDepth - 1);
+            if (c == ';' && depth == 0 && parenDepth == 0) {
+                String stmt = buf.toString().trim();
+                buf.setLength(0);
+                Matcher m = CPP_DECL_PATTERN.matcher(stmt);
+                if (m.find()) {
+                    String type = m.group(1).trim().replaceAll("\\s+", " ");
+                    String name = m.group(2);
+                    if (!isReservedKeyword(name) && seen.add(name)) decls.add(new CppDecl(name, type));
+                }
+                continue;
+            }
+            buf.append(c);
+        }
+        return decls;
+    }
+
     /** Find top-level scalar/string declarations in C++ source. */
     public static List<CppDecl> parseCppDeclarations(String source) {
         List<CppDecl> decls = new ArrayList<>();

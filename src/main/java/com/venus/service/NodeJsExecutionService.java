@@ -1,6 +1,7 @@
 package com.venus.service;
 
 import com.venus.model.ExecutionResult;
+import com.venus.util.VariableInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,8 +93,15 @@ public class NodeJsExecutionService {
             tempDir = Files.createTempDirectory("venus-js-");
             Path scriptFile = tempDir.resolve("script.js");
 
-            // Write preamble + user code
-            Files.writeString(scriptFile, VENUS_PREAMBLE + code);
+            // Append a small trailer that emits all top-level declarations
+            // back through stdout (see VariableInspector). The trailer runs
+            // only if the user's code completes — failures still produce a
+            // valid result, just without a populated variables panel.
+            List<String> jsNames = VariableInspector.parseJsDeclarations(code);
+            String trailer = VariableInspector.buildJsTrailer(jsNames);
+
+            // Write preamble + user code + trailer
+            Files.writeString(scriptFile, VENUS_PREAMBLE + code + trailer);
 
             // Resolve npm modules path
             Path npmModules = Paths.get(dataDir, "npm-modules", "node_modules").toAbsolutePath();
@@ -137,14 +145,20 @@ public class NodeJsExecutionService {
 
             boolean success = exitCode == 0 && errStr.isEmpty();
 
+            // Strip the variable-dump sentinel block out of stdout so users
+            // don't see the marker noise — and attach the parsed variables.
+            VariableInspector.ParsedOutput parsed =
+                    VariableInspector.parseDumpFromOutput(stdout.toString());
+
             return ExecutionResult.builder()
                     .sessionId(sessionId).cellId(cellId)
-                    .output(stdout.toString())
+                    .output(parsed.cleanedStdout)
                     .error(cleanErr)
                     .status(success ? "OK" : "RUNTIME_ERROR")
                     .success(success)
                     .executionTimeMs(elapsed)
                     .executionCount(execCounter.incrementAndGet())
+                    .localVariables(parsed.variables)
                     .build();
 
         } catch (Exception e) {

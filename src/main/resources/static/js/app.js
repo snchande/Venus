@@ -42,17 +42,22 @@ const Venus = (() => {
     const backdrop  = document.getElementById('ai-backdrop');
     if (!aiSidebar || !fab || !backdrop) return;
 
-    // ── Refresh the shared backdrop + FAB based on what's open ──────────
+    // ── Refresh the shared backdrop + FAB + var-tab position ──────────
+    // The vertical "Variables" tab stays parked just left of the AI panel
+    // whenever AI is open — we expose its current width as the CSS var
+    // --ai-w-current and the tab's `right:` rule reads it.
     function refreshOverlayUI() {
       const aiOpen = !aiSidebar.classList.contains('hidden');
       const inspectorOpen = inspector && !inspector.classList.contains('hidden');
       backdrop.classList.toggle('visible', aiOpen || inspectorOpen);
       fab.classList.toggle('hidden', aiOpen);
+      const aiWidth = aiOpen ? aiSidebar.offsetWidth : 0;
+      document.documentElement.style.setProperty('--ai-w-current', aiWidth + 'px');
     }
 
     function setAiOpen(open) {
-      // Opening AI displaces the inspector — only one right-side panel
-      // is visible at a time.
+      // Opening AI displaces the inspector drawer — only one drawer at a
+      // time — but the var-tab stays visible (shifted left of the AI panel).
       if (open && inspector) inspector.classList.add('hidden');
       aiSidebar.classList.toggle('hidden', !open);
       refreshOverlayUI();
@@ -64,6 +69,13 @@ const Venus = (() => {
       inspector.classList.toggle('hidden', !open);
       refreshOverlayUI();
     }
+
+    // Keep the tab offset accurate while the user resizes the AI panel
+    // via its drag handle. ResizeObserver fires on every animation frame.
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(refreshOverlayUI).observe(aiSidebar);
+    }
+    window.addEventListener('resize', refreshOverlayUI);
 
     fab.addEventListener('click', () => {
       // Suppress click that immediately follows a drag
@@ -465,10 +477,21 @@ if (document.readyState === 'loading') {
 }
 
 /* ── Variable Inspector ────────────────────────────────────────────
-   Renders local + global variables for the last executed cell into
-   the #var-inspector slide-out. The panel's open/close lifecycle is
-   managed in Venus.initAiToggle (shared backdrop, Esc handling). */
+   Two pieces:
+     1. `#var-tab` — a slim vertical pill on the right edge that appears
+        after a cell runs. It carries the cell's anchor/id as a label
+        and acts as the entry point to (re-)open the inspector.
+     2. `#var-inspector` — the slide-out drawer with the local/global
+        variable tables.
+   The tab persists across opens of the AI panel; its right-offset is
+   synced (via the --ai-w-current CSS var) so it stays just left of the
+   AI panel and never overlaps. The cell tag in the drawer header is a
+   button that scrolls to + flashes the cell it belongs to. */
 const VarInspector = (() => {
+  // Latest payload — kept so the tab can re-open the drawer with the
+  // same data even after the user dismisses and re-opens it.
+  let _payload = null;
+
   function escapeHtml(s) {
     return String(s ?? '')
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -495,36 +518,88 @@ const VarInspector = (() => {
     tableEl.innerHTML = head + body;
   }
 
-  /**
-   * Show variables for a cell and slide the inspector in.
-   * @param {{cellAnchor?:string, cellId?:string, locals:Array, globals:Array}} payload
-   */
-  function show(payload) {
-    const locals  = payload.locals  || [];
-    const globals = payload.globals || [];
+  function _renderPanel() {
+    if (!_payload) return;
+    const locals  = _payload.locals  || [];
+    const globals = _payload.globals || [];
+    const label   = _payload.cellAnchor ? '#' + _payload.cellAnchor : (_payload.cellId || '');
 
     const tag = document.getElementById('vi-cell-tag');
-    if (tag) tag.textContent = payload.cellAnchor
-        ? '#' + payload.cellAnchor
-        : (payload.cellId || '');
+    if (tag) {
+      tag.textContent = label;
+      tag.title = label
+        ? 'Scroll to & focus cell ' + label
+        : '';
+    }
 
     document.getElementById('vi-local-count').textContent  = locals.length;
     document.getElementById('vi-global-count').textContent = globals.length;
     _renderTable(document.getElementById('vi-local-table'),  locals);
     _renderTable(document.getElementById('vi-global-table'), globals);
 
-    // Hide section headers entirely when both lists are empty
     const empty = locals.length === 0 && globals.length === 0;
     document.getElementById('vi-empty')?.classList.toggle('hidden', !empty);
     document.getElementById('vi-local-section') ?.classList.toggle('empty', empty);
     document.getElementById('vi-global-section')?.classList.toggle('empty', empty);
+  }
 
+  function _renderTab() {
+    if (!_payload) return;
+    const label = _payload.cellAnchor ? '#' + _payload.cellAnchor : (_payload.cellId || '');
+    const tabCellLabel = document.getElementById('vt-cell-label');
+    if (tabCellLabel) tabCellLabel.textContent = label;
+    const tab = document.getElementById('var-tab');
+    if (tab) tab.classList.remove('hidden');
+  }
+
+  /** Push fresh variable data + show the vertical tab. Does NOT open the drawer. */
+  function update(payload) {
+    _payload = payload;
+    _renderPanel();
+    _renderTab();
+  }
+
+  /** Open the drawer with the current data. */
+  function open() {
+    _renderPanel();
     Venus.openInspector?.();
   }
 
-  function hide() { Venus.closeInspector?.(); }
+  /** Hide both the drawer and the tab. */
+  function dismissTab() {
+    document.getElementById('var-tab')?.classList.add('hidden');
+    Venus.closeInspector?.();
+  }
 
-  return { show, hide };
+  // ── Wire DOM hooks once the page is ready ─────────────────────────
+  function init() {
+    const tab = document.getElementById('var-tab');
+    if (tab) {
+      tab.addEventListener('click', (e) => {
+        // Don't open when the user clicks the × inside the tab
+        if (e.target.closest('#vt-close')) return;
+        open();
+      });
+    }
+    document.getElementById('vt-close')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissTab();
+    });
+
+    // Cell-tag in the drawer header → jump to + focus the cell
+    document.getElementById('vi-cell-tag')?.addEventListener('click', () => {
+      if (!_payload?.cellId) return;
+      const editor = window.NotebookEditor;
+      if (editor?.focusCell) editor.focusCell(_payload.cellId);
+      // Keep the drawer open so the user can keep cross-referencing
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else { init(); }
+
+  return { update, open, dismissTab };
 })();
 window.VarInspector = VarInspector;
 
