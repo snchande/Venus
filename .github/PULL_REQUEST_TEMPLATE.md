@@ -36,7 +36,7 @@ Closes #
 
 ## Reviewers
 
-This PR will be auto-marked **draft** until the `security-check` workflow reports 0 blocking findings. Once green, it requires a code-owner review from @sureshchande (founding contributor) per `CODEOWNERS`.
+This PR will be auto-marked **draft** until the `security-check` workflow reports 0 blocking findings. Once green, it requires a code-owner review from @snchande (founding contributor) per `CODEOWNERS`.
 
 ## AI-assisted changes
 

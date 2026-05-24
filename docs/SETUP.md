@@ -236,8 +236,8 @@ Install NuGet packages via the **Packages → NuGet** tab in Venus. Installed pa
 
 ```bash
 # Clone from GitHub (once published)
-git clone https://github.com/yourusername/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/snchande/Venus.git
+cd Venus
 
 # OR download the zip and extract
 ```

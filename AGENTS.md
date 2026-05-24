@@ -60,7 +60,7 @@ These are load-bearing decisions. Do not change them in a feature PR:
 - The port `8585` default — there is exactly one well-known place to look.
 - The static-resources-from-JAR pattern — no Webpack, no Vite, no npm in the frontend build.
 
-If a change requires modifying any of these, open an issue first and tag `@sureshchande`.
+If a change requires modifying any of these, open an issue first and tag `@snchande`.
 
 ### 2.3 Security non-negotiables
 

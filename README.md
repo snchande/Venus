@@ -124,8 +124,8 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/snchande/Venus.git
+cd Venus
 ```
 
 ### Step 2 — Start Venus

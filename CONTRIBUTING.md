@@ -97,11 +97,11 @@ If you have an idea that doesn't fit a category above — open a Discussion and 
 # 1. Fork the repo on GitHub (click Fork button)
 
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/YOUR_USERNAME/Venus.git
+cd Venus
 
 # 3. Add the upstream remote so you can pull future changes
-git remote add upstream https://github.com/OWNER/venus-notebooks.git
+git remote add upstream https://github.com/snchande/Venus.git
 ```
 
 ### Build and Run
