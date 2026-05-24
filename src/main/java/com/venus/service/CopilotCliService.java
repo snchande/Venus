@@ -141,8 +141,11 @@ public class CopilotCliService {
 
         log.info("Copilot CLI chat via {}: {} messages", exe, messages.size());
 
-        // Pipe prompt via stdin
+        // Pipe prompt via stdin. Run from the Venus repo root so Copilot loads
+        // .github/copilot-instructions.md + AGENTS.md (no-op when VENUS_HOME is
+        // unset — see VenusHome).
         ProcessBuilder pb = new ProcessBuilder(exe);
+        pb.directory(com.venus.util.VenusHome.directory());
         pb.redirectErrorStream(false);
         Process process = pb.start();
 

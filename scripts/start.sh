@@ -38,6 +38,23 @@ if command -v dotnet &>/dev/null; then
 else
     echo ".NET:    not found  (C#/F# cells disabled — install from https://dot.net)"
 fi
+
+# ── AI co-pilot context ─────────────────────────────────────────────────────
+# Export the guardrail + skill + agent paths so the Venus JVM (and any CLI it
+# spawns for the in-UI AI panel) resolves them regardless of launch dir.
+export VENUS_HOME="$PROJECT_DIR"
+[ -f "$PROJECT_DIR/AGENTS.md" ]        && export VENUS_AGENTS_GUIDE="$PROJECT_DIR/AGENTS.md"
+[ -d "$PROJECT_DIR/.claude/skills" ]   && export VENUS_SKILLS_DIR="$PROJECT_DIR/.claude/skills"
+[ -d "$PROJECT_DIR/.claude/agents" ]   && export VENUS_AGENTS_DIR="$PROJECT_DIR/.claude/agents"
+AI_FOUND=""
+for c in claude copilot github-copilot-cli gemini; do
+    command -v "$c" &>/dev/null && AI_FOUND="$AI_FOUND $c"
+done
+if [ -n "$AI_FOUND" ]; then
+    echo "AI:     $AI_FOUND  (co-pilot ready — AGENTS.md + .claude skills/agents loaded; run ./venus.sh agents)"
+else
+    echo "AI:     no CLI found  (install Claude / Copilot / Gemini CLI for AI features)"
+fi
 echo ""
 
 # ── Build if JAR is missing ────────────────────────────────────────────────────

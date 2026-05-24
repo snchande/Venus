@@ -5,6 +5,85 @@ Dates are in `YYYY-MM-DD` format.
 
 ---
 
+## [3.0.0] — 2026-05-24
+
+**Major release.** Venus becomes an AI-native, locally-hosted notebook platform — built for the
+agentic era. Beyond the seven languages, this release adds a built-in MCP server, multi-provider
+local-CLI AI, authentication, a cross-platform CLI, and a full agentic contributor stack.
+Highlights below; the detailed entries from this release follow.
+
+### Why this is a major version
+- **Seven languages** now run side by side — JShell, Java, JavaScript, **TypeScript**, C#, F#, and **C++** (TypeScript and C++ are new in the 2.x line).
+- **AI is multi-provider and local-first** — Claude, GitHub Copilot, and Gemini all run as local CLI subprocesses. The stored Anthropic API key and direct HTTP path were removed.
+- **Venus is now an MCP server** — any MCP client or agent can drive notebooks, cells, packages, and pipelines programmatically.
+- **Authentication** — Spring Security with `local` (default) and `oauth` modes.
+- **Cross-platform `venus` CLI** — one launcher per shell with `start/stop/status/build/rebuild/open/logs/version/welcome/docs/agents`.
+- **Agentic contributor stack** — `AGENTS.md` guardrails, the `venus` agent + specialist subagents and skills, a PR security gate, a CODEOWNERS founder review, and a 12-page product brochure.
+- **In-app Welcome & User Guide** — a first-run overlay with Overview / Admin / Developer / Architecture tracks, reopenable anytime from **Help**, plus a **What's New** panel that appears automatically after you update from the repo.
+
+### Welcome, User Guide & Release Notes (in-app)
+- New **Welcome / User Guide** overlay (`static/js/welcome.js`): short Venus highlights and four guided tracks — **Overview**, **Admin**, **Developer**, **Architecture** — each a quick flow through the relevant parts of the UI
+- Shows automatically on **first run**; reopen anytime from the **Help** button in the top bar
+- **What's New** panel surfaces this changelog's highlights automatically whenever the bundled app version changes (i.e. after you pull a new version from the repo)
+- The same welcome is available in the terminal via `venus welcome`, and as the **venus** AI agent in Claude/Copilot/Gemini — one consistent entry point everywhere
+
+### Cross-Platform Venus CLI
+- New launchers in the repo root — `venus.cmd` (Windows CMD), `venus.ps1` (PowerShell), `venus.sh` (Linux/macOS) — sharing the same subcommands: `start [--bg]`, `stop`, `status`, `build`, `rebuild`, `open`, `logs`, `version`, `help`
+- `start` auto-builds the JAR if missing, launches with the required JShell `--add-opens`/`--add-exports` flags, opens `http://localhost:8585`, and re-launches on exit code 42 (UI-requested restart)
+- Background mode (`--bg` / `-Bg`) detaches the server and streams to `venus.log`; `status`/`version` report Java, Node.js, .NET, and Maven
+- All three launchers add `welcome` (common entry experience — open the UI, drive Venus over MCP, or personalize via an agentic CLI), `docs` (open the brochure + list documentation), and `agents`/`ai` (detected AI co-pilots, guardrail files, skills, and the **venus** agent wired into the repo)
+- Launchers export AI context (`VENUS_HOME`, `VENUS_AGENTS_GUIDE`, `VENUS_SKILLS_DIR`, `VENUS_AGENTS_DIR`, `VENUS_AI_COPILOTS`) so the in-UI AI panel and any spawned CLI inherit the architecture guardrails
+
+### AI Contributors — Guardrails, Agent, Skills & Security Gate
+- **`AGENTS.md`** at the repo root — single source of truth for the architecture/contribution rules every contributor (human or AI) must follow; mirrored by `CLAUDE.md`, `.github/copilot-instructions.md`, and `GEMINI.md`
+- **`venus` agent** — the primary full-functionality AI assistant (welcome, operate, document, and extend Venus), with specialist subagents `venus-architect`, `venus-security`, `venus-tutorial-writer` and auto-invoking skills `architecture-check`, `add-execution-language`, `add-tutorial`, `add-rest-endpoint` (registered in `.claude/`)
+- **PR security gate** — `scripts/security-check.ps1` / `.sh` + `.github/workflows/security-check.yml`: scans for secrets, command injection, forbidden frontend deps, Lombok, unknown outbound hosts, and layer-crossings; converts a PR back to draft until findings are resolved
+- **`.github/CODEOWNERS`** — every PR requires founding-contributor review before merge to `master`
+- **Product brochure** — branded 12-page PDF at `docs/brochure/venus-brochure.pdf`
+
+### AI Providers — Local CLI, Multi-Provider
+- AI now runs exclusively through **local CLI subprocesses**; the direct Anthropic HTTP API path and the stored API key were removed (eliminates content-filter policy errors and a second credential to manage)
+- Three interchangeable providers: **Claude** (`claude`), **GitHub Copilot** (`github-copilot-cli` / `copilot`), **Gemini** (`gemini`) — switch in **Settings → AI Provider**
+- Settings tab: the API Key field is replaced with per-provider CLI status; status flags are `claudeCliAvailable`, `githubCopilotAvailable`, `geminiCliAvailable` (was `claudeApiKeySet`)
+- `GET /api/llm/provider` reports the active provider, model, and availability; all `/api/llm/*` routes are provider-agnostic
+- New services: `GitHubCopilotService`, `CopilotCliService`, `GeminiService` alongside `ClaudeService`
+
+### MCP Tool Server
+- Built-in **Model Context Protocol** server over HTTP+SSE (JSON-RPC 2.0) at `/api/mcp/sse` + `/api/mcp/messages` (`McpController`)
+- Eight tools: `venus_execute_code`, `venus_list_notebooks`, `venus_read_notebook`, `venus_run_pipeline`, `venus_search_cells`, `venus_load_module`, `venus_create_notebook`, `venus_append_cell`
+- Any MCP client (Claude Desktop, Claude Code, custom agents) can drive Venus programmatically — see `docs/API.md` for client setup
+
+### Authentication — Local & OAuth2
+- Spring Security added with two modes via `venus.auth.mode`: `local` (default — OS username, no login) and `oauth` (OAuth2 social login)
+- OAuth client config stored in `data/oauth-config.json` (gitignored); `SecurityConfig`, `OAuthClientConfig`, `OAuthConfigService`, `UserService`, `AuthProvider`, `OAuthConfig`, `UserProfile` added
+- New endpoints: `/api/user/me`, `/api/user/me/email`, `/api/user/oauth-config`, `/api/user/logout`, and `PUT /api/settings/auth-mode`
+- Notebooks are scoped per user (`notebooks/{userId}/`)
+
+### Variable Inspector — All Languages
+- Variable inspection extended from JShell to **all subprocess runtimes** (JS, TS, C#, F#, C++) via `VariableInspector`
+- Per-tab inspector UX
+
+### Open-Source Hardening
+- `.github/CODEOWNERS`, `.github/workflows/security-check.yml`, and `scripts/security-check.{sh,ps1}` enforce the architecture/security guardrails in CI and pre-flight
+- `AGENTS.md` is the single source of truth for AI contributors; `CLAUDE.md`, `.github/copilot-instructions.md`, and `GEMINI.md` defer to it
+- `.claude/` registers slash commands, skills, and subagents for the agentic contribution loop
+
+### Documentation — Agentic Workflow Framing
+
+- **README.md** — new "Built for the Agentic Era" section explaining the *use → customize → contribute* loop, with three surfaces (Venus UI, AI CLI in repo, MCP-aware agents) and sample prompts for each
+- **CONTRIBUTING.md** — new "Contributing in an Agentic Cycle" section at the top; the recommended path is now `ask AI CLI in the repo` → `try locally` → `ask AI to package the PR`. Traditional fork-edit-PR still works.
+- **docs/USAGE.md** — new "Agentic Workflows — Use, Customize, Contribute" section in the AI Assistant chapter; documents the three surfaces and the MCP tool surface (`venus_create_notebook`, `venus_append_cell`, `venus_read_notebook`, `venus_run_pipeline`, `venus_load_module`)
+- **docs/ARCHITECTURE.md** — new "Design Principles (Built for the Agentic Era)" preamble that names the six constraints (no frontend build, no Lombok, subprocess-per-language, small conventions, single JAR/port, MCP-native) and explains *why* — they're what makes the customize-in-an-hour promise real
+- **docs/SETUP.md** — new "Recommended: an AI CLI" section; positions installing Claude / Copilot / Gemini CLI as the standard setup step, not an optional extra
+- **Articles** — long-form articles in `articles/medium-article.md` and `articles/linkedin-article.md` (with rendered PDFs and embedded SVG diagrams) telling the same story in long-form
+- **`.ipynb` interop** — clarified everywhere that Venus ↔ Jupyter round-tripping is *planned for the next update*, not currently shipped
+
+### Variable Inspector & Tab UX
+- **Variable inspector** extended to **all subprocess languages** — JavaScript, TypeScript, C#, F#, and C++ (previously JShell-only), via `util/VariableInspector`; inspect live types, values, and structure without printing
+- Tab navigation UX refinements across the workspace
+
+---
+
 ## [2.1.0] — 2026-05-10
 
 Venus 2.1 adds **TypeScript** as a full first-class language — bringing the total to **seven execution modes** (JShell · Java · JavaScript · TypeScript · C# · F# · C++). The integration leverages Node.js's built-in type-stripping (Node 22.6+), so no additional runtime is required beyond the existing Node.js dependency.

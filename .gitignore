@@ -84,3 +84,6 @@ docs/cheatsheet.html
 
 # Claude Code local config (settings, memory — developer-only)
 .claude/settings.local.json
+
+# Article generation tooling deps
+articles/node_modules/

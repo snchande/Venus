@@ -1,0 +1,20 @@
+# Venus Notebooks — CODEOWNERS
+#
+# Every PR against master requires review by the founding contributor.
+# Specific paths add review requirements on top of this default.
+
+*                                       @snchande
+
+# Architecture-critical paths — extra emphasis
+/AGENTS.md                              @snchande
+/CLAUDE.md                              @snchande
+/GEMINI.md                              @snchande
+/.github/copilot-instructions.md        @snchande
+/docs/ARCHITECTURE.md                   @snchande
+/pom.xml                                @snchande
+/.github/workflows/                     @snchande
+/scripts/security-check.ps1             @snchande
+/scripts/security-check.sh              @snchande
+/src/main/java/com/venus/shell/         @snchande
+/src/main/java/com/venus/service/       @snchande
+/src/main/resources/application.properties  @snchande

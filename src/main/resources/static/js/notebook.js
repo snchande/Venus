@@ -487,6 +487,9 @@ const NotebookEditor = (() => {
     syncAnnotations();
     render();
     renderTabStrip();
+    // Wipe the per-notebook Variable Inspector state — cell IDs from the
+    // previous notebook would be dead links and confuse the user.
+    window.VarInspector?.clear?.();
   }
 
   /** Switch to an already-open tab by ID. */
@@ -1281,6 +1284,10 @@ const NotebookEditor = (() => {
     }
     focusedCellId = cellId;
     AIAssistant?.updateCellContext(cellId);
+    // Mirror focus in the Variable Inspector: scroll its corresponding
+    // section into view + flash. Silently no-ops when the drawer is
+    // closed or the cell has no vars yet.
+    window.VarInspector?.scrollToCell?.(cellId);
     if (!cellId) return;
     const el = document.getElementById(`cell-${cellId}`);
     el?.classList.add('cell-focused');

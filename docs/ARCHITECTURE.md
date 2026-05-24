@@ -1,5 +1,22 @@
 # Venus Notebooks — Architecture
 
+## Design Principles (Built for the Agentic Era)
+
+Venus is designed to be **reshaped by AI** — by the user themselves, in their own loop, with their own AI CLI. Every architectural decision below is in service of that goal. Read these before reading the rest:
+
+- **No build step on the frontend.** Plain HTML/CSS/vanilla JS served from the JAR. Any AI agent that can read HTML can extend the UI. No Webpack, no Vite, no React, no TypeScript transpile pipeline.
+- **Plain Java backend, no Lombok, no annotation magic.** Standard Spring Boot. Any agent that can read Java can extend it. Models are POJOs with manual builders.
+- **Subprocess-per-language.** Adding a new language = one new `*ExecutionService.java` file modeled on the existing seven. The pattern is deliberately copy-pasteable.
+- **Small conventions, not big frameworks.** Notebook format is plain JSON (`.vnb`). Cell metadata uses `//@ anchor` / `//@ depends` annotations. The MCP tool surface mirrors the REST API 1:1.
+- **One Spring Boot JAR, one port (8585).** No microservices, no databases, no message queues. There is exactly one place for an agent to look.
+- **MCP-native.** The whole system is exposed as MCP tools so external agents (Claude Code, Claude Desktop, custom) can drive Venus identically to how the UI does.
+
+> If a proposed change would force a new build step, a new framework, a new layer, or a new outbound dependency — the answer is almost always **no**. The simplicity is the feature: it's what makes the *use → customize → contribute* cycle take an hour instead of a weekend.
+
+See [`AGENTS.md`](../AGENTS.md) for the hard rules every AI contributor must follow.
+
+---
+
 ## Overview
 
 Venus Notebooks is a **single-server Java application** that serves a browser-based notebook UI and exposes REST and WebSocket APIs for interactive code execution across **six runtimes**: JShell, Java, JavaScript, C#, F#, and C++. There is no frontend build step — the browser loads static HTML/CSS/JS directly from Spring Boot's static resource handler.

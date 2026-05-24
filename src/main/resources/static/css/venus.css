@@ -1735,21 +1735,27 @@ input:checked + .slider::before { transform: translateX(16px); background: #fff;
 .var-inspector {
   position: fixed;
   top: var(--topbar-h, 52px);
-  right: 0;
+  /* When AI is open, slide in to the LEFT of the AI panel so both stay
+     visible side-by-side. --ai-w-current is driven by app.js. */
+  right: var(--ai-w-current, 0px);
   bottom: 0;
   width: 380px;
   max-width: 90vw;
   background: var(--surface-1);
   border-left: 1px solid var(--border);
   display: flex; flex-direction: column;
-  z-index: 200;
+  z-index: 199;
   transform: translateX(0);
   box-shadow: -10px 0 28px rgba(0,0,0,.4);
-  transition: transform .35s cubic-bezier(.2,.85,.25,1), opacity .25s;
+  /* Animate the slide-out AND the right-shift when AI opens/resizes */
+  transition: transform .35s cubic-bezier(.2,.85,.25,1),
+              right     .3s cubic-bezier(.2,.85,.25,1),
+              opacity   .25s;
   overflow: hidden;
 }
 .var-inspector.hidden {
-  transform: translateX(100%);
+  /* Slide off-screen relative to its current right offset (AI panel width) */
+  transform: translateX(calc(100% + var(--ai-w-current, 0px)));
   opacity: 0;
   pointer-events: none;
   box-shadow: none;
@@ -1862,6 +1868,87 @@ input:checked + .slider::before { transform: translateX(16px); background: #fff;
   padding: 32px 12px;
 }
 .vi-empty.hidden { display: none; }
+
+/* ── Per-cell variable sections inside the drawer ─────────────────────
+   Each section is a collapsible card showing one cell's locals. The
+   header is clickable — it scrolls to & focuses the source cell. Cells
+   focused from the notebook in turn scroll the matching section into
+   view here (see VarInspector.scrollToCell). */
+.vi-cell-list { display: flex; flex-direction: column; gap: 10px; }
+
+.vi-cell-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-0);
+  overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.vi-cell-section.flash {
+  animation: vi-section-flash 1.4s ease-out;
+}
+@keyframes vi-section-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(124,142,247,.85); border-color: var(--accent); }
+  40%  { box-shadow: 0 0 0 4px rgba(124,142,247,.45); border-color: var(--accent); }
+  100% { box-shadow: 0 0 0 0 rgba(124,142,247,0);    border-color: var(--border);  }
+}
+
+.vi-cell-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  color: var(--text-1);
+  transition: background .15s;
+}
+.vi-cell-header:hover { background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)); }
+.vi-cell-header:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.vi-cell-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(107,207,143,.55);
+  flex-shrink: 0;
+}
+.vi-cell-name {
+  font-family: var(--font-code);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.vi-cell-meta {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-family: var(--font-code);
+  letter-spacing: .02em;
+}
+.vi-cell-time {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.vi-cell-jump {
+  width: 16px; height: 16px; opacity: .55;
+  flex-shrink: 0;
+  margin-left: 4px;
+  transition: opacity .15s, transform .15s;
+}
+.vi-cell-header:hover .vi-cell-jump { opacity: 1; transform: translateX(2px); }
+
+.vi-cell-body { padding: 0; }
+.vi-cell-body .vi-table { width: 100%; border-collapse: collapse; }
+
+/* Hide the right-edge tab when the drawer is open (the drawer covers
+   the tab's slot at the same right offset). */
+body.var-drawer-open .var-tab {
+  transform: translate(100%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
 
 /* ── Persistent vertical "Variables" tab on the right edge ──────────
    Appears as a slim vertical pill that stays parked on the right edge
@@ -3526,3 +3613,129 @@ table.venus-df th { position: relative; padding-bottom: 14px; }
 
 /* Provider icon next to title */
 .ai-prov-icon { font-size: 15px; line-height: 1; }
+
+/* ═══════════════════════════════════════════════════════
+   Welcome / User Guide / What's New overlay
+   ═══════════════════════════════════════════════════════ */
+.welcome-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 8, 18, .72);
+  backdrop-filter: blur(4px);
+  padding: 24px;
+}
+.welcome-overlay.hidden { display: none; }
+
+.welcome-modal {
+  position: relative;
+  width: min(760px, 96vw);
+  max-height: 92vh; overflow-y: auto;
+  background:
+    radial-gradient(900px 380px at 88% -8%, rgba(245,166,35,.14), transparent 60%),
+    radial-gradient(700px 360px at -6% 108%, rgba(124,142,247,.14), transparent 60%),
+    linear-gradient(180deg, #14141f 0%, var(--surface-1) 100%);
+  border: 1px solid var(--border-strong, rgba(255,255,255,.14));
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  padding: 26px 28px 20px;
+  animation: welcome-pop .22s ease;
+}
+@keyframes welcome-pop { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: none; } }
+
+.welcome-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 30px; height: 30px; border-radius: 7px;
+  background: var(--surface-3); border: 1px solid var(--border);
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.welcome-close:hover { color: var(--text-1); background: var(--surface-4); }
+
+.welcome-hero { display: flex; gap: 16px; align-items: center; }
+.welcome-planet { flex-shrink: 0; filter: drop-shadow(0 0 16px rgba(245,166,35,.35)); }
+.welcome-hero-text h1 { font-size: 21px; font-weight: 700; color: var(--text-1); margin: 0 0 4px; letter-spacing: -.01em; }
+.welcome-hero-text h1 span { color: var(--venus, #f5a623); }
+.welcome-hero-text h1 em {
+  font-style: normal; font-family: var(--font-code); font-size: 12px; font-weight: 500;
+  color: var(--venus, #f5a623); border: 1px solid rgba(245,166,35,.4);
+  background: rgba(245,166,35,.1); border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: middle;
+}
+.welcome-hero-text p { font-size: 13px; color: var(--text-2); margin: 0; line-height: 1.5; }
+
+.welcome-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 4px; }
+.welcome-chip {
+  font-family: var(--font-code); font-size: 11px; color: var(--text-2);
+  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 9px;
+}
+
+.welcome-tracks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; }
+@media (max-width: 620px) { .welcome-tracks { grid-template-columns: repeat(2, 1fr); } }
+.welcome-track {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  text-align: left; padding: 11px 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text-1); cursor: pointer; transition: all .14s;
+}
+.welcome-track:hover { background: var(--surface-3); border-color: var(--border-strong, rgba(255,255,255,.18)); }
+.welcome-track.active { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 1px var(--accent) inset; }
+.welcome-track svg { color: var(--venus, #f5a623); }
+.welcome-track-label { font-size: 13px; font-weight: 600; }
+.welcome-track-blurb { font-size: 11px; color: var(--text-3); line-height: 1.3; }
+
+.welcome-content { min-height: 150px; }
+.welcome-steps { list-style: none; counter-reset: ws; margin: 0; padding: 0; }
+.welcome-steps li {
+  counter-increment: ws; position: relative;
+  padding: 9px 12px 9px 40px; margin-bottom: 7px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 8px;
+}
+.welcome-steps li::before {
+  content: counter(ws); position: absolute; left: 10px; top: 9px;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(124,142,247,.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-code); font-size: 11px; font-weight: 600;
+}
+.welcome-steps .ws-do { display: block; font-size: 13px; color: var(--text-1); }
+.welcome-steps .ws-where { display: block; font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+.welcome-whatsnew { padding: 4px 2px; }
+.wn-head { font-size: 15px; font-weight: 700; color: var(--text-1); }
+.wn-head .wn-date { font-family: var(--font-code); font-size: 11px; color: var(--text-3); margin-left: 8px; font-weight: 400; }
+.wn-title { font-size: 13px; color: var(--venus, #f5a623); margin: 4px 0 10px; }
+.wn-list { margin: 0; padding-left: 18px; }
+.wn-list li { font-size: 12.5px; color: var(--text-2); margin-bottom: 6px; line-height: 1.45; }
+.wn-foot { font-size: 11.5px; color: var(--text-3); margin-top: 10px; }
+.wn-foot code { font-family: var(--font-code); }
+
+.wn-links { display: flex; gap: 18px; margin-top: 12px; flex-wrap: wrap; }
+.wn-links a { font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 500; }
+.wn-links a:hover { color: var(--accent-hover, #8f9ef9); text-decoration: underline; }
+
+.welcome-history .wh-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.wh-rel { padding: 11px 13px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 9px; border-left: 3px solid var(--venus, #f5a623); }
+.wh-rel-head { display: flex; align-items: baseline; gap: 10px; }
+.wh-ver { font-family: var(--font-code); font-size: 13px; font-weight: 600; color: var(--venus, #f5a623); }
+.wh-date { font-family: var(--font-code); font-size: 11px; color: var(--text-3); }
+.wh-title { font-size: 12.5px; font-weight: 600; color: var(--text-1); margin: 2px 0 5px; }
+.wh-items { margin: 0; padding-left: 17px; }
+.wh-items li { font-size: 12px; color: var(--text-2); margin-bottom: 3px; line-height: 1.4; }
+
+.welcome-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.welcome-dismiss { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.welcome-dismiss input { accent-color: var(--accent); }
+.welcome-foot-actions { display: flex; gap: 8px; }
+.welcome-btn {
+  font-size: 12.5px; font-weight: 600; padding: 8px 16px; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface-3); color: var(--text-1); transition: all .14s;
+}
+.welcome-btn:hover { background: var(--surface-4); }
+.welcome-btn.ghost { background: transparent; color: var(--text-2); }
+.welcome-btn.ghost:hover { color: var(--text-1); background: var(--surface-3); }
+.welcome-btn.primary { background: var(--accent); border-color: var(--accent); color: #0d0f1a; }
+.welcome-btn.primary:hover { background: var(--accent-hover, #8f9ef9); }

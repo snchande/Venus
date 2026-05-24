@@ -5,13 +5,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-1.2.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-informational.svg)](CHANGELOG.md)
 
-Venus Notebooks is a **locally-hosted, browser-based notebook environment** — like Jupyter, but for seven languages. Write and run Java, JShell, JavaScript, TypeScript, C#, F#, and C++ cells side by side, manage Maven, npm, and NuGet dependencies, chain cells with pipeline orchestration, and get AI assistance from Claude, GitHub Copilot, or Gemini — all without leaving your browser.
+Venus Notebooks is a **locally-hosted, browser-based notebook environment** for seven languages — JShell, Java, JavaScript, TypeScript, C#, F#, and C++ — with three AI co-pilots (Claude, GitHub Copilot, Gemini) wired in as **local CLI subprocesses** and the **whole system exposed via MCP** so any agent can drive it programmatically.
 
 No cloud account. No data sent anywhere. Runs entirely on your machine.
 
-![Venus Notebooks UI](docs/screenshots/ui-preview.png)
+> 📄 **[Product Brochure (PDF)](docs/brochure/venus-brochure.pdf)** — 12 pages, branded, with architecture diagrams.
+> 🛡 **AI-contributor rules** live in **[AGENTS.md](AGENTS.md)** — read this before you (or your CLI) write code.
+> 🔍 **Pre-flight security check:** `pwsh ./scripts/security-check.ps1` or `./scripts/security-check.sh`.
+
+![Venus Notebooks UI](docs/screenshots/00-cover-medium.png)
 
 ---
 
@@ -29,6 +33,50 @@ Java developers have always been second-class citizens in the notebook world. Ju
 - **C++ native** — compile and run C++ cells with MSVC, GCC, or Clang; 26 standard headers pre-included
 - **AI in the loop** — Claude, GitHub Copilot, or Gemini generates, explains, and debugs code inline — all via local CLI, no API keys
 - **Offline by default** — your notebooks and code never leave your machine
+
+---
+
+## Built for the Agentic Era
+
+Venus is designed to be **used**, **customized**, and **contributed back to** — entirely through agentic prompts. The product, the docs, and the contribution workflow all assume an AI partner is in your loop.
+
+### The Agentic Cycle
+
+```
+   Use ──► Customize ──► Contribute ──► (back to) Use
+    │           │              │
+    │           │              └── "Package this as a PR." → AI opens a PR upstream
+    │           └──────────────── "Add a violin-plot helper." → AI edits the code in your fork
+    └──────────────────────────── "Generate a notebook that fits a polynomial to this data." → AI builds it in Venus
+```
+
+Three surfaces, one workflow:
+
+| Surface | What you do | How AI helps |
+|---|---|---|
+| **Venus UI** | Write and run cells | The built-in AI panel (Claude / Copilot / Gemini CLI) generates cells, explains errors, converts between languages |
+| **Your terminal** | `claude code` / `copilot` / `gemini` inside the Venus repo | Reshape Venus itself — add a language, change a theme, fix a bug, write a tutorial |
+| **Any MCP-aware agent** | Claude Code, Claude Desktop, custom agents | Drive Venus over MCP — create notebooks, add cells, run pipelines, install packages programmatically |
+
+### Sample Agentic Prompts
+
+**While using a notebook:**
+- *"Generate a JShell cell that loads `sales.csv` with Tablesaw and plots revenue by quarter."*
+- *"Convert this Java stream pipeline to a C# LINQ query."* (then click **Insert into notebook**)
+- *"Why is this cell's output empty? Look at the dependency chain."*
+
+**While customizing Venus itself (in your terminal, inside the repo):**
+- *"Add an Excel export option for notebooks — a button in the toolbar that downloads the current notebook as `.xlsx`."*
+- *"The dark theme is too contrasty. Tweak `venus.css` so the cell borders are softer."*
+- *"Add a tutorial notebook `java-701.vnb` covering Java 21 virtual threads — five cells, beginner-friendly."*
+
+**Closing the contribution loop:**
+- *"That worked. Package the change as a PR back to upstream with a good description."*
+- *"Run `pwsh ./scripts/security-check.ps1` before you push."*
+
+The bar to **customize for yourself** and the bar to **contribute back** become the same bar — one sentence to your AI CLI.
+
+> 📖 See [`AGENTS.md`](AGENTS.md) for the architecture guardrails every AI agent must follow when editing this repo. The companion files [`CLAUDE.md`](CLAUDE.md), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), and [`GEMINI.md`](GEMINI.md) all defer to it.
 
 ---
 
@@ -316,6 +364,7 @@ Three launchers sit in the project root — pick whichever matches your shell. T
 | `open` | Open browser (server must be running) |
 | `logs` | Tail `venus.log` (background mode only) |
 | `version` | Show project, Java, Node.js, .NET, and Maven versions |
+| `agents` *(alias `ai`)* | List detected AI co-pilots (Claude/Copilot/Gemini), guardrail files, skills, and subagents wired into the repo — *available in the CMD launcher (`venus.cmd`) today; PowerShell/bash parity planned* |
 | `help` | Show help screen |
 
 > **PowerShell note**: if `./venus.ps1` is blocked, run once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
@@ -335,7 +384,8 @@ venus/
 │   ├── static/              # Frontend — index.html + CSS + JS (no build step)
 │   └── application.properties
 ├── notebooks/
-│   ├── tutorials/           # 16 built-in tutorial notebooks
+│   ├── tutorials/           # 25 built-in tutorial notebooks (JShell, Java, JS, TS, C#, F#)
+│   ├── examples/            # Example & demo notebooks (incl. C++ and cross-notebook demos)
 │   └── welcome.vnb          # Getting started notebook
 ├── scripts/
 │   ├── start.sh             # Minimal Unix/Mac launcher (watchdog loop)

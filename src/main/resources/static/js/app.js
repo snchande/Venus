@@ -56,17 +56,17 @@ const Venus = (() => {
     }
 
     function setAiOpen(open) {
-      // Opening AI displaces the inspector drawer — only one drawer at a
-      // time — but the var-tab stays visible (shifted left of the AI panel).
-      if (open && inspector) inspector.classList.add('hidden');
+      // AI and the Variables drawer can now coexist — when both are open
+      // the drawer auto-positions to the LEFT of the AI panel via
+      // --ai-w-current. We no longer force-close the drawer on AI open.
       aiSidebar.classList.toggle('hidden', !open);
       refreshOverlayUI();
     }
 
     function setInspectorOpen(open) {
       if (!inspector) return;
-      if (open) aiSidebar.classList.add('hidden');
       inspector.classList.toggle('hidden', !open);
+      document.body.classList.toggle('var-drawer-open', open);
       refreshOverlayUI();
     }
 
@@ -477,98 +477,188 @@ if (document.readyState === 'loading') {
 }
 
 /* ── Variable Inspector ────────────────────────────────────────────
-   Two pieces:
-     1. `#var-tab` — a slim vertical pill on the right edge that appears
-        after a cell runs. It carries the cell's anchor/id as a label
-        and acts as the entry point to (re-)open the inspector.
-     2. `#var-inspector` — the slide-out drawer with the local/global
-        variable tables.
-   The tab persists across opens of the AI panel; its right-offset is
-   synced (via the --ai-w-current CSS var) so it stays just left of the
-   AI panel and never overlaps. The cell tag in the drawer header is a
-   button that scrolls to + flashes the cell it belongs to. */
+   Accumulates variables across cell runs, piling each cell's locals
+   into its own collapsible section. Sections are sorted by document
+   order (the same order the cells appear in the notebook), so users
+   can scan top-to-bottom and match what they see in the notebook.
+
+   Bi-directional linking:
+     • Click a section header  → scroll to & focus the source cell.
+     • Focus a cell (via run, click, or arrow-keys) → scroll the
+       inspector to that cell's section and flash it.
+
+   Coexistence with AI:
+     The drawer slides in to the LEFT of the AI panel when AI is open
+     (positioned via the --ai-w-current CSS var, which app.js keeps in
+     sync with the AI panel's current width). The right-edge tab hides
+     while the drawer is open. Clicking outside (backdrop) closes the
+     drawer; AI stays open. */
 const VarInspector = (() => {
-  // Latest payload — kept so the tab can re-open the drawer with the
-  // same data even after the user dismisses and re-opens it.
-  let _payload = null;
+  // cellId -> { cellAnchor, locals, globals, ts }
+  const _byCell = new Map();
 
   function escapeHtml(s) {
     return String(s ?? '')
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function _renderTable(tableEl, rows) {
-    if (!tableEl) return;
-    if (!rows || rows.length === 0) {
-      tableEl.innerHTML = `<tr><td colspan="3" class="vi-empty-cell" style="text-align:center;color:var(--text-3);padding:14px">—</td></tr>`;
-      return;
-    }
-    const head = `<tr><th>Name</th><th>Type</th><th>Value</th></tr>`;
-    const body = rows.map(v => {
-      const value = v.value;
-      const valClass = value === 'null' ? 'vi-value null'
-                     : value === '<unavailable>' ? 'vi-value unavailable'
+  function _renderRows(rows) {
+    if (!rows || rows.length === 0) return '';
+    const head = `<thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead>`;
+    const body = '<tbody>' + rows.map(v => {
+      const valClass = v.value === 'null'             ? 'vi-value null'
+                     : v.value === '<unavailable>'    ? 'vi-value unavailable'
+                     : v.value === 'undefined'        ? 'vi-value null'
                      : 'vi-value';
       return `<tr>
         <td class="vi-name">${escapeHtml(v.name)}</td>
         <td class="vi-type">${escapeHtml(v.type)}</td>
-        <td><div class="${valClass}">${escapeHtml(value)}</div></td>
+        <td><div class="${valClass}">${escapeHtml(v.value)}</div></td>
       </tr>`;
-    }).join('');
-    tableEl.innerHTML = head + body;
+    }).join('') + '</tbody>';
+    return head + body;
   }
 
-  function _renderPanel() {
-    if (!_payload) return;
-    const locals  = _payload.locals  || [];
-    const globals = _payload.globals || [];
-    const label   = _payload.cellAnchor ? '#' + _payload.cellAnchor : (_payload.cellId || '');
+  function _fmtTimeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 5) return 'just now';
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    return Math.floor(s / 3600) + 'h ago';
+  }
 
-    const tag = document.getElementById('vi-cell-tag');
-    if (tag) {
-      tag.textContent = label;
-      tag.title = label
-        ? 'Scroll to & focus cell ' + label
-        : '';
+  /** Return cell IDs in notebook document order. */
+  function _orderedCellIds() {
+    const ids = Array.from(document.querySelectorAll('.cell[id^="cell-"]'))
+      .map(el => el.id.replace(/^cell-/, ''));
+    // Move any tracked cells that don't appear in the DOM (deleted, switched
+    // notebook, etc.) to the end so they don't get lost — they'll be culled
+    // on the next notebook reload via clear().
+    const known = new Set(ids);
+    const extras = Array.from(_byCell.keys()).filter(k => !known.has(k));
+    return [...ids.filter(id => _byCell.has(id)), ...extras];
+  }
+
+  function _renderAll() {
+    const list = document.getElementById('vi-cell-list');
+    const empty = document.getElementById('vi-empty');
+    if (!list) return;
+
+    if (_byCell.size === 0) {
+      list.innerHTML = '';
+      empty?.classList.remove('hidden');
+      return;
     }
+    empty?.classList.add('hidden');
 
-    document.getElementById('vi-local-count').textContent  = locals.length;
-    document.getElementById('vi-global-count').textContent = globals.length;
-    _renderTable(document.getElementById('vi-local-table'),  locals);
-    _renderTable(document.getElementById('vi-global-table'), globals);
+    const orderedIds = _orderedCellIds();
+    list.innerHTML = orderedIds.map(cellId => {
+      const e = _byCell.get(cellId);
+      const label = e.cellAnchor ? '#' + e.cellAnchor : cellId;
+      const meta = `${e.locals.length} local${e.locals.length === 1 ? '' : 's'}`;
+      const time = _fmtTimeAgo(e.ts);
+      const table = _renderRows(e.locals);
+      return `
+        <section class="vi-cell-section" id="vi-section-${escapeHtml(cellId)}" data-cell-id="${escapeHtml(cellId)}">
+          <button class="vi-cell-header" type="button" data-cell-id="${escapeHtml(cellId)}"
+                  title="Scroll to & focus cell ${escapeHtml(label)}">
+            <span class="vi-cell-dot"></span>
+            <span class="vi-cell-name">${escapeHtml(label)}</span>
+            <span class="vi-cell-meta">${meta}</span>
+            <span class="vi-cell-time">${time}</span>
+            <svg class="vi-cell-jump" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="vi-cell-body">
+            ${table || '<div class="vi-empty" style="padding:14px">No locals captured.</div>'}
+          </div>
+        </section>
+      `;
+    }).join('');
 
-    const empty = locals.length === 0 && globals.length === 0;
-    document.getElementById('vi-empty')?.classList.toggle('hidden', !empty);
-    document.getElementById('vi-local-section') ?.classList.toggle('empty', empty);
-    document.getElementById('vi-global-section')?.classList.toggle('empty', empty);
+    // Wire each header to focus its cell
+    list.querySelectorAll('.vi-cell-header').forEach(h => {
+      h.addEventListener('click', () => {
+        const cid = h.dataset.cellId;
+        window.NotebookEditor?.focusCell?.(cid);
+      });
+    });
   }
 
   function _renderTab() {
-    if (!_payload) return;
-    const label = _payload.cellAnchor ? '#' + _payload.cellAnchor : (_payload.cellId || '');
-    const tabCellLabel = document.getElementById('vt-cell-label');
-    if (tabCellLabel) tabCellLabel.textContent = label;
     const tab = document.getElementById('var-tab');
-    if (tab) tab.classList.remove('hidden');
+    if (!tab) return;
+    if (_byCell.size === 0) {
+      tab.classList.add('hidden');
+      return;
+    }
+    // Tab label shows the most recently-updated cell + total cell count
+    const latest = Array.from(_byCell.entries()).sort((a,b) => b[1].ts - a[1].ts)[0];
+    const latestLabel = latest[1].cellAnchor ? '#' + latest[1].cellAnchor : latest[0];
+    const countLabel  = _byCell.size === 1 ? latestLabel : `${_byCell.size} cells`;
+    const labelEl = document.getElementById('vt-cell-label');
+    if (labelEl) labelEl.textContent = countLabel;
+    tab.classList.remove('hidden');
   }
 
-  /** Push fresh variable data + show the vertical tab. Does NOT open the drawer. */
+  /** Push a cell's variables in. Empty payloads remove the cell's section. */
   function update(payload) {
-    _payload = payload;
-    _renderPanel();
+    const cellId = payload?.cellId;
+    if (!cellId) return;
+    const locals  = payload.locals  || [];
+    const globals = payload.globals || [];
+    if (locals.length === 0 && globals.length === 0) {
+      _byCell.delete(cellId);
+    } else {
+      _byCell.set(cellId, {
+        cellAnchor: payload.cellAnchor || null,
+        locals, globals,
+        ts: Date.now(),
+      });
+    }
+    _renderAll();
     _renderTab();
   }
 
-  /** Open the drawer with the current data. */
+  /** Open the drawer (re-renders so timestamps and counts are current). */
   function open() {
-    _renderPanel();
+    _renderAll();
+    _renderTab();
     Venus.openInspector?.();
   }
 
-  /** Hide both the drawer and the tab. */
+  /** Hide the drawer AND the tab. Tab returns on the next cell run. */
   function dismissTab() {
+    _byCell.clear();
     document.getElementById('var-tab')?.classList.add('hidden');
     Venus.closeInspector?.();
+    _renderAll();
+  }
+
+  /** Clear the inspector — called when switching notebooks. */
+  function clear() {
+    _byCell.clear();
+    _renderAll();
+    document.getElementById('var-tab')?.classList.add('hidden');
+  }
+
+  /**
+   * Scroll the drawer to (and flash) the section for `cellId`. Called by
+   * NotebookEditor when a cell gets focus, so the inspector mirrors what
+   * the user is looking at. Silently no-ops when the drawer is closed.
+   */
+  function scrollToCell(cellId) {
+    const drawer = document.getElementById('var-inspector');
+    if (!drawer || drawer.classList.contains('hidden')) return;
+    if (!cellId || !_byCell.has(cellId)) return;
+    const sec = document.getElementById('vi-section-' + cellId);
+    if (!sec) return;
+    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    sec.classList.remove('flash');
+    void sec.offsetWidth; // restart animation
+    sec.classList.add('flash');
+    setTimeout(() => sec.classList.remove('flash'), 1500);
   }
 
   // ── Wire DOM hooks once the page is ready ─────────────────────────
@@ -576,7 +666,6 @@ const VarInspector = (() => {
     const tab = document.getElementById('var-tab');
     if (tab) {
       tab.addEventListener('click', (e) => {
-        // Don't open when the user clicks the × inside the tab
         if (e.target.closest('#vt-close')) return;
         open();
       });
@@ -585,21 +674,13 @@ const VarInspector = (() => {
       e.stopPropagation();
       dismissTab();
     });
-
-    // Cell-tag in the drawer header → jump to + focus the cell
-    document.getElementById('vi-cell-tag')?.addEventListener('click', () => {
-      if (!_payload?.cellId) return;
-      const editor = window.NotebookEditor;
-      if (editor?.focusCell) editor.focusCell(_payload.cellId);
-      // Keep the drawer open so the user can keep cross-referencing
-    });
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else { init(); }
 
-  return { update, open, dismissTab };
+  return { update, open, dismissTab, clear, scrollToCell };
 })();
 window.VarInspector = VarInspector;
 

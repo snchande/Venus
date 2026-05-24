@@ -16,7 +16,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Venus Notebooks</name>
-    <description>Interactive multi-language notebook environment — Java, C#, F#, JavaScript</description>
+    <description>Interactive multi-language notebook environment — Java/JShell, JavaScript, TypeScript, C#, F#, and C++</description>
     <url>https://github.com/sureshchande/venus-notebooks</url>
     <inceptionYear>2026</inceptionYear>
 

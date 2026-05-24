@@ -2,6 +2,14 @@
 
 Thank you for your interest in contributing to Venus Notebooks. This document covers everything you need to know — from setting up your development environment to getting your pull request merged.
 
+> **Working with AI coding agents?** Read [`AGENTS.md`](AGENTS.md) first. It is the single source of truth for the architecture rules every contributor — human or AI — must follow. Provider-specific files ([`CLAUDE.md`](CLAUDE.md), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), [`GEMINI.md`](GEMINI.md)) all point at it.
+>
+> **Before you push:** run `pwsh ./scripts/security-check.ps1` (or `./scripts/security-check.sh`). The same script runs in CI and gates whether your PR can leave draft state. See [`AGENTS.md` §2.3](AGENTS.md) for the rules it enforces.
+>
+> **Want the big picture?** See the [Product Brochure](docs/brochure/venus-brochure.pdf) — feature set, architecture diagrams, install, and contribution workflow on 12 pages.
+>
+> **Claude Code users:** skills and subagents specific to Venus live under [`.claude/`](.claude/README.md) — `architecture-check`, `add-execution-language`, `add-tutorial`, and `add-rest-endpoint` skills, plus `venus-architect`, `venus-security`, and `venus-tutorial-writer` subagents.
+
 ---
 
 ## Why Contribute?
@@ -17,6 +25,34 @@ By contributing, you help:
 - **The JVM and .NET ecosystems** become more productive and approachable
 
 This is a young, growing project. Your contributions have outsized impact — there is no huge backlog of existing contributors to compete with. Features you build will be used immediately by real developers.
+
+---
+
+## Contributing in an Agentic Cycle
+
+Venus is designed to be **reshaped by AI in your own loop, then contributed back through the same loop.** You do not need to spend a Saturday morning learning the codebase by hand. The recommended workflow is:
+
+1. **Use Venus.** Notice something missing or wrong.
+2. **Open your AI CLI inside the repo** — `claude code`, `copilot`, `gemini`, whichever you have authenticated.
+3. **Describe what you want** in plain English. The AI reads the architecture rules in [`AGENTS.md`](AGENTS.md), edits the right files, runs the build, iterates.
+4. **Try it locally.** Refresh Venus. Confirm it works for you.
+5. **Ask the same AI to contribute it back:**
+   > *"Run `pwsh ./scripts/security-check.ps1`, then package this as a PR back to upstream with a good description."*
+
+That is the contribution path. The same loop that customizes Venus for you produces the PR for everyone else — the bar to do both becomes the same bar.
+
+### Examples of agentic prompts for contributions
+
+| Goal | Sample prompt to your AI CLI |
+|------|---|
+| Add a language | *"Add a Kotlin execution mode following the pattern of `CppExecutionService.java`. Wire it into `ShellController` and add the JS frontend mode."* |
+| Fix a bug | *"This stack trace shows a NullPointerException in `OrchestrationService.runPipeline`. Find the root cause and fix it. Add a test."* |
+| New tutorial | *"Create a `notebooks/tutorials/java-701.vnb` covering Java 21 virtual threads. Five cells, beginner-to-intermediate."* |
+| UI tweak | *"In the dark theme, the cell border for TypeScript cells is too saturated. Soften the blue and update `venus.css`."* |
+| New API endpoint | *"Add a `GET /api/notebooks/{id}/stats` endpoint that returns cell count, total runs, and last-modified. Update `docs/API.md`."* |
+| Close the loop | *"Run security-check, push the branch, open a PR with title `feat(kotlin): add Kotlin execution mode` and a clear description."* |
+
+> If you prefer the traditional fork-edit-PR-by-hand workflow, the rest of this document still applies. The agentic cycle is the **fastest** path, not the only one.
 
 ---
 
