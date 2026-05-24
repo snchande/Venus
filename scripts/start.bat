@@ -39,6 +39,24 @@ if %ERRORLEVEL% == 0 (
 )
 echo.
 
+REM ── AI co-pilot context ─────────────────────────────────────────────────────
+REM Export guardrail + skill + agent paths so the Venus JVM (and any CLI it
+REM spawns for the in-UI AI panel) resolves them regardless of launch dir.
+set "VENUS_HOME=%CD%"
+if exist "%CD%\AGENTS.md"       set "VENUS_AGENTS_GUIDE=%CD%\AGENTS.md"
+if exist "%CD%\.claude\skills"  set "VENUS_SKILLS_DIR=%CD%\.claude\skills"
+if exist "%CD%\.claude\agents"  set "VENUS_AGENTS_DIR=%CD%\.claude\agents"
+set "AI_FOUND="
+where claude  >nul 2>&1 && set "AI_FOUND=!AI_FOUND! claude"
+where copilot >nul 2>&1 && set "AI_FOUND=!AI_FOUND! copilot"
+where gemini  >nul 2>&1 && set "AI_FOUND=!AI_FOUND! gemini"
+if defined AI_FOUND (
+    echo AI:     !AI_FOUND!  -- co-pilot ready, AGENTS.md + .claude loaded; run venus agents
+) else (
+    echo AI:     no CLI found -- install Claude / Copilot / Gemini for AI features
+)
+echo.
+
 REM ── Build if JAR missing ───────────────────────────────────────────────────
 set JAR=target\venus-notebooks-1.0.0-SNAPSHOT.jar
 

@@ -495,8 +495,8 @@ The Settings tab → Server Status shows which AI providers are detected.
 ### Step 1 — Get the code
 
 \`\`\`bash
-git clone https://github.com/yourusername/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/snchande/Venus.git
+cd Venus
 \`\`\`
 
 ### Step 2 — Build

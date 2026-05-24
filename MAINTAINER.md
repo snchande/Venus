@@ -77,7 +77,7 @@ The Founding Maintainer will:
 
 | Role | GitHub | Responsibilities |
 |------|--------|-----------------|
-| **Founding Maintainer** | @yourusername | Final merge authority · Roadmap · Releases |
+| **Founding Maintainer** | @snchande | Final merge authority · Roadmap · Releases |
 
 *Co-maintainers will be listed here as they are added.*
 

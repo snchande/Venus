@@ -167,8 +167,11 @@ public class ClaudeService {
 
         log.info("Claude CLI chat via {}: {} messages", claudeExe, messages.size());
 
-        // Pipe prompt via stdin; --print enables non-interactive single-turn mode
+        // Pipe prompt via stdin; --print enables non-interactive single-turn mode.
+        // Run from the Venus repo root so claude loads CLAUDE.md + AGENTS.md +
+        // .claude skills/agents (no-op when VENUS_HOME is unset — see VenusHome).
         ProcessBuilder pb = new ProcessBuilder(claudeExe, "--print");
+        pb.directory(com.venus.util.VenusHome.directory());
         pb.redirectErrorStream(false);
         Process process = pb.start();
 

@@ -880,6 +880,52 @@ Click **Generate Notebook** to have the active AI provider create a complete not
 
 ---
 
+## Agentic Workflows — Use, Customize, Contribute
+
+Venus assumes an AI partner is in your loop and gives you three surfaces to work from. Pick whichever fits the moment.
+
+### Surface 1 — The AI panel inside Venus (use)
+
+For *this notebook, right now*. Generate cells, explain output, convert between languages, ask why something failed. Attach a cell with the 🤖 button so the AI sees the actual code. Code blocks in responses have an **Insert into notebook** button.
+
+**Try:**
+- *"Generate a JShell cell that reads `data/sales.csv` with Tablesaw and shows the first 10 rows."*
+- *"Convert the selected Java cell to TypeScript."* (then **Insert into notebook**)
+- *"Why is the pipeline saying `clean-data` is stale? Look at the dependency chain."*
+
+### Surface 2 — Your AI CLI in the Venus repo (customize)
+
+For *Venus itself*. Open `claude code`, `copilot`, or `gemini` inside the cloned repo. The agent reads [`AGENTS.md`](../AGENTS.md) for the architecture rules and edits the right files. Most one-feature changes take under an hour.
+
+**Try:**
+- *"Add a 'Export as Markdown' button to the notebook toolbar. New endpoint, new UI button, update `docs/API.md`."*
+- *"The JShell error messages should highlight unresolved symbols in red. Update `JShellManager.formatError` and the matching CSS."*
+- *"Add a `notebooks/tutorials/csharp-401.vnb` covering async/await in C#. Six cells, intermediate."*
+
+When you're happy, close the contribution loop with one more prompt:
+
+> *"Run `pwsh ./scripts/security-check.ps1`, then push the branch and open a PR back to upstream with a clear description."*
+
+### Surface 3 — Any MCP-aware agent (drive Venus programmatically)
+
+Venus publishes itself as an [MCP](https://modelcontextprotocol.io) server. Add it to Claude Code, Claude Desktop, or any MCP-aware agent and you can drive notebooks from outside the UI.
+
+| MCP tool | What it does |
+|---|---|
+| `venus_create_notebook` | Create a notebook by name |
+| `venus_append_cell` | Append a cell (and optionally run it) |
+| `venus_read_notebook` | Read all cells (source, anchors, output) |
+| `venus_run_pipeline` | Execute a cell with its full dependency chain |
+| `venus_load_module` | Load `notebookId/anchor` into a session for cross-notebook reuse |
+
+**Try (from inside Claude Desktop, after MCP setup):**
+- *"Create a Venus notebook that explores yesterday's API latency data — one cell to load the parquet, one to plot the p95 over time, one to flag outliers. Run it."*
+- *"Read the `pricing-experiment` notebook in Venus and summarize what each cell does."*
+
+The notebook is the shared artifact. You, the Venus UI, the AI panel, the CLI, and any MCP agent are all first-class users of it.
+
+---
+
 ## Settings Tab
 
 ### AI Provider

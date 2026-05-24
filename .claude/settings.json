@@ -18,11 +18,45 @@
       "Bash(ps:*)",
       "Bash(touch:*)",
       "Bash(mv:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(./scripts/security-check.sh:*)",
+      "Bash(pwsh ./scripts/security-check.ps1:*)",
+      "Bash(./venus.sh:*)",
+      "Bash(./venus.ps1:*)",
+      "Bash(venus:*)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git commit --no-verify:*)"
+    ]
   },
   "env": {
-    "VENUS_HOME": "${PWD}"
-  }
+    "VENUS_HOME": "${PWD}",
+    "VENUS_AGENTS_GUIDE": "AGENTS.md"
+  },
+  "skills": {
+    "enabled": [
+      "architecture-check",
+      "add-execution-language",
+      "add-tutorial",
+      "add-rest-endpoint"
+    ],
+    "source": ".claude/skills"
+  },
+  "agents": {
+    "enabled": [
+      "venus",
+      "venus-architect",
+      "venus-security",
+      "venus-tutorial-writer"
+    ],
+    "primary": "venus",
+    "source": ".claude/agents"
+  },
+  "instructionFiles": [
+    "CLAUDE.md",
+    "AGENTS.md"
+  ]
 }

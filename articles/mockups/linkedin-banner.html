@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>banner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1584px; height: 396px;
+    background: linear-gradient(110deg, #0f172a 0%, #1e3a8a 60%, #0e7490 100%);
+    font-family: -apple-system, 'Segoe UI', sans-serif; color: #f1f5f9;
+    overflow: hidden; position: relative; }
+  .grid-bg { position: absolute; inset: 0; opacity: 0.06;
+    background-image: linear-gradient(rgba(6,182,212,0.7) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(6,182,212,0.7) 1px, transparent 1px);
+    background-size: 40px 40px; }
+  .container { position: relative; z-index: 10; padding: 50px 80px;
+    height: 100%; display: grid; grid-template-columns: 1.3fr 1fr; gap: 60px;
+    align-items: center; }
+  .left .tag { display: inline-block; font-size: 12px;
+    background: rgba(6,182,212,0.2); color: #67e8f9;
+    padding: 6px 14px; border-radius: 999px;
+    border: 1px solid rgba(6,182,212,0.4); margin-bottom: 18px;
+    text-transform: uppercase; letter-spacing: 2.5px; font-weight: 600; }
+  .left h1 { font-size: 50px; font-weight: 800; line-height: 1.08;
+    background: linear-gradient(120deg, #fff 30%, #67e8f9 90%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; color: transparent; letter-spacing: -1.5px; }
+  .left p.sub { font-size: 17px; color: #cbd5e1; margin-top: 18px;
+    line-height: 1.5; max-width: 720px; }
+  .langs { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .lang { padding: 6px 14px; border-radius: 6px; font-size: 12px;
+    font-family: 'Consolas', monospace; font-weight: 600;
+    border: 1px solid rgba(148,163,184,0.3); background: rgba(15,23,42,0.5); }
+  .lang.j  { color: #fdba74; border-color: rgba(249,115,22,0.4); }
+  .lang.js { color: #fde047; border-color: rgba(234,179,8,0.4); }
+  .lang.ts { color: #93c5fd; border-color: rgba(59,130,246,0.4); }
+  .lang.cs { color: #c4b5fd; border-color: rgba(168,85,247,0.4); }
+  .lang.fs { color: #a7f3d0; border-color: rgba(16,185,129,0.4); }
+  .lang.cpp{ color: #67e8f9; border-color: rgba(6,182,212,0.4); }
+  /* Right: connection diagram */
+  .right { position: relative; height: 100%; display: flex;
+    align-items: center; justify-content: center; }
+  .nodes { display: grid; grid-template-columns: auto auto auto;
+    gap: 50px; align-items: center; position: relative; }
+  .node { width: 110px; height: 110px;
+    background: rgba(30,41,59,0.9); border-radius: 18px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 2px solid rgba(6,182,212,0.5);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(6,182,212,0.3);
+    position: relative; z-index: 2; }
+  .node .icon { font-size: 32px; color: #67e8f9; margin-bottom: 4px; }
+  .node .lbl { font-size: 11px; color: #cbd5e1;
+    text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+  .arrow { position: absolute; top: 50%; transform: translateY(-50%);
+    height: 2px; background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+    z-index: 1; }
+  .arrow-1 { left: 100px; width: 60px; }
+  .arrow-2 { left: 270px; width: 60px; }
+  .arrow .label { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #67e8f9; white-space: nowrap;
+    text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+</style></head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="container">
+    <div class="left">
+      <span class="tag">◆ The Agentic Era</span>
+      <h1>Developer Tools Built for an<br>AI-Native World</h1>
+      <p class="sub">Venus Notebooks — multi-language, MCP-native, CLI-AI integrated.
+        Reshape it for your needs in under an hour.</p>
+      <div class="langs">
+        <span class="lang j">Java</span>
+        <span class="lang j">JShell</span>
+        <span class="lang js">JavaScript</span>
+        <span class="lang ts">TypeScript</span>
+        <span class="lang cs">C#</span>
+        <span class="lang fs">F#</span>
+        <span class="lang cpp">C++</span>
+      </div>
+    </div>
+    <div class="right">
+      <div class="nodes">
+        <div class="node">
+          <div class="icon">◉</div>
+          <div class="lbl">You + AI</div>
+        </div>
+        <div class="arrow arrow-1"><span class="label">MCP</span></div>
+        <div class="node">
+          <div class="icon">▣</div>
+          <div class="lbl">Venus</div>
+        </div>
+        <div class="arrow arrow-2"><span class="label">Subprocess</span></div>
+        <div class="node">
+          <div class="icon">⚙</div>
+          <div class="lbl">7 Runtimes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body></html>

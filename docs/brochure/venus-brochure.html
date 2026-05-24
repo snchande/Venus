@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Venus Notebooks — Product Brochure</title>
+<meta name="author" content="Suresh Chande">
+<meta name="description" content="Venus Notebooks — Interactive multi-language notebooks for Java, C++, C#, F#, JavaScript, TypeScript — with AI assistance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<style>
+  /* ═══════════════════════════════════════════════════════
+     Venus Brochure — print-optimized
+     Mirrors src/main/resources/static/css/venus.css palette
+     ═══════════════════════════════════════════════════════ */
+  :root{
+    --surface-0:#0f0f17; --surface-1:#161622; --surface-2:#1e1e2e;
+    --surface-3:#252538; --surface-4:#2e2e45; --surface-5:#383858;
+    --text-1:#e2e4f0; --text-2:#a8aac8; --text-3:#6b6d8a;
+    --accent:#7c8ef7; --accent-dim:rgba(124,142,247,.15); --accent-hover:#8f9ef9;
+    --venus:#f5a623; --venus-warm:#c87518; --venus-glow:rgba(245,166,35,.45);
+    --green:#6bcf8f; --red:#f07878; --yellow:#f7c86a; --purple:#c084fc; --teal:#5ccfcf;
+    --jshell:#7c8ef7; --java:#f7c86a; --js:#22c55e; --ts:#3178c6;
+    --csharp:#a855f7; --fsharp:#f97316; --cpp:#06b6d4;
+    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.18);
+    --font-ui:'Inter',system-ui,-apple-system,sans-serif;
+    --font-code:'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+  }
+  @page { size: A4; margin: 0; }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:var(--font-ui);
+    color:var(--text-1);
+    background:var(--surface-0);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    line-height:1.55;
+    font-size:11pt;
+  }
+  .page{
+    width:210mm; height:297mm;
+    padding:16mm 16mm 14mm;
+    margin:0 auto;
+    position:relative;
+    page-break-after:always;
+    break-after:page;
+    background:
+      radial-gradient(1200px 600px at 90% -10%, rgba(124,142,247,.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(245,166,35,.06), transparent 60%),
+      var(--surface-0);
+    overflow:hidden;
+  }
+  .page:last-child{ page-break-after:auto; break-after:auto; }
+
+  /* ───── Typography ───── */
+  h1,h2,h3,h4{ font-family:var(--font-ui); font-weight:700; letter-spacing:-.01em; margin:0; }
+  h1{ font-size:34pt; line-height:1.05; }
+  h2{ font-size:22pt; line-height:1.15; color:var(--text-1); }
+  h2 .accent{ color:var(--venus); }
+  h3{ font-size:14pt; color:var(--text-1); margin:18px 0 6px; }
+  h4{ font-size:11.5pt; color:var(--accent); margin:14px 0 4px; }
+  p{ margin:8px 0; color:var(--text-2); }
+  strong{ color:var(--text-1); font-weight:600; }
+  code{ font-family:var(--font-code); font-size:.9em; padding:1.5px 5px; border-radius:4px;
+        background:var(--surface-2); border:1px solid var(--border); color:var(--accent); }
+  a{ color:var(--accent); text-decoration:none; }
+
+  /* ───── Cover page ───── */
+  .cover{
+    display:flex; flex-direction:column; justify-content:space-between;
+    background:
+      radial-gradient(900px 600px at 78% 24%, rgba(245,166,35,.22), transparent 55%),
+      radial-gradient(700px 500px at 18% 78%, rgba(124,142,247,.18), transparent 60%),
+      linear-gradient(180deg,#080812 0%, #0f0f17 60%, #161622 100%);
+  }
+  .cover .stars{ position:absolute; inset:0; pointer-events:none; opacity:.7; }
+  .cover .stars i{
+    position:absolute; width:2px; height:2px; border-radius:50%; background:#fff;
+    box-shadow:0 0 4px rgba(255,255,255,.7);
+  }
+  .cover-top{ display:flex; align-items:center; gap:14px; z-index:2; position:relative; }
+  .logo{ width:54px; height:54px; }
+  .brand-name{ font-size:13.5pt; font-weight:700; letter-spacing:.18em; color:var(--text-1); }
+  .brand-sub{ font-size:9pt; color:var(--text-3); letter-spacing:.2em; text-transform:uppercase; }
+
+  .cover-hero{ z-index:2; position:relative; margin-top:18mm; }
+  .cover-eyebrow{
+    display:inline-block;
+    font-family:var(--font-code); font-size:9.5pt; letter-spacing:.18em;
+    color:var(--venus); text-transform:uppercase;
+    padding:5px 12px; border:1px solid rgba(245,166,35,.4);
+    border-radius:999px; background:rgba(245,166,35,.08);
+  }
+  .cover-title{
+    font-size:60pt; font-weight:800; line-height:1; margin-top:14px;
+    background:linear-gradient(180deg, #fff 0%, #cfd2e8 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .cover-title em{ font-style:normal; color:var(--venus);
+    background:linear-gradient(180deg,#fff5b0 0%, #f5a623 60%, #c87518 100%);
+    -webkit-background-clip:text; background-clip:text;
+  }
+  .cover-tag{ font-size:16pt; color:var(--text-2); margin-top:14px; max-width:165mm; line-height:1.4; }
+
+  .cover-planet{
+    position:absolute; right:-30mm; top:55mm; width:160mm; height:160mm;
+    z-index:1; opacity:.95;
+  }
+  .cover-langs{
+    display:flex; flex-wrap:wrap; gap:8px; margin-top:18mm; z-index:2; position:relative;
+  }
+  .lang-pill{
+    font-family:var(--font-code); font-size:9.5pt; font-weight:500;
+    padding:6px 12px; border-radius:6px; border:1px solid var(--border-strong);
+    background:rgba(255,255,255,.04);
+  }
+  .lang-pill.jshell { color:var(--jshell); border-color:rgba(124,142,247,.5); background:rgba(124,142,247,.10); }
+  .lang-pill.java   { color:var(--java);   border-color:rgba(247,200,106,.5); background:rgba(247,200,106,.10); }
+  .lang-pill.js     { color:var(--js);     border-color:rgba(34,197,94,.5);   background:rgba(34,197,94,.10); }
+  .lang-pill.ts     { color:var(--ts);     border-color:rgba(49,120,198,.5);  background:rgba(49,120,198,.10); }
+  .lang-pill.csharp { color:var(--csharp); border-color:rgba(168,85,247,.5);  background:rgba(168,85,247,.10); }
+  .lang-pill.fsharp { color:var(--fsharp); border-color:rgba(249,115,22,.5);  background:rgba(249,115,22,.10); }
+  .lang-pill.cpp    { color:var(--cpp);    border-color:rgba(6,182,212,.5);   background:rgba(6,182,212,.10); }
+
+  .cover-foot{
+    z-index:2; position:relative; display:flex; justify-content:space-between; align-items:flex-end;
+    border-top:1px solid var(--border); padding-top:14px;
+    font-size:10pt; color:var(--text-3);
+  }
+  .cover-foot .who{ color:var(--text-2); }
+  .cover-foot .who strong{ color:var(--venus); }
+  .cover-foot .ver{ font-family:var(--font-code); color:var(--text-3); }
+
+  /* ───── Section header ───── */
+  .section-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:14px;
+    border-bottom:1px solid var(--border); padding-bottom:10px;
+  }
+  .section-num{
+    font-family:var(--font-code); font-size:10pt; color:var(--venus);
+    letter-spacing:.15em;
+  }
+
+  /* ───── Reusable layouts ───── */
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+
+  .card{
+    background:linear-gradient(180deg, rgba(30,30,46,.85), rgba(22,22,34,.85));
+    border:1px solid var(--border);
+    border-radius:8px; padding:12px 14px;
+  }
+  .card .ttl{ font-weight:600; font-size:10.5pt; color:var(--text-1); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .card .ttl .dot{ width:8px; height:8px; border-radius:50%; background:var(--venus); display:inline-block; box-shadow:0 0 6px var(--venus-glow); }
+  .card p{ margin:0; font-size:9.5pt; color:var(--text-2); }
+  .card.lang{ border-left:3px solid var(--venus); }
+  .card.lang.jshell{ border-left-color:var(--jshell); }
+  .card.lang.java  { border-left-color:var(--java); }
+  .card.lang.js    { border-left-color:var(--js); }
+  .card.lang.ts    { border-left-color:var(--ts); }
+  .card.lang.csharp{ border-left-color:var(--csharp); }
+  .card.lang.fsharp{ border-left-color:var(--fsharp); }
+  .card.lang.cpp   { border-left-color:var(--cpp); }
+
+  /* ───── Feature table ───── */
+  table.feat{ width:100%; border-collapse:collapse; margin-top:8px; }
+  table.feat td, table.feat th{
+    text-align:left; padding:6px 10px; vertical-align:top; font-size:9.5pt;
+    border-bottom:1px solid var(--border);
+  }
+  table.feat th{ color:var(--accent); font-weight:600; }
+  table.feat tr:last-child td{ border-bottom:none; }
+  table.feat td:first-child{ width:35%; font-weight:500; color:var(--text-1); }
+  table.feat td:last-child{ color:var(--text-2); }
+
+  /* ───── Code blocks ───── */
+  pre.code{
+    font-family:var(--font-code); font-size:9pt; line-height:1.5;
+    background:#0a0a14; border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    padding:10px 14px; border-radius:6px;
+    color:#cfd2e8; overflow:hidden; white-space:pre-wrap; word-break:break-all;
+    margin:8px 0;
+  }
+  pre.code .tok-kw{ color:var(--venus); }
+  pre.code .tok-cmt{ color:var(--text-3); font-style:italic; }
+  pre.code .tok-str{ color:var(--green); }
+  pre.code .tok-fn{ color:var(--accent); }
+
+  /* ───── Mermaid container ───── */
+  .arch{
+    background:#0a0a14;
+    border:1px solid var(--border); border-radius:8px;
+    padding:14px; margin-top:10px;
+  }
+  .mermaid{ background:transparent; }
+  .arch-cap{ text-align:center; font-size:9pt; color:var(--text-3); margin-top:6px; }
+
+  /* ───── Step strip ───── */
+  .steps{ counter-reset:s; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; }
+  .step{
+    background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; position:relative; padding-left:42px;
+  }
+  .step::before{
+    counter-increment:s; content:counter(s);
+    position:absolute; left:10px; top:9px;
+    width:24px; height:24px; border-radius:50%;
+    background:var(--accent-dim); color:var(--accent);
+    border:1px solid rgba(124,142,247,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-code); font-weight:600; font-size:10pt;
+  }
+  .step .st-ttl{ font-weight:600; font-size:10pt; color:var(--text-1); }
+  .step p{ margin:2px 0 0; font-size:9.5pt; }
+
+  /* ───── Callout ───── */
+  .callout{
+    border:1px solid rgba(245,166,35,.35); border-left:3px solid var(--venus);
+    background:linear-gradient(90deg, rgba(245,166,35,.10), rgba(245,166,35,.03));
+    border-radius:8px; padding:10px 14px; margin:10px 0; font-size:10pt; color:var(--text-1);
+  }
+  .callout strong{ color:var(--venus); }
+
+  /* ───── Footer ───── */
+  .page-foot{
+    position:absolute; left:16mm; right:16mm; bottom:8mm;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:8.5pt; color:var(--text-3); letter-spacing:.05em;
+    border-top:1px solid var(--border); padding-top:6px;
+    font-family:var(--font-code);
+  }
+  .page-foot .mark{ display:flex; align-items:center; gap:6px; }
+  .page-foot .mark svg{ width:14px; height:14px; }
+
+  /* ───── Contact card ───── */
+  .contact{
+    display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:center;
+    border:1px solid var(--border); border-radius:12px; padding:14px 18px;
+    background:linear-gradient(180deg, rgba(245,166,35,.08), rgba(245,166,35,.02));
+  }
+  .contact .avatar{
+    width:72px; height:72px; border-radius:50%; overflow:hidden;
+    background:radial-gradient(circle at 32% 30%, #fff5b0, #f5a623 40%, #c87518 68%, #6e3000);
+    box-shadow:0 0 16px var(--venus-glow);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,.6); font-family:var(--font-code); font-size:24pt;
+  }
+  .contact .who-name{ font-size:14pt; font-weight:700; color:var(--text-1); margin:0; }
+  .contact .who-role{ font-size:10pt; color:var(--venus); letter-spacing:.05em; }
+  .contact .who-mail{ font-family:var(--font-code); font-size:10pt; color:var(--text-2); margin-top:4px; }
+
+  /* ───── TOC ───── */
+  .toc{ display:grid; grid-template-columns:1fr 1fr; gap:10px 28px; margin-top:10px; }
+  .toc a{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--border);
+          color:var(--text-1); font-size:11pt; }
+  .toc a .num{ font-family:var(--font-code); color:var(--venus); }
+  .toc a .pg{  font-family:var(--font-code); color:var(--text-3); font-size:9.5pt; }
+
+  /* ───── Print-only no break inside cards ───── */
+  .card,.step,.contact,.callout,pre.code,.arch{ break-inside:avoid; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 1 — COVER
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page cover">
+  <div class="stars" aria-hidden="true">
+    <i style="left:7%;top:12%"></i><i style="left:22%;top:5%"></i><i style="left:36%;top:18%"></i>
+    <i style="left:52%;top:9%"></i><i style="left:68%;top:14%"></i><i style="left:82%;top:7%"></i>
+    <i style="left:92%;top:22%"></i><i style="left:14%;top:28%"></i><i style="left:46%;top:32%"></i>
+    <i style="left:74%;top:36%"></i><i style="left:88%;top:44%"></i><i style="left:10%;top:55%"></i>
+    <i style="left:30%;top:65%"></i><i style="left:62%;top:72%"></i><i style="left:84%;top:83%"></i>
+    <i style="left:18%;top:90%"></i><i style="left:48%;top:94%"></i><i style="left:72%;top:88%"></i>
+  </div>
+
+  <div class="cover-top">
+    <!-- Venus planet logo (inline SVG, scaled) -->
+    <svg class="logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="pg" cx="36%" cy="30%" r="68%">
+          <stop offset="0%"   stop-color="#fff5b0"/>
+          <stop offset="38%"  stop-color="#f5a623"/>
+          <stop offset="68%"  stop-color="#c87518"/>
+          <stop offset="100%" stop-color="#6e3000"/>
+        </radialGradient>
+        <radialGradient id="sh" cx="65%" cy="70%" r="55%">
+          <stop offset="0%"   stop-color="rgba(0,0,0,0.45)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+      </defs>
+      <circle cx="16" cy="16" r="14" fill="rgba(245,166,35,0.22)"/>
+      <ellipse cx="16" cy="16" rx="15.5" ry="4.8" fill="none"
+               stroke="rgba(245,166,35,0.55)" stroke-width="0.9"
+               transform="rotate(-22,16,16)"/>
+      <circle cx="16" cy="16" r="11.5" fill="url(#pg)"/>
+      <circle cx="16" cy="16" r="11.5" fill="url(#sh)"/>
+      <circle cx="16" cy="12.5" r="4"   fill="none" stroke="rgba(255,255,255,0.55)"
+              stroke-width="1.6" stroke-linecap="round"/>
+      <line   x1="16" y1="16.5" x2="16" y2="21.5" stroke="rgba(255,255,255,0.55)"
+              stroke-width="1.6" stroke-linecap="round"/>
+      <line   x1="13" y1="19.5" x2="19" y2="19.5" stroke="rgba(255,255,255,0.55)"
+              stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="28.8" cy="13.8" r="1.1" fill="#f5a623" opacity="0.9"/>
+    </svg>
+    <div>
+      <div class="brand-name">VENUS NOTEBOOKS</div>
+      <div class="brand-sub">Open-source · Local-first · Multi-language</div>
+    </div>
+  </div>
+
+  <!-- Large background planet -->
+  <svg class="cover-planet" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <radialGradient id="bigP" cx="35%" cy="28%" r="68%">
+        <stop offset="0%"   stop-color="#fff5b0"/>
+        <stop offset="36%"  stop-color="#f5a623"/>
+        <stop offset="68%"  stop-color="#c87518"/>
+        <stop offset="100%" stop-color="#6e3000"/>
+      </radialGradient>
+      <radialGradient id="bigSh" cx="65%" cy="72%" r="55%">
+        <stop offset="0%"   stop-color="rgba(0,0,0,0.55)"/>
+        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+      </radialGradient>
+      <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+        <stop offset="55%" stop-color="rgba(245,166,35,0.22)"/>
+        <stop offset="100%" stop-color="rgba(245,166,35,0)"/>
+      </radialGradient>
+    </defs>
+    <circle cx="100" cy="100" r="98" fill="url(#halo)"/>
+    <ellipse cx="100" cy="100" rx="95" ry="28" fill="none"
+             stroke="rgba(245,166,35,.4)" stroke-width="1.4"
+             stroke-dasharray="3 5" transform="rotate(-22,100,100)"/>
+    <ellipse cx="100" cy="100" rx="84" ry="22" fill="none"
+             stroke="rgba(245,166,35,.55)" stroke-width="1" transform="rotate(-22,100,100)"/>
+    <circle cx="100" cy="100" r="62" fill="url(#bigP)"/>
+    <circle cx="100" cy="100" r="62" fill="url(#bigSh)"/>
+  </svg>
+
+  <div class="cover-hero">
+    <span class="cover-eyebrow">Product Brochure · v1.2</span>
+    <div class="cover-title">Venus<br><em>Notebooks</em></div>
+    <p class="cover-tag">
+      Interactive multi-language notebooks in your browser — <strong>Java, JShell, JavaScript, TypeScript, C#, F#, C++</strong> —
+      with first-class AI assistance from Claude, GitHub Copilot, and Gemini.
+      Runs entirely on your machine. No cloud account. No telemetry.
+    </p>
+    <div class="cover-langs">
+      <span class="lang-pill jshell">◈ JShell</span>
+      <span class="lang-pill java">◈ Java</span>
+      <span class="lang-pill js">◈ JavaScript</span>
+      <span class="lang-pill ts">◆ TypeScript</span>
+      <span class="lang-pill csharp">◈ C#</span>
+      <span class="lang-pill fsharp">◈ F#</span>
+      <span class="lang-pill cpp">◈ C++</span>
+    </div>
+  </div>
+
+  <div class="cover-foot">
+    <div class="who">An open-source product by <strong>Suresh Chande</strong> — founding contributor</div>
+    <div class="ver">github.com/snchande/Venus</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 2 — TOC + WHY VENUS
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2>What is <span class="accent">Venus</span>?</h2>
+  </div>
+
+  <p>
+    Venus Notebooks is a <strong>locally-hosted, browser-based notebook environment</strong> for
+    seven languages — JShell, Java, JavaScript, TypeScript, C#, F#, and C++ — with three AI
+    co-pilots (Claude, GitHub Copilot, Gemini) wired in as <strong>local CLI subprocesses</strong>
+    and the <strong>whole system exposed via MCP</strong> so any agent can drive it programmatically.
+    Everything runs on your machine. No cloud account. No telemetry.
+  </p>
+
+  <div class="callout">
+    <strong>Built for the Agentic Era.</strong> The notebook tools we love were designed for a
+    pre-AI world. Venus keeps the best of that lineage — cells, kernels, rich output, pipelines —
+    and adds what the modern era demands: <strong>your favourite AI CLI inside the notebook</strong>,
+    <strong>MCP exposing every capability</strong>, and a workflow where you can <em>personalize
+    Venus to your needs in minutes</em>. Add a feature. Ask your CLI to package and open a PR.
+    Ship it. <em>Tools should be shaped by the people who use them.</em>
+  </div>
+
+  <p style="margin-top:8px">
+    Venus is <strong>additive, not adversarial</strong>. If you already love another notebook tool,
+    keep using it. Venus reads and writes <code>.ipynb</code> alongside its native <code>.vnb</code>
+    format — so you can prototype here, export there, and back, freely. Use what fits the moment;
+    pick the canvas that gives you the best leverage.
+  </p>
+
+  <h3 style="margin-top:18px">What's inside this brochure</h3>
+  <nav class="toc">
+    <a><span><span class="num">01</span> &nbsp; What is Venus?</span><span class="pg">02</span></a>
+    <a><span><span class="num">02</span> &nbsp; Capabilities &amp; Features</span><span class="pg">03</span></a>
+    <a><span><span class="num">03</span> &nbsp; Seven languages, one canvas</span><span class="pg">04</span></a>
+    <a><span><span class="num">04</span> &nbsp; Architecture</span><span class="pg">05</span></a>
+    <a><span><span class="num">05</span> &nbsp; Install &amp; quick start</span><span class="pg">06</span></a>
+    <a><span><span class="num">06</span> &nbsp; Your first notebook</span><span class="pg">07</span></a>
+    <a><span><span class="num">07</span> &nbsp; AI assistance &amp; the MCP server</span><span class="pg">08</span></a>
+    <a><span><span class="num">08</span> &nbsp; Contributor playbook</span><span class="pg">09</span></a>
+    <a><span><span class="num">09</span> &nbsp; Security &amp; quality gates</span><span class="pg">10</span></a>
+    <a><span><span class="num">10</span> &nbsp; About &amp; contact</span><span class="pg">11</span></a>
+  </nav>
+
+  <h3 style="margin-top:14px">At a glance</h3>
+  <div class="grid-4">
+    <div class="card"><div class="ttl"><span class="dot"></span>7 languages</div><p>JShell · Java · JS · TS · C# · F# · C++ — one UI.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>CLI inside</div><p>Claude · Copilot · Gemini as local subprocess.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>MCP outside</div><p>Whole system exposed to any agent over MCP.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>.ipynb interop</div><p>Round-trip with Jupyter — pick your canvas.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>Live output</div><p>STOMP/WebSocket streaming. Zero polling.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>3 package mgrs</div><p>Maven · npm · NuGet — one click each.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>Pipeline DSL</div><p><code>//@ anchor</code> / <code>//@ depends</code> across all 7 modes.</p></div>
+    <div class="card"><div class="ttl"><span class="dot"></span>Personalize fast</div><p>Add features in minutes — your CLI opens the PR.</p></div>
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 02 · what is venus</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 3 — CAPABILITIES & FEATURES
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <h2>Capabilities &amp; <span class="accent">Features</span></h2>
+  </div>
+
+  <p>Every capability in Venus is designed around two principles: <em>your environment, your machine</em>, and
+     <em>fast iteration from idea to executed cell</em>. Here is the full feature surface.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>JShell-native execution</div>
+      <p>Every JShell cell shares one persistent session per notebook. Variables, imports, and method
+      definitions persist across cells exactly like a classic REPL.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Full <code>javac</code> compile mode</div>
+      <p>Switch any cell to Java mode to write a full <code>public class</code>. Compiled with
+      <code>javax.tools</code>, line numbers normalised, stdout/stderr captured.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>JavaScript &amp; TypeScript</div>
+      <p>Node 18+ for JS; Node 22.6+ type-stripping for TS, with optional <code>tsc --noEmit</code> for
+      full diagnostics. Both share the same npm modules.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>C# &amp; F# via .NET SDK</div>
+      <p>C# 9+ top-level programs via <code>dotnet run</code>; F# scripts via <code>dotnet fsi</code>.
+      NuGet packages auto-injected as <code>&lt;PackageReference&gt;</code> or <code>#r "nuget:"</code>.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>C++ with auto-detected toolchain</div>
+      <p>MSVC, GCC, or Clang — auto-detected on <code>PATH</code>. 25 standard headers pre-included.
+      Notebook mode wraps cells in <code>main()</code> automatically.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Real-time output</div>
+      <p>STOMP over SockJS streams stdout/stderr live as the cell runs. No polling, no buffering surprises.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Maven package manager</div>
+      <p>Type <code>groupId:artifactId:version</code>, click Install. Venus downloads from Maven Central
+      and injects the JAR into the active JShell classpath immediately.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>npm package manager</div>
+      <p>One-click install for JavaScript <em>and</em> TypeScript cells. Modules land in
+      <code>data/npm-modules/node_modules/</code>; <code>require()</code> resolves automatically.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>NuGet package manager</div>
+      <p>Same flow for C# and F#. Installed packages are wired into every C# project file and every F#
+      script as <code>#r "nuget:"</code> on the first line.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Pipeline orchestration</div>
+      <p>Annotate cells with <code>//@ anchor</code> and <code>//@ depends</code>. The orchestration
+      service builds a DAG, topologically sorts, and runs ancestors before your target cell. Works in
+      all 7 languages, including cross-notebook references.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Multi-provider AI</div>
+      <p>Claude, GitHub Copilot, and Gemini all run as local CLI subprocesses. Switch providers from the
+      AI tab. No API keys stored by Venus; provider auth lives with the CLI.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>AI language conversion</div>
+      <p>Switch a cell from Java to C#, or from JS to TypeScript, and Venus offers to convert the existing
+      code using the active AI provider. Same intent, new dialect.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>MCP server</div>
+      <p>Expose Venus itself as an MCP tool server — Claude Code, Claude Desktop, and custom agents can
+      drive cells, manage packages, and read notebook state programmatically.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Variable inspector</div>
+      <p>Inspect live variable state across JShell, JS, TS, C#, F#, and C++ sessions. See types, values,
+      and structure without printing.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Built-in data science stack</div>
+      <p>XChart, Apache Commons Math, Tablesaw, OpenCSV pre-loaded for Java. <code>simple-statistics</code>
+      and <code>mathjs</code> for JS/TS. <code>venus.table()</code> / <code>venusDisplay()</code> helpers
+      across all runtimes.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>28 built-in tutorials</div>
+      <p>Read-only curriculum from <em>JShell-101</em> through <em>C++-301</em> — generators in every
+      language at every level. Personal notebooks stay separate.</p>
+    </div>
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 03 · capabilities</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 4 — SEVEN LANGUAGES, ONE CANVAS
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2>Seven languages, <span class="accent">one canvas</span></h2>
+  </div>
+
+  <p>Each cell carries a mode badge that mirrors the language colour shown in the live UI. Switch
+     modes from the badge button at the top of any cell.</p>
+
+  <div class="grid-2">
+    <div class="card lang jshell">
+      <div class="ttl"><span class="dot" style="background:var(--jshell)"></span>JShell — shared session</div>
+      <p>Every JShell cell in the notebook shares one <code>jdk.jshell</code> instance.
+      Pre-loaded imports for <code>java.util</code>, <code>java.time</code>, XChart, Tablesaw,
+      Commons Math, and the <code>VenusDisplay</code> helpers. Variables and methods persist across
+      cells until you press <strong>Restart</strong>.</p>
+    </div>
+    <div class="card lang java">
+      <div class="ttl"><span class="dot" style="background:var(--java)"></span>Java — full classes</div>
+      <p>Switch a cell to Java mode for a complete <code>public class Main</code> with <code>main()</code>.
+      Compiled via <code>javax.tools</code>, errors are line-number-normalised, stdout/stderr captured
+      from the subprocess.</p>
+    </div>
+    <div class="card lang js">
+      <div class="ttl"><span class="dot" style="background:var(--js)"></span>JavaScript — Node.js</div>
+      <p>Runs in a <code>node -e</code> subprocess. <code>require()</code> resolves from
+      <code>data/npm-modules</code>. <code>venus.table()</code>, <code>venus.html()</code>,
+      <code>venus.display()</code>, <code>venus.stats()</code> are available globally.</p>
+    </div>
+    <div class="card lang ts">
+      <div class="ttl"><span class="dot" style="background:var(--ts)"></span>TypeScript — Node 22.6+</div>
+      <p>Cells run via Node.js's built-in <code>--experimental-strip-types</code>. Install
+      <code>typescript</code> globally to enable <code>tsc --noEmit</code> diagnostics with
+      proper line numbers. Same helpers as JS, full type signatures.</p>
+    </div>
+    <div class="card lang csharp">
+      <div class="ttl"><span class="dot" style="background:var(--csharp)"></span>C# — <code>dotnet run</code></div>
+      <p>Cells are wrapped as a C# 9+ top-level program inside a temp <code>.csproj</code>. NuGet
+      packages auto-injected as <code>&lt;PackageReference&gt;</code>. Type declarations are moved to
+      the end automatically to satisfy CS8803.</p>
+    </div>
+    <div class="card lang fsharp">
+      <div class="ttl"><span class="dot" style="background:var(--fsharp)"></span>F# — <code>dotnet fsi</code></div>
+      <p>Runs as an <code>.fsx</code> script. Inline <code>#r "nuget:"</code> directives are extracted
+      and hoisted to the top of the file so <code>fsi</code> resolves them before compilation.
+      <code>System</code>, <code>System.Linq</code>, and generics are pre-opened.</p>
+    </div>
+    <div class="card lang cpp">
+      <div class="ttl"><span class="dot" style="background:var(--cpp)"></span>C++ — MSVC / GCC / Clang</div>
+      <p>Compiler auto-detected on <code>PATH</code> with <code>-std=c++17 -Wall</code>. 25 standard
+      headers pre-included. Notebook mode wraps in <code>main()</code> automatically; if your cell
+      declares <code>int main(</code> Venus treats it as a complete program. Declarations are split to
+      global scope, statements stay in <code>main()</code>. Helpers: <code>venusHtml</code>,
+      <code>venusDisplay</code>, <code>venusTable</code>.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Cross-language pipelines</div>
+      <p>The <code>//@ anchor</code> / <code>//@ depends</code> DSL is identical across every runtime.
+      The orchestration service builds the DAG once and dispatches each step to its language-specific
+      execution service.</p>
+    </div>
+  </div>
+
+  <h3>Example — pipeline across cells</h3>
+<pre class="code"><span class="tok-cmt">//@ anchor: load-data</span>
+<span class="tok-cmt">//@ description: Load CSV from disk (JShell)</span>
+<span class="tok-kw">var</span> data = Table.read().csv(<span class="tok-str">"data.csv"</span>);
+
+<span class="tok-cmt">//@ anchor: clean-data</span>
+<span class="tok-cmt">//@ depends: load-data</span>
+<span class="tok-kw">var</span> clean = data.dropRowsWithMissingValues();
+
+<span class="tok-cmt">//@ anchor: visualize</span>
+<span class="tok-cmt">//@ depends: clean-data</span>
+Plot.show(clean.column(<span class="tok-str">"sales"</span>).asDoubleArray());</pre>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 04 · seven languages</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 5 — ARCHITECTURE (Mermaid)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <h2>Architecture <span class="accent">at a glance</span></h2>
+  </div>
+
+  <p>Venus is a single Spring Boot 3 application on Java 21. The browser loads static HTML/CSS/JS
+     directly from Spring's static resource handler — there is no frontend build step. REST and STOMP
+     endpoints sit in front of a fleet of execution services, each owning one language runtime.</p>
+
+  <div class="arch">
+    <div class="mermaid">
+flowchart TB
+  classDef browser fill:#161622,stroke:#7c8ef7,color:#e2e4f0,stroke-width:1.2px;
+  classDef shell   fill:#1e1e2e,stroke:#f5a623,color:#e2e4f0,stroke-width:1.2px;
+  classDef exec    fill:#1e1e2e,stroke:#6bcf8f,color:#e2e4f0,stroke-width:1.2px;
+  classDef ai      fill:#1e1e2e,stroke:#c084fc,color:#e2e4f0,stroke-width:1.2px;
+  classDef data    fill:#252538,stroke:#5ccfcf,color:#e2e4f0,stroke-width:1.2px;
+  classDef ext     fill:#0a0a14,stroke:#383858,color:#a8aac8,stroke-width:1px,stroke-dasharray:4 3;
+
+  subgraph B["Browser  ·  localhost:8585"]
+    UI["index.html  +  venus.css  +  app.js / notebook.js / ai-assistant.js"]
+  end
+  class B,UI browser;
+
+  subgraph S["Venus Server  ·  Spring Boot 3.2  ·  Java 21"]
+    direction TB
+    REST["REST Controllers<br/>NotebookCtl · ShellCtl · PackageCtl<br/>NuGetCtl · LLMCtl · SettingsCtl"]
+    WS["STOMP / SockJS<br/>/ws  (live stdout, stderr)"]
+    ORCH["OrchestrationService<br/>(DAG · topo-sort · cross-notebook)"]
+
+    subgraph EX["Execution Services"]
+      direction LR
+      JS_["JShellManager<br/>+ ShellSession"]
+      JC["JavaCompilerService"]
+      ND["NodeJsExecutionService"]
+      TS["TypeScriptExecutionService"]
+      DN["DotNetExecutionService<br/>(C# + F#)"]
+      CPP["CppExecutionService<br/>(MSVC / GCC / Clang)"]
+    end
+
+    subgraph AI["AI Services"]
+      direction LR
+      CL["ClaudeService"]
+      CP["CopilotCliService"]
+      GM["GeminiService"]
+    end
+
+    subgraph DT["Persistence  ·  data/  +  notebooks/"]
+      direction LR
+      NB[(".vnb<br/>notebooks")]
+      PKG[("Maven JARs<br/>data/packages")]
+      NPM[("npm modules<br/>data/npm-modules")]
+      NUGET[("NuGet packages<br/>data/nuget-packages.json")]
+      CFG[("settings.json")]
+    end
+  end
+
+  MAVEN["Maven Central"]:::ext
+  NPMREG["npm registry"]:::ext
+  NUGETREG["NuGet.org"]:::ext
+  CLI["Claude · Copilot · Gemini  CLI<br/>(local subprocess)"]:::ext
+
+  UI -- "REST /api/*" --> REST
+  UI -- "STOMP /ws"   --> WS
+  REST --> ORCH
+  WS   --> ORCH
+  ORCH --> EX
+  REST --> AI
+  AI --> CLI
+
+  EX --> NB
+  EX --> PKG
+  EX --> NPM
+  EX --> NUGET
+  REST --> CFG
+
+  JC -. uses .-> MAVEN
+  ND -. uses .-> NPMREG
+  TS -. uses .-> NPMREG
+  DN -. uses .-> NUGETREG
+
+  class REST,WS,ORCH shell;
+  class JS_,JC,ND,TS,DN,CPP exec;
+  class CL,CP,GM ai;
+  class NB,PKG,NPM,NUGET,CFG data;
+    </div>
+    <div class="arch-cap">Figure 1 — Component map. Browser ↔ Spring Boot ↔ language-specific execution services ↔ local disk &amp; package registries.</div>
+  </div>
+
+  <h3 style="margin-top:14px">Execution flow for a single cell</h3>
+  <div class="arch">
+    <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as Browser
+  participant W as STOMP /ws
+  participant C as ShellController
+  participant O as OrchestrationService
+  participant E as Execution Service
+  participant D as data/ + notebooks/
+
+  U->>C: POST /api/shell/execute (cellId, mode, source)
+  C->>O: Resolve //@ depends graph
+  O->>E: Dispatch by mode (JShell / Java / JS / TS / C# / F# / C++)
+  E->>D: Read classpath / modules / nuget refs
+  E-->>W: stdout chunks (live)
+  E-->>W: stderr chunks (live)
+  E-->>C: ExecutionResult (status, value, errors)
+  C-->>U: 200 OK
+  W-->>U: stream complete
+    </div>
+    <div class="arch-cap">Figure 2 — One cell, end-to-end. Real-time output streams over STOMP while the REST request stays open for the final result.</div>
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 05 · architecture</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 6 — INSTALL & QUICK START
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <h2>Install &amp; <span class="accent">quick start</span></h2>
+  </div>
+
+  <p>Venus is a single Java app. There is one JAR, one config file, and one port. The <code>venus</code>
+  launcher detects what is missing, builds the JAR if needed, starts the server, and opens your browser.</p>
+
+  <h3>Prerequisites</h3>
+  <table class="feat">
+    <tr><th>Tool</th><th>Version</th><th>Why</th></tr>
+    <tr><td>JDK</td><td>17+ (21 recommended)</td><td>JShell + Spring Boot runtime. Must be a JDK, not just JRE.</td></tr>
+    <tr><td>Maven</td><td>3.8+</td><td>Build from source. Skip if you only run a published JAR.</td></tr>
+    <tr><td>Node.js</td><td>18+ (22.6+ for TS)</td><td>JavaScript / TypeScript cells + npm packages.</td></tr>
+    <tr><td>.NET SDK</td><td>6.0+</td><td>C# (<code>dotnet run</code>) and F# (<code>dotnet fsi</code>).</td></tr>
+    <tr><td>C++ compiler</td><td>any</td><td>MSVC on Windows, GCC or Clang on Linux/macOS — auto-detected.</td></tr>
+    <tr><td>AI CLI</td><td>latest</td><td>Optional. Claude CLI / GitHub Copilot CLI / Gemini CLI.</td></tr>
+  </table>
+
+  <h3>Five-step quick start</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="st-ttl">Clone the repo</div>
+      <p><code>git clone https://github.com/snchande/Venus.git &amp;&amp; cd Venus</code></p>
+    </div>
+    <div class="step">
+      <div class="st-ttl">Start with the venus CLI</div>
+      <p>Windows CMD: <code>venus</code> · PowerShell: <code>./venus.ps1</code> · Linux/macOS: <code>./venus.sh</code></p>
+    </div>
+    <div class="step">
+      <div class="st-ttl">Open the browser</div>
+      <p>The launcher opens <code>http://localhost:8585</code> automatically. The first build downloads Maven deps.</p>
+    </div>
+    <div class="step">
+      <div class="st-ttl">Create your first notebook</div>
+      <p>Click the folder icon → <strong>+ New Notebook</strong>. Name it. A starter code cell opens immediately.</p>
+    </div>
+    <div class="step">
+      <div class="st-ttl">(Optional) Enable AI</div>
+      <p>Install a CLI: <code>claude</code>, <code>github-copilot-cli</code>, or <code>gemini</code>. Pick the provider in <strong>Settings → AI Provider</strong>. No API keys touch Venus. <code>venus stop</code> · <code>venus status</code> · <code>venus rebuild</code> manage the lifecycle.</p>
+    </div>
+  </div>
+
+  <h3>Running the JAR directly</h3>
+<pre class="code">java --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \
+     --add-opens=java.base/java.lang=ALL-UNNAMED \
+     --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \
+     -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar</pre>
+
+  <div class="callout">
+    <strong>Tip.</strong> If PowerShell blocks <code>./venus.ps1</code>, run once:
+    <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code>.
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 06 · install</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 7 — YOUR FIRST NOTEBOOK
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">06</span>
+    <h2>Your first <span class="accent">notebook</span></h2>
+  </div>
+
+  <p>Venus opens with a single empty code cell in JShell mode. From here, you can switch modes, install
+  packages, chain dependencies, and ask an AI to fill in the body.</p>
+
+  <h3>JShell mode — shared state across cells</h3>
+<pre class="code"><span class="tok-cmt">// Cell 1 (JShell)</span>
+<span class="tok-kw">var</span> name = <span class="tok-str">"Venus"</span>;
+<span class="tok-kw">var</span> version = 1.2;
+
+<span class="tok-cmt">// Cell 2 (JShell) — name and version are already in scope</span>
+System.out.printf(<span class="tok-str">"Hello from %s v%.1f%n"</span>, name, version);</pre>
+
+  <h3>Java mode — full class compilation</h3>
+<pre class="code"><span class="tok-kw">public class</span> <span class="tok-fn">Fibonacci</span> {
+  <span class="tok-kw">public static void</span> <span class="tok-fn">main</span>(String[] args) {
+    <span class="tok-kw">int</span> a = 0, b = 1;
+    <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = 0; i &lt; 10; i++) {
+      System.out.print(a + <span class="tok-str">" "</span>);
+      <span class="tok-kw">int</span> t = a + b; a = b; b = t;
+    }
+  }
+}</pre>
+
+  <h3>Installing a Maven package</h3>
+  <p>Open the <strong>Packages</strong> tab → enter <code>com.google.code.gson:gson:2.10.1</code> → click <strong>Install</strong>.
+  The JAR downloads from Maven Central and is added to the active JShell classpath in seconds — no restart required.</p>
+
+  <h3>Pipeline orchestration — cells with dependencies</h3>
+<pre class="code"><span class="tok-cmt">//@ anchor: parse</span>
+<span class="tok-cmt">//@ description: Parse the JSON input</span>
+<span class="tok-kw">var</span> json = <span class="tok-str">"{\"x\": 42}"</span>;
+<span class="tok-kw">var</span> obj  = <span class="tok-fn">new</span> Gson().fromJson(json, Map.<span class="tok-kw">class</span>);
+
+<span class="tok-cmt">//@ anchor: render</span>
+<span class="tok-cmt">//@ depends: parse</span>
+venus.display(obj);</pre>
+
+  <p>Click <strong>Run with Dependencies</strong> on the <em>render</em> cell, and Venus automatically
+  runs <em>parse</em> first, then <em>render</em> — in topological order. The same syntax works in C#,
+  F#, C++, JS, and TS.</p>
+
+  <h3>Keyboard shortcuts</h3>
+  <table class="feat">
+    <tr><td><code>Ctrl+Enter</code></td><td>Run current cell</td></tr>
+    <tr><td><code>Shift+Enter</code></td><td>Run cell and move focus to next</td></tr>
+    <tr><td><code>Ctrl+\</code></td><td>Toggle AI panel</td></tr>
+    <tr><td><code>Ctrl+S</code></td><td>Save notebook</td></tr>
+    <tr><td><code>Ctrl+Shift+P</code></td><td>Command palette</td></tr>
+  </table>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 07 · first notebook</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 8 — AI ASSISTANCE & MCP
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">07</span>
+    <h2>The Agentic Era — <span class="accent">CLI inside, MCP outside</span></h2>
+  </div>
+
+  <p>Venus treats AI as <strong>first-class infrastructure</strong>, not a side panel. Three things make
+  this real: a CLI runs <em>inside</em> every notebook session as a local subprocess; the entire Venus
+  capability surface is <em>outside</em>-exposed over MCP so any agent can drive it; and you can
+  personalize Venus itself the same way — by asking the same CLI to write the change and open the PR.
+  No API keys live with Venus. Authentication stays in the CLI you trust.</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--accent)"></span>Claude</div>
+      <p>Install: <a>claude.ai/code</a> → run <code>claude auth</code>. Used via the <code>claude</code> binary on PATH.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--green)"></span>GitHub Copilot</div>
+      <p><code>npm install -g @githubnext/github-copilot-cli</code> → <code>github-copilot-cli auth</code>.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--purple)"></span>Gemini</div>
+      <p><code>npm install -g @google/gemini-cli</code> → <code>gemini auth</code>.</p>
+    </div>
+  </div>
+
+  <h3>What you can ask the assistant</h3>
+  <ul style="color:var(--text-2); font-size:10pt; padding-left:20px;">
+    <li><em>"Write a C++ cell that sorts a vector using std::sort and prints the result."</em></li>
+    <li><em>"Explain what this cell does"</em> — attach a cell with the 🤖 button.</li>
+    <li><em>"Convert this Java cell to C#."</em> — Venus offers conversion automatically when you switch a cell's mode.</li>
+    <li><em>"Generate a notebook showing Java streams with examples."</em> — produces a full <code>.vnb</code> file.</li>
+    <li><em>"Why did this cell fail?"</em> — the failed cell's stderr is attached automatically.</li>
+  </ul>
+
+  <h3>Venus as an MCP server — the whole system, exposed</h3>
+  <p>Pick the canvas that fits the moment. Drive Venus from your terminal, from Claude Code or Claude
+  Desktop, from a custom agent — or from Venus itself. Same capability surface, three ways in.</p>
+
+  <table class="feat">
+    <tr><td>List notebooks</td><td>Read directory of <code>.vnb</code> files including tutorials.</td></tr>
+    <tr><td>Read &amp; write cells</td><td>Append, modify, and reorder cells programmatically.</td></tr>
+    <tr><td>Execute cells</td><td>Run any cell in any of the seven modes; get the full execution result.</td></tr>
+    <tr><td>Manage packages</td><td>Install Maven, npm, or NuGet packages on behalf of an agent.</td></tr>
+    <tr><td>Inspect state</td><td>Query live variables in JShell, JS, TS, C#, F#, and C++ sessions.</td></tr>
+    <tr><td>Import / export <code>.ipynb</code></td><td>Round-trip between Venus and Jupyter so you pick the canvas, not the tool.</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Personalize Venus in minutes.</strong> If a capability is missing, the workflow is the
+    point: ask your CLI to add the feature — service, controller, UI hook — verify with
+    <code>venus rebuild</code>, and ask the CLI again to package the change as a PR. New capability
+    in less than an hour. If it helps you, it probably helps others; ship it back.
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 08 · ai &amp; mcp</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 9 — CONTRIBUTOR PLAYBOOK
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">08</span>
+    <h2>Personalize &amp; <span class="accent">contribute</span></h2>
+  </div>
+
+  <p>Venus is meant to be <strong>shaped by the people who use it</strong>. The loop is short: clone,
+  describe the change to your AI CLI, verify, ask the same CLI to package the PR. The repo ships with
+  explicit instruction files for Claude, Copilot, and Gemini so the agent respects the architecture
+  while it works.</p>
+
+  <h3>1 — Fork &amp; clone</h3>
+<pre class="code">git clone https://github.com/&lt;your-fork&gt;/Venus.git
+cd Venus
+git remote add upstream https://github.com/snchande/Venus.git
+git checkout -b feat/&lt;short-name&gt;</pre>
+
+  <h3>2 — Pick your AI co-pilot</h3>
+  <div class="grid-3">
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--accent)"></span>Claude CLI</div>
+      <p>Run <code>claude</code> in the repo root. It reads <code>CLAUDE.md</code> and <code>AGENTS.md</code>
+      automatically — both encode the architecture rules.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--green)"></span>GitHub Copilot</div>
+      <p>Inline in VS Code or via <code>gh copilot</code>. Reads
+      <code>.github/copilot-instructions.md</code> — same architecture rules.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot" style="background:var(--purple)"></span>Gemini CLI</div>
+      <p>Run <code>gemini</code> in the repo root. Reads <code>GEMINI.md</code> — same architecture rules
+      restated for Gemini's prompt format.</p>
+    </div>
+  </div>
+
+  <h3>3 — Describe the feature, let the CLI write it</h3>
+  <p>Open your AI CLI in the repo root and describe the capability you want. The agent files from
+  step 2 keep it inside the layered architecture: <em>model → service → controller → static UI</em>.
+  No layer-merging, no smuggling backends into the frontend, no surprise network calls.</p>
+
+  <h3>4 — Verify locally</h3>
+<pre class="code">venus rebuild
+venus start
+<span class="tok-cmt"># exercise your feature in the browser; check WebSocket output</span>
+mvn test
+pwsh ./scripts/security-check.ps1   <span class="tok-cmt"># or .sh on Linux/macOS</span></pre>
+
+  <h3>5 — Ask your CLI to package and PR</h3>
+  <p>Same CLI, one more prompt: <em>"package these changes as a PR against <code>master</code>, fill
+  the PR template, attach screenshots if UI."</em> Push, open, done. If the change personalizes
+  Venus only for you, keep it local. If it helps others, ship it back.</p>
+
+  <h3>6 — Wait for the green checks</h3>
+  <p>Every PR triggers GitHub Actions checks before review:</p>
+  <table class="feat">
+    <tr><td><code>build</code></td><td>Maven compile + unit tests on JDK 21.</td></tr>
+    <tr><td><code>security-scan</code></td><td>Runs <code>scripts/security-check.ps1</code> / <code>.sh</code> — see page 10.</td></tr>
+    <tr><td><code>architecture-lint</code></td><td>Verifies you didn't break layer boundaries the agent files describe.</td></tr>
+    <tr><td><strong>Founder review</strong></td><td>Required code-owner review by Suresh Chande before merge to <code>master</code>.</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>The compact.</strong> Use AI freely. Read <code>AGENTS.md</code> first. Stay inside the
+    layer. Update the docs. Green checks before review — the faster they pass, the faster your PR
+    moves. <em>Tools should evolve at the speed of the people using them.</em>
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 09 · contributing</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 10 — SECURITY & QUALITY GATES
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">09</span>
+    <h2>Security &amp; <span class="accent">quality gates</span></h2>
+  </div>
+
+  <p>Every pull request runs through an automated security check before it can be marked
+  <strong>ready for review</strong>. The intent is simple: catch obvious risk before a human spends
+  time on it.</p>
+
+  <h3>The PR security pipeline</h3>
+  <div class="arch">
+    <div class="mermaid">
+flowchart LR
+  classDef ok fill:#1e1e2e,stroke:#6bcf8f,color:#e2e4f0;
+  classDef warn fill:#1e1e2e,stroke:#f7c86a,color:#e2e4f0;
+  classDef bad  fill:#1e1e2e,stroke:#f07878,color:#e2e4f0;
+  classDef step fill:#161622,stroke:#7c8ef7,color:#e2e4f0;
+
+  A["PR opened<br/>(draft)"]:::step --> B["scripts/security-check<br/>(.ps1 / .sh)"]:::step
+  B --> C{Findings?}
+  C -- "no findings" --> D["GitHub Action: PASS"]:::ok --> E["Founder review<br/>requested"]:::ok
+  C -- "warnings only" --> F["GitHub Action: WARN<br/>(comment posted)"]:::warn --> E
+  C -- "any blocking finding" --> G["GitHub Action: FAIL<br/>(PR stays draft)"]:::bad
+  G --> H["Author resolves<br/>+ pushes update"]:::step --> B
+    </div>
+    <div class="arch-cap">Figure 3 — A PR cannot become "ready for review" until <code>security-check</code> reports zero blocking findings.</div>
+  </div>
+
+  <h3>What the script checks</h3>
+  <table class="feat">
+    <tr><th>Check</th><th>Why it matters</th></tr>
+    <tr><td>Secret patterns (<code>sk-…</code>, AWS keys, private-key PEM headers, GitHub tokens)</td>
+        <td>Prevents accidental credential leaks. Blocks the PR.</td></tr>
+    <tr><td>Hard-coded API keys in <code>data/settings.json</code></td>
+        <td>The settings file is <code>.gitignore</code>-d for a reason. Blocks.</td></tr>
+    <tr><td>Calls to <code>Runtime.exec</code> with user-controlled strings</td>
+        <td>Command-injection risk in execution services. Blocks.</td></tr>
+    <tr><td>New outbound HTTP hosts (anything beyond Maven Central, npm, NuGet, AI CLIs)</td>
+        <td>Preserves the local-first guarantee. Blocks unless allow-listed.</td></tr>
+    <tr><td>Dependency vulnerabilities (<code>mvn dependency:check</code>)</td>
+        <td>Known-CVE detection. High-severity blocks; medium warns.</td></tr>
+    <tr><td>Architecture lint — layer crossings (frontend → DB, controller → controller)</td>
+        <td>Preserves the contract in <code>AGENTS.md</code>. Blocks.</td></tr>
+    <tr><td>Test coverage for changed files (best-effort)</td>
+        <td>Warns if a new service has no companion test.</td></tr>
+  </table>
+
+  <h3>Local pre-flight</h3>
+<pre class="code"><span class="tok-cmt"># Windows</span>
+pwsh ./scripts/security-check.ps1
+
+<span class="tok-cmt"># Linux / macOS</span>
+./scripts/security-check.sh</pre>
+
+  <p>Run this before you push. The local script is identical to the one CI runs. <strong>If it fails locally,
+  the PR will fail in CI.</strong></p>
+
+  <div class="callout">
+    <strong>Founding contributor review.</strong> Even after green checks, every change to
+    <code>master</code> requires a code-owner review by <strong>Suresh Chande</strong>. CODEOWNERS is wired
+    so GitHub blocks merge automatically.
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 10 · security</div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     PAGE 11 — ABOUT & CONTACT
+     ════════════════════════════════════════════════════════════════ -->
+<section class="page">
+  <div class="section-head">
+    <span class="section-num">10</span>
+    <h2>About &amp; <span class="accent">contact</span></h2>
+  </div>
+
+  <p>Venus Notebooks is an open-source product distributed under the <strong>MIT License</strong>.
+  It is built and maintained by <strong>Suresh Chande</strong> with help from the community — and
+  with a healthy population of AI co-pilots, which is exactly the workflow Venus is built to support.
+  This project stands on the shoulders of every great notebook tool that came before it; the goal is
+  to <em>add</em> to that lineage, not replace it.</p>
+
+  <div class="contact" style="margin-top:14px">
+    <div class="avatar">♀</div>
+    <div>
+      <p class="who-name">Suresh Chande</p>
+      <div class="who-role">Founding contributor · Maintainer</div>
+      <div class="who-mail">✉ &nbsp; suresh.chande@gmail.com</div>
+      <div class="who-mail">↗ &nbsp; github.com/snchande/Venus</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">How to get involved</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>File an issue</div>
+      <p>Bugs, feature requests, tutorial ideas — anything. Use the issue templates under
+      <code>.github/ISSUE_TEMPLATE</code>.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Open a discussion</div>
+      <p>Got an idea but not sure where it fits? Start a GitHub Discussion. The maintainer reads them all.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Send a PR</div>
+      <p>Follow the <em>Contributor Playbook</em> on page 09. Small, focused PRs are merged fastest.</p>
+    </div>
+    <div class="card">
+      <div class="ttl"><span class="dot"></span>Share a tutorial</div>
+      <p>Ship a <code>.vnb</code> file to the tutorial library. New languages, new techniques — all
+      welcome.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">Licence &amp; attribution</h3>
+  <p>
+    Venus Notebooks is released under the <strong>MIT License</strong>. You may use, modify, and
+    distribute it freely, in personal and commercial projects, as long as the copyright notice is
+    retained. JShell, Java, the .NET SDK, and the AI provider CLIs remain the property of their
+    respective owners — Venus orchestrates them; it does not redistribute them.
+  </p>
+
+  <div class="callout">
+    <strong>Thanks.</strong> If Venus saves you time, the simplest way to say thanks is a star on the
+    repo and a PR — even a one-line typo fix lands you on the contributor list.
+  </div>
+
+  <div class="page-foot">
+    <div class="mark">
+      <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#f5a623"/></svg>
+      VENUS NOTEBOOKS
+    </div>
+    <div>page 11 · contact &amp; licence</div>
+  </div>
+</section>
+
+<script>
+  // Mermaid — initialize with Venus-themed colours
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      darkMode: true,
+      background: '#0a0a14',
+      primaryColor: '#1e1e2e',
+      primaryTextColor: '#e2e4f0',
+      primaryBorderColor: '#7c8ef7',
+      lineColor: '#7c8ef7',
+      secondaryColor: '#252538',
+      tertiaryColor: '#161622',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: '13px',
+      noteBkgColor: '#252538',
+      noteTextColor: '#e2e4f0',
+      noteBorderColor: '#f5a623',
+      actorBkg: '#1e1e2e',
+      actorBorder: '#f5a623',
+      actorTextColor: '#e2e4f0',
+      sequenceNumberColor: '#f5a623',
+      labelBoxBkgColor: '#1e1e2e',
+      labelBoxBorderColor: '#7c8ef7',
+      labelTextColor: '#e2e4f0',
+      signalColor: '#a8aac8',
+      signalTextColor: '#e2e4f0'
+    },
+    flowchart: { curve: 'basis', padding: 10, htmlLabels: true },
+    sequence:  { mirrorActors: false, showSequenceNumbers: true, actorMargin: 60 }
+  });
+
+  // Signal to the headless renderer when mermaid is done rendering
+  window.__venusBrochureReady = false;
+  window.addEventListener('load', () => {
+    // mermaid 10 renders synchronously on initialize when startOnLoad:true,
+    // but give it one more frame for fonts.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { window.__venusBrochureReady = true; });
+    });
+  });
+</script>
+
+</body>
+</html>

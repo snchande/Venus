@@ -224,6 +224,10 @@
   </div>
 
   <div class="topbar-right">
+    <button class="tb-btn" id="btn-help" title="Welcome &amp; User Guide" onclick="Welcome && Welcome.open()">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.3"/><path d="M6.1 6.2a1.9 1.9 0 1 1 2.5 1.8c-.5.2-.8.5-.8 1.1v.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".8" fill="currentColor"/></svg>
+      Help
+    </button>
     <button class="tb-btn" id="btn-docs" title="Documentation">
       <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2zM5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>
       Docs
@@ -1150,23 +1154,10 @@ dotnet fsi --version  # verify F# Interactive</pre>
     </button>
   </div>
   <div class="vi-body" id="vi-body">
-    <section class="vi-section" id="vi-local-section">
-      <h4 class="vi-section-title">
-        <span class="vi-dot local"></span>
-        Local <span class="vi-count" id="vi-local-count">0</span>
-        <span class="vi-section-hint">declared in this cell</span>
-      </h4>
-      <div class="vi-table-wrap"><table class="vi-table" id="vi-local-table"></table></div>
-    </section>
-    <section class="vi-section" id="vi-global-section">
-      <h4 class="vi-section-title">
-        <span class="vi-dot global"></span>
-        Global <span class="vi-count" id="vi-global-count">0</span>
-        <span class="vi-section-hint">live in the JShell session</span>
-      </h4>
-      <div class="vi-table-wrap"><table class="vi-table" id="vi-global-table"></table></div>
-    </section>
-    <div class="vi-empty hidden" id="vi-empty">No variables in scope yet.</div>
+    <!-- Per-cell sections are injected by VarInspector.update() — each cell
+         that has been run gets its own collapsible header + table. -->
+    <div class="vi-cell-list" id="vi-cell-list"></div>
+    <div class="vi-empty hidden" id="vi-empty">No variables yet — run a cell.</div>
   </div>
 </aside>
 
@@ -1207,6 +1198,57 @@ dotnet fsi --version  # verify F# Interactive</pre>
 </div>
 
 <!-- ═══════════════ DOCS OVERLAY ═══════════════ -->
+<!-- ═══════════════ WELCOME / USER GUIDE OVERLAY ═══════════════ -->
+<div class="welcome-overlay hidden" id="welcome-overlay">
+  <div class="welcome-modal">
+    <button class="welcome-close" id="welcome-close" title="Close (Esc)" onclick="Welcome.close()">
+      <svg viewBox="0 0 16 16" width="16" height="16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <!-- Hero -->
+    <div class="welcome-hero">
+      <div class="welcome-planet">
+        <svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
+          <defs>
+            <radialGradient id="wpg" cx="36%" cy="30%" r="68%">
+              <stop offset="0%" stop-color="#fff5b0"/><stop offset="38%" stop-color="#f5a623"/>
+              <stop offset="68%" stop-color="#c87518"/><stop offset="100%" stop-color="#6e3000"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="32" cy="32" rx="30" ry="9" fill="none" stroke="rgba(245,166,35,.5)" stroke-width="1.6" transform="rotate(-22 32 32)"/>
+          <circle cx="32" cy="32" r="22" fill="url(#wpg)"/>
+          <circle cx="32" cy="26" r="7" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="32" y1="33" x2="32" y2="44" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="26" y1="38.5" x2="38" y2="38.5" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="welcome-hero-text">
+        <h1>Welcome to <span>Venus Notebooks</span> <em id="welcome-version-tag">v2.1.0</em></h1>
+        <p>A local, browser-based notebook for seven languages — with AI co-pilots and MCP. Pick a quick tour below; reopen anytime from <strong>Help</strong>.</p>
+      </div>
+    </div>
+
+    <!-- Highlight chips -->
+    <div class="welcome-chips" id="welcome-chips"></div>
+
+    <!-- Track picker -->
+    <div class="welcome-tracks" id="welcome-tracks"></div>
+
+    <!-- Selected track / what's-new content -->
+    <div class="welcome-content" id="welcome-content"></div>
+
+    <!-- Footer actions -->
+    <div class="welcome-foot">
+      <label class="welcome-dismiss"><input type="checkbox" id="welcome-dontshow"> Don't show this automatically</label>
+      <div class="welcome-foot-actions">
+        <button class="welcome-btn ghost" onclick="Welcome.openReleaseNotes()">What's New</button>
+        <button class="welcome-btn ghost" onclick="if(window.showDocsPanel)showDocsPanel('usage');Welcome.close()">Open Docs</button>
+        <button class="welcome-btn primary" onclick="Welcome.close()">Start using Venus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="docs-overlay hidden" id="docs-overlay">
   <div class="docs-panel">
 
@@ -1285,7 +1327,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
     <span class="sb-sep">|</span>
     <span id="sb-java">Java 25</span>
     <span class="sb-sep">|</span>
-    <span id="sb-version" title="Build date" style="cursor:default">v1.0.0</span>
+    <span id="sb-version" title="Version — click for What's New" style="cursor:pointer" onclick="Welcome && Welcome.openReleaseNotes()">v3.0.0</span>
     <span id="sb-build-date" class="sb-build-date" title="Build timestamp"></span>
     <span class="sb-sep">|</span>
     <span id="sb-time"></span>
@@ -1379,6 +1421,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
 <script src="/js/docs.js"></script>
 <script src="/js/npm-packages.js"></script>
 <script src="/js/nuget.js"></script>
+<script src="/js/welcome.js"></script>
 <script>
 const PackageTabUI = {
   show(tab) {

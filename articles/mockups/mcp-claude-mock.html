@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>mcp-claude</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1600px; height: 1000px; background: #1a1a1a;
+    font-family: -apple-system, 'Segoe UI', sans-serif; color: #e5e5e5;
+    display: flex; padding: 30px; gap: 30px; }
+  /* Left — fake Claude Desktop window */
+  .claude-win { flex: 1.4; background: #262626; border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    overflow: hidden; display: flex; flex-direction: column;
+    border: 1px solid #404040; }
+  .titlebar { height: 38px; background: #1f1f1f; display: flex;
+    align-items: center; padding: 0 14px; gap: 10px;
+    border-bottom: 1px solid #404040; }
+  .titlebar .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #ffbd2e; } .dot.g { background: #28ca42; }
+  .titlebar .title { margin-left: 14px; font-size: 13px; color: #a3a3a3; }
+  .toolbar { background: #1f1f1f; padding: 10px 18px;
+    border-bottom: 1px solid #404040; display: flex; gap: 14px;
+    align-items: center; font-size: 12px; color: #a3a3a3; }
+  .tool-pill { background: #2d4a3a; color: #86efac; padding: 4px 10px;
+    border-radius: 6px; font-family: 'Consolas', monospace; font-size: 11px;
+    border: 1px solid #15803d; }
+  .conv { flex: 1; padding: 24px 30px; overflow: hidden; }
+  .msg { margin-bottom: 22px; }
+  .user-msg { background: #2d2d2d; border-radius: 12px; padding: 14px 18px;
+    margin-left: 90px; font-size: 14px; line-height: 1.5; color: #f1f5f9; }
+  .user-msg .author { font-size: 11px; color: #a3a3a3; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 1px; }
+  .ai-msg { padding: 0 18px; font-size: 14px; line-height: 1.6; color: #e5e5e5; }
+  .ai-msg .author { font-size: 11px; color: #c084fc; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .tool-call { background: #1f1f1f; border-left: 3px solid #06b6d4;
+    border-radius: 0 6px 6px 0; padding: 10px 14px; margin: 12px 0;
+    font-family: 'Consolas', monospace; font-size: 12px; }
+  .tool-call .name { color: #67e8f9; font-weight: 600; }
+  .tool-call .args { color: #94a3b8; margin-top: 4px; }
+  .tool-call .ok { float: right; color: #86efac; font-size: 11px; }
+  /* Right — Venus window */
+  .venus-win { flex: 1; background: #0f172a; border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    overflow: hidden; display: flex; flex-direction: column;
+    border: 1px solid #334155; transform: rotate(0.4deg); }
+  .venus-bar { height: 38px; background: #020617; display: flex;
+    align-items: center; padding: 0 14px; gap: 10px;
+    border-bottom: 1px solid #1e293b; }
+  .venus-bar .v-title { margin-left: 14px; font-size: 13px; color: #94a3b8;
+    display: flex; align-items: center; gap: 8px; }
+  .venus-bar .v-title::before { content: ''; width: 18px; height: 18px;
+    background: radial-gradient(circle at 35% 30%, #fb923c, #c2410c);
+    border-radius: 50%; display: inline-block; }
+  .venus-content { flex: 1; padding: 18px; overflow: hidden; }
+  .nb-title { font-size: 18px; color: #f1f5f9; font-weight: 700;
+    margin-bottom: 6px; }
+  .nb-meta { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+  .cell { background: #1e293b; border-radius: 8px; padding: 14px 16px;
+    margin-bottom: 10px; border-left: 3px solid; }
+  .cell.j  { border-color: #f97316; }
+  .cell.ts { border-color: #3b82f6; }
+  .cell.cpp { border-color: #06b6d4; }
+  .cell .head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .cell .badge { font-size: 10px; font-family: 'Consolas', monospace;
+    padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+  .cell.j .badge  { background: rgba(249,115,22,0.2); color: #fdba74; }
+  .cell.ts .badge { background: rgba(59,130,246,0.2); color: #93c5fd; }
+  .cell.cpp .badge{ background: rgba(6,182,212,0.2); color: #67e8f9; }
+  .cell .anchor { font-size: 10px; color: #64748b;
+    font-family: 'Consolas', monospace; }
+  .cell .code { font-family: 'Consolas', monospace; font-size: 12px;
+    color: #e2e8f0; line-height: 1.5; }
+  .cell .kw  { color: #c4b5fd; }
+  .cell .str { color: #86efac; }
+  .cell .fn  { color: #fcd34d; }
+  .arrow-anim { position: absolute; top: 50%; left: 48%;
+    transform: translate(-50%, -50%); z-index: 10;
+    font-size: 60px; color: #06b6d4; opacity: 0.5; }
+</style></head>
+<body>
+  <div class="claude-win">
+    <div class="titlebar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="title">Claude Desktop · Conversation</div>
+    </div>
+    <div class="toolbar">
+      <span>MCP Tools Active:</span>
+      <span class="tool-pill">venus.create_notebook</span>
+      <span class="tool-pill">venus.add_cell</span>
+      <span class="tool-pill">venus.execute_cell</span>
+      <span class="tool-pill">venus.install_package</span>
+    </div>
+    <div class="conv">
+      <div class="msg user-msg">
+        <div class="author">You</div>
+        Create a Venus notebook that fits a polynomial to this sales data,
+        with cells in TypeScript (data prep) and Java (regression). Run it.
+      </div>
+      <div class="msg ai-msg">
+        <div class="author">◆ Claude</div>
+        I'll create the notebook, add cells in both languages, and execute them in order.
+        <div class="tool-call">
+          <span class="name">venus.create_notebook</span><span class="ok">✓ created</span>
+          <div class="args">name: "polynomial-fit", language: "mixed"</div>
+        </div>
+        <div class="tool-call">
+          <span class="name">venus.add_cell</span><span class="ok">✓ added</span>
+          <div class="args">mode: "typescript", anchor: "load-data"</div>
+        </div>
+        <div class="tool-call">
+          <span class="name">venus.add_cell</span><span class="ok">✓ added</span>
+          <div class="args">mode: "jshell", anchor: "regression", depends: ["load-data"]</div>
+        </div>
+        <div class="tool-call">
+          <span class="name">venus.execute_cell</span><span class="ok">✓ ran</span>
+          <div class="args">cellId: "regression", pipeline: true</div>
+        </div>
+        Notebook ready — open it in Venus to see the chart. R² = 0.94.
+      </div>
+    </div>
+  </div>
+  <div class="venus-win">
+    <div class="venus-bar">
+      <div class="v-title">Venus Notebooks · polynomial-fit.vnb</div>
+    </div>
+    <div class="venus-content">
+      <div class="nb-title">polynomial-fit</div>
+      <div class="nb-meta">Created by agent · 4 cells · session nb-poly</div>
+      <div class="cell ts">
+        <div class="head">
+          <span class="badge">◆ TS</span>
+          <span class="anchor">#load-data</span>
+        </div>
+        <div class="code">
+<span class="kw">const</span> raw = <span class="kw">await</span> fs.<span class="fn">readFile</span>(<span class="str">"sales.csv"</span>);<br>
+<span class="kw">const</span> points = <span class="fn">parse</span>(raw).map(r =&gt; ({x: +r.q, y: +r.sales}));<br>
+venus.<span class="fn">table</span>(points);
+        </div>
+      </div>
+      <div class="cell j">
+        <div class="head">
+          <span class="badge">◈ JShell</span>
+          <span class="anchor">#regression · depends: load-data</span>
+        </div>
+        <div class="code">
+<span class="kw">var</span> fit = PolynomialRegression.<span class="fn">fit</span>(points, <span class="str">3</span>);<br>
+System.out.<span class="fn">println</span>(<span class="str">"R² = "</span> + fit.<span class="fn">r2</span>());<br>
+Chart.<span class="fn">scatter</span>(points).<span class="fn">addLine</span>(fit).<span class="fn">show</span>();
+        </div>
+      </div>
+      <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+                  padding: 14px; border-radius: 8px; margin-top: 12px;">
+        <div style="font-size: 12px; color: #86efac; font-weight: 600;
+                    margin-bottom: 6px;">✓ Pipeline OK · R² = 0.94</div>
+        <div style="font-size: 11px; color: #94a3b8; font-family: 'Consolas', monospace;">
+          load-data (1.2s) → regression (0.8s) · chart rendered
+        </div>
+      </div>
+    </div>
+  </div>
+</body></html>

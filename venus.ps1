@@ -35,6 +35,14 @@ $JarPath = Join-Path 'target' 'venus-notebooks-1.0.0-SNAPSHOT.jar'
 $Port    = 8585
 $Url     = "http://localhost:$Port"
 
+# ── AI co-pilot context ───────────────────────────────────────────────────────
+# These files turn any AI CLI invoked inside this repo (the in-UI AI panel or a
+# terminal session) into a Venus-aware co-pilot that follows the architecture
+# guardrails and can use the registered skills + subagents.
+$AgentsGuide = Join-Path $RepoRoot 'AGENTS.md'
+$SkillsDir   = Join-Path $RepoRoot (Join-Path '.claude' 'skills')
+$AgentsDir   = Join-Path $RepoRoot (Join-Path '.claude' 'agents')
+
 # ── Colour helpers ──────────────────────────────────────────────────────────
 function W-Title  ($t) { Write-Host $t -ForegroundColor White }
 function W-Info   ($t) { Write-Host $t -ForegroundColor Cyan }
@@ -53,6 +61,56 @@ function Show-Banner {
     Write-Host '   /__|   |__\    ' -ForegroundColor Yellow
     W-Dim '  -----------------------------'
     Write-Host ''
+}
+
+# ── AI co-pilot wiring ────────────────────────────────────────────────────────
+# Detect installed AI CLIs. Each may be invoked under a couple of binary names.
+function Get-AiCopilots {
+    $copilots = [ordered]@{}
+    $probes = [ordered]@{
+        'Claude'  = @('claude')
+        'Copilot' = @('copilot', 'github-copilot-cli', 'gh')
+        'Gemini'  = @('gemini')
+    }
+    foreach ($name in $probes.Keys) {
+        foreach ($bin in $probes[$name]) {
+            $cmd = Get-Command $bin -ErrorAction SilentlyContinue
+            if ($cmd) { $copilots[$name] = $bin; break }
+        }
+    }
+    return $copilots
+}
+
+# Export the context so the Venus JVM (and any CLI it spawns for the in-UI AI
+# panel) resolves the guardrails + skills + agents regardless of where the
+# process was launched from.
+function Set-VenusAiContext {
+    $env:VENUS_HOME = $RepoRoot
+    if (Test-Path $AgentsGuide) { $env:VENUS_AGENTS_GUIDE = $AgentsGuide }
+    if (Test-Path $SkillsDir)   { $env:VENUS_SKILLS_DIR   = $SkillsDir }
+    if (Test-Path $AgentsDir)   { $env:VENUS_AGENTS_DIR   = $AgentsDir }
+    $copilots = Get-AiCopilots
+    if ($copilots.Count -gt 0) {
+        $env:VENUS_AI_COPILOTS = ($copilots.Keys -join ',').ToLower()
+    }
+    return $copilots
+}
+
+function Show-AiCopilots {
+    param([hashtable] $Copilots)
+    if ($null -eq $Copilots) { $Copilots = Get-AiCopilots }
+    $guardOk = (Test-Path $AgentsGuide) -and (Test-Path $SkillsDir) -and (Test-Path $AgentsDir)
+    if ($Copilots.Count -gt 0) {
+        $list = ($Copilots.Keys -join ' · ')
+        W-Dim  "  AI:      $list  (co-pilot ready)"
+    } else {
+        W-Warn '  AI:      no CLI found  (install Claude, Copilot, or Gemini CLI for AI features)'
+    }
+    if ($guardOk) {
+        W-Dim  '           guardrails AGENTS.md + skills/ + agents/ loaded -> run `./venus.ps1 agents`'
+    } else {
+        W-Warn '           AGENTS.md / .claude skills+agents missing -- AI guardrails not wired'
+    }
 }
 
 # ── Probes ──────────────────────────────────────────────────────────────────
@@ -148,6 +206,11 @@ function Cmd-Start {
     } else {
         W-Warn '  .NET:    not found  (C#/F# cells disabled -- install from https://dot.net)'
     }
+
+    # Wire the AI co-pilot context before launching the JVM so the in-UI AI
+    # panel (and any CLI it spawns) inherits the guardrails + skills + agents.
+    $copilots = Set-VenusAiContext
+    Show-AiCopilots -Copilots $copilots
 
     if (-not (Ensure-Jar)) { return 1 }
 
@@ -245,6 +308,13 @@ function Cmd-Status {
         W-Dim "  .NET:     $(dotnet --version)"
     } else {
         W-Warn '  .NET:     not found (C# / F# cells disabled)'
+    }
+
+    $copilots = Get-AiCopilots
+    if ($copilots.Count -gt 0) {
+        W-Dim  "  AI:       $($copilots.Keys -join ' · ')  (co-pilot ready -- run: ./venus.ps1 agents)"
+    } else {
+        W-Warn '  AI:       no CLI found (Claude / Copilot / Gemini -- AI features limited)'
     }
     Write-Host ''
     return 0
@@ -349,6 +419,9 @@ function Cmd-Help {
     Write-Host '    open             Open browser (server must already be running)' -ForegroundColor White
     Write-Host '    logs             Tail venus.log (background mode only)' -ForegroundColor White
     Write-Host '    version          Show Java, Node.js, .NET, Maven, project version' -ForegroundColor White
+    Write-Host '    welcome          Common welcome — open the UI, use MCP, or personalize Venus' -ForegroundColor White
+    Write-Host '    docs             Open the brochure and list the documentation' -ForegroundColor White
+    Write-Host '    agents           Show AI co-pilots, skills & the venus agent wired into this repo' -ForegroundColor White
     Write-Host '    help             Show this help' -ForegroundColor White
     Write-Host ''
     W-Info '  EXAMPLES'
@@ -363,6 +436,131 @@ function Cmd-Help {
     return 0
 }
 
+function Cmd-Welcome {
+    $copilots = Set-VenusAiContext
+    Show-Banner
+    W-Title  '  Welcome to Venus Notebooks'
+    W-Dim    '  A local notebook for Java | JS | TS | C# | F# | C++ — with AI co-pilots and MCP.'
+    Write-Host ''
+    W-Info   '  PICK HOW YOU WANT TO WORK'
+    W-Dim    '  --------------------------------------'
+    Write-Host '    1) Open the UI            ' -ForegroundColor White -NoNewline; W-Dim 'full notebook experience in your browser'
+    W-Dim    "         ./venus.ps1 start        ->  $Url"
+    Write-Host '    2) Drive Venus over MCP   ' -ForegroundColor White -NoNewline; W-Dim 'operate & automate from any MCP client'
+    W-Dim    "         SSE  $Url/api/mcp/sse"
+    W-Dim    "         POST $Url/api/mcp/messages"
+    Write-Host '    3) Personalize & extend   ' -ForegroundColor White -NoNewline; W-Dim 'add features — needs an agentic CLI'
+    W-Dim    '         run  claude  /  copilot  /  gemini   in this folder, then ask the venus agent'
+    Write-Host ''
+    if ($copilots.Count -gt 0) {
+        W-Ok   "  AI co-pilots ready: $($copilots.Keys -join ' · ')   (run: ./venus.ps1 agents)"
+    } else {
+        W-Warn '  No AI CLI found — install Claude, Copilot, or Gemini to personalize Venus.'
+    }
+    Write-Host ''
+    W-Info   '  THE ONE DIFFERENCE'
+    W-Dim    '  --------------------------------------'
+    W-Dim    '    This `venus` CLI operates & automates Venus (incl. MCP) but cannot change its code.'
+    W-Dim    '    An agentic CLI (claude / copilot / gemini) can ALSO personalize and extend Venus.'
+    Write-Host ''
+    W-Info   '  NEXT'
+    W-Dim    '  --------------------------------------'
+    Write-Host '    ./venus.ps1 start      Start the server and open the UI' -ForegroundColor White
+    Write-Host '    ./venus.ps1 docs       Open the brochure and list the docs' -ForegroundColor White
+    Write-Host '    ./venus.ps1 agents     AI co-pilots, skills & the venus agent' -ForegroundColor White
+    Write-Host ''
+    W-Dim    '  Full welcome: docs/WELCOME.md'
+    Write-Host ''
+    return 0
+}
+
+function Cmd-Docs {
+    $brochure = Join-Path $RepoRoot (Join-Path 'docs' (Join-Path 'brochure' 'venus-brochure.pdf'))
+    Write-Host ''
+    W-Title  '  Venus Notebooks — Documentation'
+    W-Dim    '  --------------------------------------'
+    Write-Host '    Brochure (PDF) docs/brochure/venus-brochure.pdf' -ForegroundColor White
+    Write-Host '    Welcome        docs/WELCOME.md' -ForegroundColor White
+    Write-Host '    Getting started README.md' -ForegroundColor White
+    Write-Host '    Architecture   docs/ARCHITECTURE.md' -ForegroundColor White
+    Write-Host '    API + MCP      docs/API.md' -ForegroundColor White
+    Write-Host '    Contributor    CONTRIBUTING.md  +  AGENTS.md' -ForegroundColor White
+    Write-Host '    Cheat sheet    docs/cheatsheet.html' -ForegroundColor White
+    Write-Host ''
+    if (Test-ServerUp) {
+        W-Dim "    In the running app: open the in-UI docs overlay at $Url"
+    }
+    if (Test-Path $brochure) {
+        W-Ok  '    Opening the brochure...'
+        Start-Process $brochure
+    } else {
+        W-Warn '    Brochure PDF not found — open docs/brochure/venus-brochure.html in a browser.'
+    }
+    Write-Host ''
+    return 0
+}
+
+function Cmd-Agents {
+    $copilots = Set-VenusAiContext
+    Write-Host ''
+    Write-Host '        .         ' -ForegroundColor Yellow -NoNewline; W-Title '  Venus AI Co-pilots, Skills & Agents'
+    Write-Host '       /|\        ' -ForegroundColor Yellow -NoNewline; W-Dim   '  --------------------------------------'
+    Write-Host '      ( @ )       ' -ForegroundColor Yellow
+    Write-Host ''
+
+    W-Info '  DETECTED AI CLIs'
+    W-Dim  '  --------------------------------------'
+    if ($copilots.Count -gt 0) {
+        foreach ($name in $copilots.Keys) { W-Ok "    [ok] $name  (binary: $($copilots[$name]))" }
+    } else {
+        W-Warn '    none found -- install one:'
+        W-Dim  '      Claude :  https://claude.ai/code           then  claude auth'
+        W-Dim  '      Copilot:  npm i -g @githubnext/github-copilot-cli'
+        W-Dim  '      Gemini :  npm i -g @google/gemini-cli       then  gemini auth'
+    }
+    Write-Host ''
+
+    W-Info '  GUARDRAILS (read automatically by every AI CLI in this repo)'
+    W-Dim  '  --------------------------------------'
+    $g = @(@('AGENTS.md', $AgentsGuide), @('.claude/skills', $SkillsDir), @('.claude/agents', $AgentsDir),
+           @('CLAUDE.md', (Join-Path $RepoRoot 'CLAUDE.md')),
+           @('.github/copilot-instructions.md', (Join-Path $RepoRoot (Join-Path '.github' 'copilot-instructions.md'))),
+           @('GEMINI.md', (Join-Path $RepoRoot 'GEMINI.md')))
+    foreach ($pair in $g) {
+        if (Test-Path $pair[1]) { W-Ok "    [ok] $($pair[0])" } else { W-Warn "    [--] $($pair[0])  (missing)" }
+    }
+    Write-Host ''
+
+    W-Info '  SKILLS (auto-invoke when your request matches)'
+    W-Dim  '  --------------------------------------'
+    if (Test-Path $SkillsDir) {
+        Get-ChildItem -Path $SkillsDir -Directory | ForEach-Object { W-Dim "    - $($_.Name)" }
+    }
+    Write-Host ''
+    W-Info '  SUBAGENTS (spawn explicitly for a focused review)'
+    W-Dim  '  --------------------------------------'
+    if (Test-Path $AgentsDir) {
+        Get-ChildItem -Path $AgentsDir -Filter '*.md' | ForEach-Object { W-Dim "    - $($_.BaseName)" }
+    }
+    Write-Host ''
+
+    W-Info '  HOW TO USE'
+    W-Dim  '  --------------------------------------'
+    Write-Host '    In the Venus UI : open the AI panel (Ctrl+\), pick a provider, ask away.' -ForegroundColor White
+    Write-Host '    In a terminal   : run your CLI from this folder so it loads AGENTS.md:' -ForegroundColor White
+    W-Dim      '                        claude        (or)   copilot        (or)   gemini'
+    Write-Host '    Example prompt  : "Add a Kotlin execution mode following CppExecutionService,' -ForegroundColor White
+    W-Dim      '                       then run ./scripts/security-check.ps1 and open a PR."'
+    Write-Host ''
+    W-Dim      '    Env exported for this session:'
+    W-Dim      "      VENUS_HOME=$env:VENUS_HOME"
+    W-Dim      "      VENUS_AGENTS_GUIDE=$env:VENUS_AGENTS_GUIDE"
+    W-Dim      "      VENUS_SKILLS_DIR=$env:VENUS_SKILLS_DIR"
+    W-Dim      "      VENUS_AGENTS_DIR=$env:VENUS_AGENTS_DIR"
+    Write-Host ''
+    return 0
+}
+
 # ── Dispatch ────────────────────────────────────────────────────────────────
 switch ($Command.ToLower()) {
     'start'    { exit (Cmd-Start) }
@@ -373,6 +571,10 @@ switch ($Command.ToLower()) {
     'open'     { exit (Cmd-Open) }
     'logs'     { exit (Cmd-Logs) }
     'version'  { exit (Cmd-Version) }
+    'agents'   { exit (Cmd-Agents) }
+    'ai'       { exit (Cmd-Agents) }
+    'welcome'  { exit (Cmd-Welcome) }
+    'docs'     { exit (Cmd-Docs) }
     'help'     { exit (Cmd-Help) }
     '-h'       { exit (Cmd-Help) }
     '--help'   { exit (Cmd-Help) }

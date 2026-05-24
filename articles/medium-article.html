@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>medium-article</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 780px; margin: 0 auto; padding: 0;
+    color: #1f2937; line-height: 1.65; font-size: 11pt;
+  }
+  h1 { font-size: 2em; border-bottom: 3px solid #06b6d4; padding-bottom: 0.3em;
+       color: #0f172a; margin-top: 0; }
+  h2 { font-size: 1.45em; color: #0f172a; margin-top: 1.8em;
+       border-bottom: 1px solid #e5e7eb; padding-bottom: 0.2em; }
+  h3 { font-size: 1.15em; color: #334155; margin-top: 1.4em; }
+  h3 em { color: #64748b; font-weight: normal; }
+  p { margin: 0.7em 0; }
+  code { background: #f1f5f9; padding: 0.15em 0.4em; border-radius: 3px;
+         font-family: 'Consolas', 'Monaco', monospace; font-size: 0.88em; color: #be123c; }
+  pre { background: #1e293b; color: #f1f5f9; padding: 1em 1.2em;
+        border-radius: 6px; overflow-x: auto; font-size: 0.85em; line-height: 1.5; }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  blockquote { border-left: 4px solid #06b6d4; background: #ecfeff;
+               padding: 0.6em 1em; margin: 1em 0; color: #155e75;
+               font-style: italic; border-radius: 0 4px 4px 0; }
+  blockquote strong { color: #0e7490; font-style: normal; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.92em; }
+  th, td { border: 1px solid #e5e7eb; padding: 0.5em 0.8em; text-align: left;
+           vertical-align: top; }
+  th { background: #f8fafc; font-weight: 600; color: #0f172a; }
+  a { color: #0891b2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 2em 0; }
+  ul, ol { margin: 0.7em 0; padding-left: 1.5em; }
+  li { margin: 0.3em 0; }
+  .mermaid-svg { text-align: center; margin: 1.5em 0; padding: 1.2em 0.5em;
+             background: #f8fafc; border-radius: 8px; page-break-inside: avoid;
+             border: 1px solid #e2e8f0; }
+  .mermaid-svg svg { max-width: 100%; height: auto; display: inline-block; }
+  img { max-width: 100%; height: auto; display: block;
+        margin: 1.2em auto; border-radius: 6px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.10); page-break-inside: avoid; }
+  img + em, p > em:only-child { display: block; text-align: center;
+        color: #64748b; font-size: 0.88em; margin-top: -0.5em; margin-bottom: 1.5em; }
+  /* page-break controls */
+  h1, h2, h3 { page-break-after: avoid; }
+  pre, blockquote, table { page-break-inside: avoid; }
+</style>
+</head>
+<body><h1>Notebooks for the Agentic Era: Why I Built Venus to Be Reshaped, Not Just Used</h1>
+<h3>A multi-language, browser-based notebook with MCP, CLI-native AI, and a single rule: if you can describe what you want, your AI should be able to build it into the product itself in under an hour.</h3>
+<p><em>By Suresh Chande · ~10 min read · Tags: Notebooks, MCP, Agentic AI, Developer Tools, Open Source</em></p>
+<hr>
+<p><img src="../docs/screenshots/00-cover-medium.png" alt="Notebooks for the Agentic Era"></p>
+<hr>
+<h2>A Quiet Tribute Before the Pitch</h2>
+<p>I have loved Jupyter for years. It taught a whole generation of engineers and scientists how to think interactively. It made notebooks the lingua franca of data science. The ecosystem around it — kernels, widgets, JupyterHub, Colab — is one of the great open-source achievements of the last fifteen years.</p>
+<p>This article isn&#39;t about replacing any of that.</p>
+<p>It&#39;s about a simple observation: most of the tools we use every day — IDEs, notebooks, package managers, even our shells — were designed for a world where <strong>the developer was the only intelligent agent in the room.</strong> They optimized for <em>me typing into them</em>. They didn&#39;t optimize for <em>me, plus an AI, plus a CLI, plus an agent loop, all collaborating on the same artifact</em>.</p>
+<p>That world is over. The agentic era needs tools designed for it. Not as replacements — as additions.</p>
+<p>So I built one, called it <strong>Venus Notebooks</strong>, and open-sourced it. This is the story of <em>why</em> and the few decisions I&#39;d want anyone building a modern developer tool to consider.</p>
+<hr>
+<p><img src="../docs/screenshots/01-hero-welcome.png" alt="Venus Notebooks UI — Welcome notebook with multiple JShell cells"></p>
+<p><em>The Venus UI: tabs across the top for Notebook · Console · Packages · Settings · Docs; cells with anchors and pipeline metadata; live status bar showing the active JShell session.</em></p>
+<hr>
+<h2>The Premise: Tools Built Before AI Were Built For a Different User</h2>
+<p>Walk through almost any tool you opened today and ask: <em>what was this designed around?</em></p>
+<ul>
+<li><strong>Your IDE</strong> was designed around a human reading and writing one file at a time</li>
+<li><strong>Your terminal</strong> was designed around a human typing one command at a time</li>
+<li><strong>Your notebook</strong> was designed around a human running one cell at a time</li>
+<li><strong>Your package manager</strong> was designed around a human deciding what to install</li>
+</ul>
+<p>These are good designs — for that user. But that user has a new partner now: an AI that can read the whole file, run a sequence of commands, run every cell, and decide what to install — all in the same loop, on the same artifact, in real time.</p>
+<p>If a tool wasn&#39;t designed with that collaborator in mind, two things tend to be true:</p>
+<ol>
+<li>The AI sits <em>outside</em> the tool, in a separate panel, copy-pasting code in and out</li>
+<li>Customizing the tool itself still requires the old workflow — fork, learn the codebase, write code by hand, submit PR, wait</li>
+</ol>
+<p>Venus is an experiment in flipping both. The AI sits <em>inside</em> the tool, and the tool itself is designed to be reshaped by an AI, by you, in under an hour.</p>
+<hr>
+<h2>What Venus Actually Is</h2>
+<p>A locally-hosted, browser-based notebook. One command to start, one URL to open. Seven languages run side by side in the same notebook:</p>
+<ul>
+<li><strong>Java (JShell)</strong> — official JDK REPL, state shared across cells</li>
+<li><strong>Java (full)</strong> — per-cell <code>javac</code> compile + run</li>
+<li><strong>JavaScript</strong> — Node.js subprocess</li>
+<li><strong>TypeScript</strong> — Node 22.6+ type-stripping, optional <code>tsc --noEmit</code></li>
+<li><strong>C#</strong> — <code>dotnet run</code> with NuGet</li>
+<li><strong>F#</strong> — <code>dotnet fsi</code> with inline <code>#r &quot;nuget:&quot;</code> directives</li>
+<li><strong>C++</strong> — MSVC / GCC / Clang auto-detected</li>
+</ul>
+<p>Maven, npm, and NuGet are first-class. Notebooks are JSON files on disk. Nothing is sent to a cloud — ever. None of that is the interesting part.</p>
+<p>The interesting part is the three design decisions below.</p>
+<hr>
+<h2>Decision 1 — AI Lives Inside the Notebook, Through Your Own CLI</h2>
+<p>Most &quot;AI in the editor&quot; experiences ask you for an API key and route through a vendor backend. That introduces a second relationship to manage, a second bill to pay, and a second data-flow path your security team has to bless.</p>
+<p>Venus takes a different route. It shells out to whatever AI CLI you already have authenticated on your machine:</p>
+<ul>
+<li><strong>Claude Code CLI</strong></li>
+<li><strong>GitHub Copilot CLI</strong></li>
+<li><strong>Gemini CLI</strong></li>
+</ul>
+<p>Switch providers in Settings. The AI runs as a local subprocess, using your existing CLI auth. No second API key. No second vendor. No exfiltration path that wasn&#39;t already there.</p>
+<p><img src="../docs/screenshots/03-typescript-notebook.png" alt="Venus TypeScript notebook with execution output"></p>
+<p><em>A TypeScript notebook running in Venus — anchored cells, live output streaming, and the same look-and-feel whether the cell runs as Java, TypeScript, or C++.</em></p>
+<p>This is a small architectural choice with a large practical consequence. It means <strong>the AI in Venus has the same powers as the AI in your terminal</strong> — and we lean into that hard in Decision 3.</p>
+<hr>
+<h2>Decision 2 — Venus Is an MCP Server. The Whole Thing.</h2>
+<p>This is the one I&#39;m most excited about.</p>
+<p><a href="https://modelcontextprotocol.io">MCP</a> — Model Context Protocol — is the standard that lets agents talk to tools in a structured way. Venus doesn&#39;t just <em>consume</em> MCP; it <em>publishes</em> itself as one.</p>
+<p>That means: every notebook, every cell, every execution engine, every package install, every pipeline — is exposed as MCP tools. So you can:</p>
+<ul>
+<li>Open Venus in your browser and work in it directly, <strong>or</strong></li>
+<li>Stay in Claude Code / Claude Desktop / any MCP-aware agent and drive Venus from there</li>
+<li>Or do both, on the same notebook, at the same time</li>
+</ul>
+<div class="mermaid-svg"><p><svg id="mmd-0" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width: 1280.5234375px;" viewBox="-8 -8 1280.5234375 252" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-0{font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:16px;fill:#333;}#mmd-0 .error-icon{fill:#552222;}#mmd-0 .error-text{fill:#552222;stroke:#552222;}#mmd-0 .edge-thickness-normal{stroke-width:2px;}#mmd-0 .edge-thickness-thick{stroke-width:3.5px;}#mmd-0 .edge-pattern-solid{stroke-dasharray:0;}#mmd-0 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-0 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-0 .marker{fill:#333333;stroke:#333333;}#mmd-0 .marker.cross{stroke:#333333;}#mmd-0 svg{font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:16px;}#mmd-0 .label{font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;color:#333;}#mmd-0 .cluster-label text{fill:#333;}#mmd-0 .cluster-label span,#mmd-0 p{color:#333;}#mmd-0 .label text,#mmd-0 span,#mmd-0 p{fill:#333;color:#333;}#mmd-0 .node rect,#mmd-0 .node circle,#mmd-0 .node ellipse,#mmd-0 .node polygon,#mmd-0 .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#mmd-0 .flowchart-label text{text-anchor:middle;}#mmd-0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-0 .node .label{text-align:center;}#mmd-0 .node.clickable{cursor:pointer;}#mmd-0 .arrowheadPath{fill:#333333;}#mmd-0 .edgePath .path{stroke:#333333;stroke-width:2.0px;}#mmd-0 .flowchart-link{stroke:#333333;fill:none;}#mmd-0 .edgeLabel{background-color:#e8e8e8;text-align:center;}#mmd-0 .edgeLabel rect{opacity:0.5;background-color:#e8e8e8;fill:#e8e8e8;}#mmd-0 .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#mmd-0 .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#mmd-0 .cluster text{fill:#333;}#mmd-0 .cluster span,#mmd-0 p{color:#333;}#mmd-0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#mmd-0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#mmd-0 :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}</style><g><marker id="mmd-0_flowchart-pointEnd" class="marker flowchart" viewBox="0 0 10 10" refX="6" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mmd-0_flowchart-pointStart" class="marker flowchart" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mmd-0_flowchart-circleEnd" class="marker flowchart" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mmd-0_flowchart-circleStart" class="marker flowchart" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mmd-0_flowchart-crossEnd" class="marker cross flowchart" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="mmd-0_flowchart-crossStart" class="marker cross flowchart" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"><g class="cluster default flowchart-label" id="Venus"><rect style="fill:#1e293b;stroke:#06b6d4;" rx="0" ry="0" x="433.5" y="0" width="831.0234375" height="236"></rect><g class="cluster-label" transform="translate(849.01171875, 0)"><text style="fill:#fff;"><tspan xml:space="preserve" dy="1em" x="0" class="row">Venus Notebooks</tspan></text></g></g><g class="cluster default flowchart-label" id="You"><rect style="fill:#0f172a;stroke:#3b82f6;" rx="0" ry="0" x="0" y="8" width="287.96875" height="228"></rect><g class="cluster-label" transform="translate(143.984375, 8)"><text style="fill:#fff;"><tspan xml:space="preserve" dy="1em" x="0" class="row">You + Your AI Partner</tspan></text></g></g></g><g class="edgePaths"><path d="M169.722,60L189.43,60C209.138,60,248.553,60,280.389,60C312.224,60,336.479,60,360.734,60C384.99,60,409.245,60,434.165,60C459.086,60,484.672,60,497.465,60L510.259,60" id="L-DEV-UI-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-DEV LE-UI" style="fill:none;" marker-start="url(#mmd-0_flowchart-pointStart)" marker-end="url(#mmd-0_flowchart-pointEnd)"></path><path d="M268.269,168L271.552,168C274.835,168,281.402,168,296.813,168C312.224,168,336.479,168,360.734,168C384.99,168,409.245,168,424.656,168C440.067,168,446.633,168,449.917,168L453.2,168" id="L-AI-MCP-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-AI LE-MCP" style="fill:none;" marker-start="url(#mmd-0_flowchart-pointStart)" marker-end="url(#mmd-0_flowchart-pointEnd)"></path><path d="M634.496,60L648.173,60C661.849,60,689.202,60,714.774,65.781C740.346,71.561,764.138,83.122,776.033,88.903L787.929,94.684" id="L-UI-REST-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-UI LE-REST" style="fill:none;" marker-end="url(#mmd-0_flowchart-pointEnd)"></path><path d="M691.555,168L695.721,168C699.888,168,708.221,168,724.284,162.219C740.346,156.439,764.138,144.878,776.033,139.097L787.929,133.316" id="L-MCP-REST-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-MCP LE-REST" style="fill:none;" marker-end="url(#mmd-0_flowchart-pointEnd)"></path><path d="M913.805,114L917.971,114C922.138,114,930.471,114,937.921,114C945.371,114,951.938,114,955.221,114L958.505,114" id="L-REST-ENG-0" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-REST LE-ENG" style="fill:none;" marker-end="url(#mmd-0_flowchart-pointEnd)"></path></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><rect rx="0" ry="0" width="0" height="0"></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row"></tspan></text></g></g><g class="edgeLabel" transform="translate(360.734375, 168)"><g class="label" transform="translate(-47.765625, -9.5)"><rect rx="0" ry="0" width="95.48115539550781" height="19.001178741455078"></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">MCP protocol</tspan></text></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><rect rx="0" ry="0" width="0" height="0"></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row"></tspan></text></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><rect rx="0" ry="0" width="0" height="0"></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row"></tspan></text></g></g><g class="edgeLabel"><g class="label" transform="translate(0, 0)"><rect rx="0" ry="0" width="0" height="0"></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row"></tspan></text></g></g></g><g class="nodes"><g class="node default default flowchart-label" id="flowchart-UI-2" data-node="true" data-id="UI" transform="translate(575.02734375, 60)"><rect class="basic label-container" style="" rx="0" ry="0" x="-59.46875" y="-25" width="118.9375" height="50"></rect><g class="label" style="" transform="translate(0, -17.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">Browser UI</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">localhost:8585</tspan></text></g></g><g class="node default default flowchart-label" id="flowchart-MCP-3" data-node="true" data-id="MCP" transform="translate(575.02734375, 168)"><rect class="basic label-container" style="" rx="0" ry="0" x="-116.52734375" y="-33" width="233.0546875" height="66"></rect><g class="label" style="" transform="translate(0, -25.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">MCP Server</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">Tools: notebooks · cells ·</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">execute · packages · pipelines</tspan></text></g></g><g class="node default default flowchart-label" id="flowchart-REST-4" data-node="true" data-id="REST" transform="translate(827.6796875, 114)"><rect class="basic label-container" style="" rx="0" ry="0" x="-86.125" y="-17" width="172.25" height="34"></rect><g class="label" style="" transform="translate(0, -9.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">REST + WebSocket API</tspan></text></g></g><g class="node default default flowchart-label" id="flowchart-ENG-5" data-node="true" data-id="ENG" transform="translate(1101.6640625, 114)"><rect class="basic label-container" style="" rx="0" ry="0" x="-137.859375" y="-25" width="275.71875" height="50"></rect><g class="label" style="" transform="translate(0, -17.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">Execution Engines</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">JShell · Java · JS · TS · C# · F# · C++</tspan></text></g></g><g class="node default default flowchart-label" id="flowchart-DEV-0" data-node="true" data-id="DEV" transform="translate(143.984375, 60)"><rect class="basic label-container" style="" rx="0" ry="0" x="-20.4375" y="-17" width="40.875" height="34"></rect><g class="label" style="" transform="translate(0, -9.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">You</tspan></text></g></g><g class="node default default flowchart-label" id="flowchart-AI-1" data-node="true" data-id="AI" transform="translate(143.984375, 168)"><rect class="basic label-container" style="" rx="0" ry="0" x="-118.984375" y="-33" width="237.96875" height="66"></rect><g class="label" style="" transform="translate(0, -25.5)"><rect></rect><text style=""><tspan xml:space="preserve" dy="1em" x="0" class="row">Your AI Agent</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">(Claude Code, Claude Desktop,</tspan><tspan xml:space="preserve" dy="1em" x="0" class="row">custom agent)</tspan></text></g></g></g></g></g></svg></p>
+</div><p>This unlocks something specific: <strong>the agent can prepare a notebook for you while you sleep.</strong> You tell Claude Code &quot;build me an exploration notebook for the new pricing API, with cells that load sample requests, validate the schema, and chart latency distributions&quot; — and when you sit down in the morning, the notebook exists in Venus, every cell already populated, ready to run.</p>
+<p>Conversely, <strong>you can sit in the Venus UI and pull the agent&#39;s context</strong> — &quot;AI, here&#39;s the cell I&#39;m staring at, why is the latency spike here?&quot; — and it answers using the same provider, the same auth, the same context window.</p>
+<p>The notebook becomes the shared artifact. You and the AI are both first-class users of it.</p>
+<hr>
+<h2>Decision 3 — The Tool Is Designed to Be Reshaped</h2>
+<p>This is the philosophical core.</p>
+<p>Most products say: <em>here is what we built; submit a feature request and we&#39;ll consider it.</em></p>
+<p>Venus says: <em>here is what we built; if you need something else, ask your AI to add it, and it should take less than an hour.</em></p>
+<p>This isn&#39;t a slogan. It&#39;s the result of specific choices:</p>
+<ul>
+<li><strong>No build step on the frontend.</strong> Plain HTML/CSS/vanilla JS. Edit a file, refresh the browser, see the change. Your AI doesn&#39;t need to know Webpack, Vite, or React.</li>
+<li><strong>Plain Java backend, no Lombok, no magic.</strong> Standard Spring Boot. Any agent that can read Java can extend it.</li>
+<li><strong>Subprocess-per-language.</strong> Adding a new language means writing one <code>*ExecutionService.java</code> file modeled on the existing six.</li>
+<li><strong>Tiny conventions, not frameworks.</strong> Notebook format is JSON. Cell metadata uses <code>//@</code> annotations. The MCP surface mirrors the REST surface 1:1.</li>
+</ul>
+<p>The result: if you want a new chart type, a new language, a new export format, a custom keybinding, a different theme — you open a Claude Code session in the venus repo, describe what you want, and it ships.</p>
+<p>And then the part that closes the loop:</p>
+<blockquote>
+<p><em>&quot;That worked. Package this as a PR back to the upstream repo.&quot;</em></p>
+</blockquote>
+<p>The same CLI that built your local change can prepare the contribution. The bar to giving back drops to the same level as the bar to customizing.</p>
+<p><img src="../docs/screenshots/09-agentic-loop.png" alt="The Agentic Loop — Use, Reshape, Contribute, Repeat"></p>
+<hr>
+<h2>Interoperability Over Tribalism</h2>
+<p>A question I get asked: <em>&quot;So should I use Venus or Jupyter?&quot;</em></p>
+<p>Wrong question. The right question is: <em>&quot;What&#39;s the friction cost of moving between them?&quot;</em></p>
+<p>I&#39;d like that cost to be zero. There&#39;s no good reason a notebook authored in Venus shouldn&#39;t open in Jupyter, or vice versa. The artifact is JSON. The cells are code. The execution model differs, but the <em>content</em> is portable.</p>
+<p><strong>To be clear: this isn&#39;t shipped yet.</strong> Venus today reads and writes its own <code>.vnb</code> format — <code>.ipynb</code> round-tripping is coming in the next update, and it&#39;s a great first contribution for anyone who wants to dip in. The point isn&#39;t that any one notebook tool should &quot;win.&quot; The point is that the developer should be free to pick whichever tool fits the moment, and move their work between them without ceremony — and we should be building toward that, not away from it.</p>
+<p>The same applies to AI providers. Same applies to languages. Same applies to package ecosystems. <strong>The era of &quot;pick your tool and live inside it forever&quot; is over.</strong> The era of &quot;compose what you need, swap when you want, shape what doesn&#39;t fit&quot; is here.</p>
+<hr>
+<h2>What This Looks Like In Practice</h2>
+<p>A normal afternoon with Venus, for me, looks like this:</p>
+<ol>
+<li>Open a notebook from yesterday. Half the cells are JShell, two are TypeScript (for some npm package I wanted to try), one is C++ (for a perf comparison).</li>
+<li>Realize I want a chart type Venus doesn&#39;t have. Open Claude Code in the repo. <em>&quot;Add a violin plot helper to the JavaScript helpers module.&quot;</em> Eighteen minutes later, it works.</li>
+<li>Use the new helper in the notebook.</li>
+<li>Ask Claude (in the AI panel inside Venus, attached to the cell) why my numbers look off. It explains. I fix.</li>
+<li><em>&quot;Package this morning&#39;s helper change as a PR with a good description.&quot;</em> Done.</li>
+<li>Close the laptop.</li>
+</ol>
+<p>None of those steps required leaving the notebook abstraction. None of them required learning a new framework. None of them required filing a feature request with someone else and waiting.</p>
+<p>That&#39;s what I think a modern developer tool should feel like.</p>
+<hr>
+<h2>Try It</h2>
+<pre><code class="language-bash">git clone https://github.com/snchande/Venus.git
+cd Venus
+./venus       # Windows CMD
+./venus.ps1   # PowerShell
+./venus.sh    # macOS / Linux
+</code></pre>
+<p>The CLI builds the JAR, starts the server on port 8585, and opens your browser. About 30 seconds.</p>
+<p>If you want to drive it from an agent instead, add the MCP server config to Claude Code or Claude Desktop — see the repo&#39;s <code>docs/MCP.md</code>.</p>
+<p><img src="../docs/screenshots/08-mcp-claude.png" alt="MCP-driven workflow — Claude Desktop creating a Venus notebook via MCP tools"></p>
+<p><em>Two surfaces, one artifact: Claude Desktop on the left calling <code>venus.create_notebook</code>, <code>venus.add_cell</code>, <code>venus.execute_cell</code> over MCP — Venus on the right showing the resulting notebook ready to inspect.</em></p>
+<hr>
+<h2>An Invitation</h2>
+<p>I built Venus because I wanted a notebook that fit the way I — and my AI — actually work together now. I open-sourced it because I&#39;m sure other people will want different things, and the most exciting outcome is <em>not</em> that Venus stays the way I built it.</p>
+<p>The most exciting outcome is that someone clones it tonight, asks their AI to add a feature I never imagined, ships that feature in 40 minutes, and pushes the PR back upstream — and a week later someone else benefits.</p>
+<p>That loop — <em>use, reshape, contribute, repeat</em> — is what I think open source should feel like in 2026. Tools that bend toward the person using them, not the other way around.</p>
+<p>Jupyter taught us to think in cells. Venus is one attempt to extend that thinking into the agentic era. If it sparks even one better idea in someone else&#39;s hands, it&#39;ll have been worth the weekends.</p>
+<hr>
+<h3>Links</h3>
+<ul>
+<li><strong>GitHub:</strong> <a href="https://github.com/snchande/Venus">github.com/snchande/Venus</a></li>
+<li><strong>MCP setup:</strong> <code>docs/MCP.md</code> in the repo</li>
+<li><strong>Tutorials:</strong> 28 built-in across all 7 languages</li>
+<li><strong>License:</strong> MIT</li>
+</ul>
+<p>If this resonates, a 👏 helps it reach others thinking about the same questions. And if you ship a fork or a contribution, I&#39;d love to see it.</p>
+<hr>
+<p><em>Built with Spring Boot, JShell, MCP, and the conviction that the tools of the next decade will be the ones that let their users reshape them.</em></p>
+</body>
+</html>

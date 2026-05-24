@@ -146,6 +146,7 @@ public class GeminiService {
         log.info("Gemini CLI chat via {}: {} messages", geminiExe, messages.size());
 
         ProcessBuilder pb = new ProcessBuilder(geminiExe, "-p", prompt.toString());
+        pb.directory(com.venus.util.VenusHome.directory());
         pb.redirectErrorStream(false);
         Process process = pb.start();
 
@@ -166,6 +167,7 @@ public class GeminiService {
 
     private String chatViaStdin(String prompt, String geminiExe) throws IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder(geminiExe);
+        pb.directory(com.venus.util.VenusHome.directory());
         pb.redirectErrorStream(false);
         Process process = pb.start();
 

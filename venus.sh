@@ -16,6 +16,14 @@ JAR="target/venus-notebooks-1.0.0-SNAPSHOT.jar"
 PORT=8585
 URL="http://localhost:${PORT}"
 
+# ── AI co-pilot context ─────────────────────────────────────────────────────
+# These files turn any AI CLI invoked inside this repo (the in-UI AI panel or a
+# terminal session) into a Venus-aware co-pilot that follows the architecture
+# guardrails and can use the registered skills + subagents.
+AGENTS_GUIDE="$SCRIPT_DIR/AGENTS.md"
+SKILLS_DIR="$SCRIPT_DIR/.claude/skills"
+AGENTS_DIR="$SCRIPT_DIR/.claude/agents"
+
 # ── Colours (skip if NO_COLOR or not a TTY) ─────────────────────────────────
 if [ -t 1 ] && [ -z "${NO_COLOR-}" ]; then
     C_RESET=$'\033[0m'
@@ -54,6 +62,43 @@ banner() {
 
 # ── Probes ──────────────────────────────────────────────────────────────────
 have()       { command -v "$1" >/dev/null 2>&1; }
+
+# ── AI co-pilot wiring ──────────────────────────────────────────────────────
+# Echoes detected co-pilots as "Name=binary" lines (one per line).
+detect_copilots() {
+    local first
+    for first in claude;                          do have "$first" && { echo "Claude=$first";  break; }; done
+    for first in copilot github-copilot-cli gh;   do have "$first" && { echo "Copilot=$first"; break; }; done
+    for first in gemini;                          do have "$first" && { echo "Gemini=$first";  break; }; done
+}
+
+# Export the context so the Venus JVM (and any CLI it spawns for the in-UI AI
+# panel) resolves the guardrails + skills + agents regardless of launch dir.
+set_ai_context() {
+    export VENUS_HOME="$SCRIPT_DIR"
+    [ -f "$AGENTS_GUIDE" ] && export VENUS_AGENTS_GUIDE="$AGENTS_GUIDE"
+    [ -d "$SKILLS_DIR" ]   && export VENUS_SKILLS_DIR="$SKILLS_DIR"
+    [ -d "$AGENTS_DIR" ]   && export VENUS_AGENTS_DIR="$AGENTS_DIR"
+    local names
+    names=$(detect_copilots | cut -d= -f1 | tr '\n' ',' | sed 's/,$//' | tr 'A-Z' 'a-z')
+    [ -n "$names" ] && export VENUS_AI_COPILOTS="$names"
+}
+
+show_copilots() {
+    local names
+    names=$(detect_copilots | cut -d= -f1 | paste -sd' · ' - 2>/dev/null)
+    [ -z "$names" ] && names=$(detect_copilots | cut -d= -f1 | tr '\n' ' ')
+    if [ -n "$names" ]; then
+        dim  "  AI:      ${names}  (co-pilot ready)"
+    else
+        warn '  AI:      no CLI found  (install Claude, Copilot, or Gemini CLI for AI features)'
+    fi
+    if [ -f "$AGENTS_GUIDE" ] && [ -d "$SKILLS_DIR" ] && [ -d "$AGENTS_DIR" ]; then
+        dim  '           guardrails AGENTS.md + skills/ + agents/ loaded -> run: ./venus.sh agents'
+    else
+        warn '           AGENTS.md / .claude skills+agents missing -- AI guardrails not wired'
+    fi
+}
 
 check_java() {
     if ! have java; then
@@ -152,6 +197,11 @@ cmd_start() {
     else
         warn '  .NET:    not found  (C#/F# cells disabled -- install from https://dot.net)'
     fi
+
+    # Wire the AI co-pilot context before launching the JVM so the in-UI AI
+    # panel (and any CLI it spawns) inherits the guardrails + skills + agents.
+    set_ai_context
+    show_copilots
 
     ensure_jar || return 1
 
@@ -252,6 +302,144 @@ cmd_status() {
 
     if have dotnet; then dim  "  .NET:     $(dotnet --version)"
     else warn '  .NET:     not found (C# / F# cells disabled)'; fi
+
+    local ai_names
+    ai_names=$(detect_copilots | cut -d= -f1 | tr '\n' ' ')
+    if [ -n "${ai_names// }" ]; then
+        dim  "  AI:       ${ai_names} (co-pilot ready -- run: ./venus.sh agents)"
+    else
+        warn '  AI:       no CLI found (Claude / Copilot / Gemini -- AI features limited)'
+    fi
+    echo
+    return 0
+}
+
+cmd_welcome() {
+    set_ai_context
+    banner
+    title '  Welcome to Venus Notebooks'
+    dim   '  A local notebook for Java | JS | TS | C# | F# | C++ — with AI co-pilots and MCP.'
+    echo
+    info  '  PICK HOW YOU WANT TO WORK'
+    dim   '  ──────────────────────────────────────'
+    printf '    %s1) Open the UI%s            %sfull notebook experience in your browser%s\n' "$C_WHITE" "$C_RESET" "$C_DIM" "$C_RESET"
+    dim   "         ./venus.sh start        ->  $URL"
+    printf '    %s2) Drive Venus over MCP%s   %soperate & automate from any MCP client%s\n' "$C_WHITE" "$C_RESET" "$C_DIM" "$C_RESET"
+    dim   "         SSE  $URL/api/mcp/sse"
+    dim   "         POST $URL/api/mcp/messages"
+    printf '    %s3) Personalize & extend%s   %sadd features — needs an agentic CLI%s\n' "$C_WHITE" "$C_RESET" "$C_DIM" "$C_RESET"
+    dim   '         run  claude  /  copilot  /  gemini   in this folder, then ask the venus agent'
+    echo
+    local ai_names
+    ai_names=$(detect_copilots | cut -d= -f1 | tr '\n' ' ')
+    if [ -n "${ai_names// }" ]; then
+        ok   "  AI co-pilots ready: ${ai_names}  (run: ./venus.sh agents)"
+    else
+        warn '  No AI CLI found — install Claude, Copilot, or Gemini to personalize Venus.'
+    fi
+    echo
+    info  '  THE ONE DIFFERENCE'
+    dim   '  ──────────────────────────────────────'
+    dim   '    This venus CLI operates & automates Venus (incl. MCP) but cannot change its code.'
+    dim   '    An agentic CLI (claude / copilot / gemini) can ALSO personalize and extend Venus.'
+    echo
+    info  '  NEXT'
+    dim   '  ──────────────────────────────────────'
+    echo  '    ./venus.sh start      Start the server and open the UI'
+    echo  '    ./venus.sh docs       Open the brochure and list the docs'
+    echo  '    ./venus.sh agents     AI co-pilots, skills & the venus agent'
+    echo
+    dim   '  Full welcome: docs/WELCOME.md'
+    echo
+    return 0
+}
+
+cmd_docs() {
+    echo
+    title '  Venus Notebooks — Documentation'
+    dim   '  ──────────────────────────────────────'
+    echo  '    Brochure (PDF) docs/brochure/venus-brochure.pdf'
+    echo  '    Welcome        docs/WELCOME.md'
+    echo  '    Getting started README.md'
+    echo  '    Architecture   docs/ARCHITECTURE.md'
+    echo  '    API + MCP      docs/API.md'
+    echo  '    Contributor    CONTRIBUTING.md  +  AGENTS.md'
+    echo  '    Cheat sheet    docs/cheatsheet.html'
+    echo
+    if server_up; then dim "    In the running app: open the in-UI docs overlay at $URL"; fi
+    local pdf="$SCRIPT_DIR/docs/brochure/venus-brochure.pdf"
+    if [ -f "$pdf" ]; then
+        ok '    Opening the brochure...'
+        if   have xdg-open; then xdg-open "$pdf" >/dev/null 2>&1 &
+        elif have open;     then open "$pdf"     >/dev/null 2>&1 &
+        else dim "    Open manually: $pdf"; fi
+    else
+        warn '    Brochure PDF not found — open docs/brochure/venus-brochure.html in a browser.'
+    fi
+    echo
+    return 0
+}
+
+cmd_agents() {
+    set_ai_context
+    echo
+    printf '%s        .         %s%s  Venus AI Co-pilots, Skills & Agents%s\n' "$C_YELLOW" "$C_RESET" "$C_WHITE" "$C_RESET"
+    printf '%s       /|\\        %s%s  ──────────────────────────────────────%s\n' "$C_YELLOW" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '%s      ( @ )       %s\n' "$C_YELLOW" "$C_RESET"
+    echo
+
+    info '  DETECTED AI CLIs'
+    dim  '  ──────────────────────────────────────'
+    local found
+    found=$(detect_copilots)
+    if [ -n "$found" ]; then
+        while IFS='=' read -r name bin; do
+            [ -n "$name" ] && ok "    [ok] $name  (binary: $bin)"
+        done <<< "$found"
+    else
+        warn '    none found -- install one:'
+        dim  '      Claude :  https://claude.ai/code           then  claude auth'
+        dim  '      Copilot:  npm i -g @githubnext/github-copilot-cli'
+        dim  '      Gemini :  npm i -g @google/gemini-cli       then  gemini auth'
+    fi
+    echo
+
+    info '  GUARDRAILS (read automatically by every AI CLI in this repo)'
+    dim  '  ──────────────────────────────────────'
+    for pair in "AGENTS.md|$AGENTS_GUIDE" ".claude/skills|$SKILLS_DIR" ".claude/agents|$AGENTS_DIR" \
+                "CLAUDE.md|$SCRIPT_DIR/CLAUDE.md" ".github/copilot-instructions.md|$SCRIPT_DIR/.github/copilot-instructions.md" \
+                "GEMINI.md|$SCRIPT_DIR/GEMINI.md"; do
+        label="${pair%%|*}"; path="${pair#*|}"
+        if [ -e "$path" ]; then ok "    [ok] $label"; else warn "    [--] $label  (missing)"; fi
+    done
+    echo
+
+    info '  SKILLS (auto-invoke when your request matches)'
+    dim  '  ──────────────────────────────────────'
+    if [ -d "$SKILLS_DIR" ]; then
+        for d in "$SKILLS_DIR"/*/; do [ -d "$d" ] && dim "    - $(basename "$d")"; done
+    fi
+    echo
+    info '  SUBAGENTS (spawn explicitly for a focused review)'
+    dim  '  ──────────────────────────────────────'
+    if [ -d "$AGENTS_DIR" ]; then
+        for f in "$AGENTS_DIR"/*.md; do [ -f "$f" ] && dim "    - $(basename "$f" .md)"; done
+    fi
+    echo
+
+    info '  HOW TO USE'
+    dim  '  ──────────────────────────────────────'
+    echo "    In the Venus UI : open the AI panel (Ctrl+\\), pick a provider, ask away."
+    echo "    In a terminal   : run your CLI from this folder so it loads AGENTS.md:"
+    dim  "                        claude        (or)   copilot        (or)   gemini"
+    echo '    Example prompt  : "Add a Kotlin execution mode following CppExecutionService,'
+    dim  '                       then run ./scripts/security-check.sh and open a PR."'
+    echo
+    dim  '    Env exported for this session:'
+    dim  "      VENUS_HOME=${VENUS_HOME:-}"
+    dim  "      VENUS_AGENTS_GUIDE=${VENUS_AGENTS_GUIDE:-}"
+    dim  "      VENUS_SKILLS_DIR=${VENUS_SKILLS_DIR:-}"
+    dim  "      VENUS_AGENTS_DIR=${VENUS_AGENTS_DIR:-}"
     echo
     return 0
 }
@@ -354,6 +542,9 @@ cmd_help() {
     echo "    open             Open browser (server must already be running)"
     echo "    logs             Tail venus.log (background mode only)"
     echo "    version          Show Java, Node.js, .NET, Maven, project version"
+    echo "    welcome          Common welcome — open the UI, use MCP, or personalize Venus"
+    echo "    docs             Open the brochure and list the documentation"
+    echo "    agents           Show AI co-pilots, skills & the venus agent wired into this repo"
     echo "    help             Show this help"
     echo
     info '  EXAMPLES'
@@ -389,6 +580,9 @@ case "${CMD,,}" in
     open)               cmd_open ;;
     logs)               cmd_logs ;;
     version|--version)  cmd_version ;;
+    agents|ai)          cmd_agents ;;
+    welcome)            cmd_welcome ;;
+    docs)               cmd_docs ;;
     help|-h|--help)     cmd_help ;;
     *)
         err "Unknown command: $CMD"

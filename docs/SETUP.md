@@ -40,6 +40,26 @@
 
 ---
 
+## Recommended: an AI CLI
+
+Venus is designed to be **used, customized, and contributed back to entirely through agentic prompts** — see the [README's "Built for the Agentic Era"](../README.md#built-for-the-agentic-era) section. To get the full workflow, install at least one of:
+
+| CLI | Install | Auth |
+|-----|---------|------|
+| **Claude Code** *(recommended)* | [claude.ai/code](https://claude.ai/code) | `claude auth` |
+| **GitHub Copilot CLI** | `npm install -g @githubnext/github-copilot-cli` | `github-copilot-cli auth` |
+| **Gemini CLI** | `npm install -g @google/gemini-cli` | `gemini auth` |
+
+Once installed, Venus uses the CLI as a **local subprocess** — no API key for Venus to manage, no second vendor relationship. The same CLI lets you:
+
+- Drive Venus from the in-app AI panel (generate cells, explain output, convert languages)
+- Open the same CLI inside the cloned repo to **reshape Venus itself** (add a feature, fix a bug, write a tutorial)
+- Ask the same CLI to **package your change as a PR back upstream** — closing the contribute loop
+
+If you also want to drive Venus from outside the UI, the Venus MCP server lets any MCP-aware agent (Claude Code, Claude Desktop, custom agents) create notebooks, add cells, and run pipelines programmatically. See [`docs/USAGE.md` → Agentic Workflows](USAGE.md#agentic-workflows--use-customize-contribute).
+
+---
+
 ## Language Support
 
 Venus supports multiple cell execution modes. Each language is **optional** — install only what you need.
@@ -216,8 +236,8 @@ Install NuGet packages via the **Packages → NuGet** tab in Venus. Installed pa
 
 ```bash
 # Clone from GitHub (once published)
-git clone https://github.com/yourusername/venus-notebooks.git
-cd venus-notebooks
+git clone https://github.com/snchande/Venus.git
+cd Venus
 
 # OR download the zip and extract
 ```

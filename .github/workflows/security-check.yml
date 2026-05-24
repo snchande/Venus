@@ -1,0 +1,137 @@
+name: security-check
+
+# Venus Notebooks — PR Security & Architecture Gate
+#
+# Every PR runs scripts/security-check (the same script you run locally).
+# A blocking finding fails this job, which in turn keeps the PR in DRAFT
+# state via the auto-draft step at the bottom. Once the author resolves
+# the findings and pushes, the workflow re-runs; on PASS the PR is moved
+# back to "ready for review", and the founding-contributor review (via
+# CODEOWNERS) becomes the next gate before merge.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  security-check:
+    name: Security & architecture scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need history for base-ref diff
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Make scripts executable
+        run: chmod +x scripts/security-check.sh
+
+      - name: Determine base ref
+        id: base
+        run: |
+          if [[ -n "${{ github.base_ref }}" ]]; then
+            echo "ref=origin/${{ github.base_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run security check (JSON)
+        id: scan
+        run: |
+          set +e
+          if [[ -n "${{ steps.base.outputs.ref }}" ]]; then
+            ./scripts/security-check.sh --base "${{ steps.base.outputs.ref }}" --json > security-report.json
+          else
+            ./scripts/security-check.sh --json > security-report.json
+          fi
+          exit_code=$?
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          echo "----- security-report.json -----"
+          cat security-report.json
+          exit 0   # we re-decide pass/fail explicitly below
+
+      - name: Run security check (human-readable, for log)
+        run: |
+          set +e
+          if [[ -n "${{ steps.base.outputs.ref }}" ]]; then
+            ./scripts/security-check.sh --base "${{ steps.base.outputs.ref }}"
+          else
+            ./scripts/security-check.sh
+          fi
+          exit 0
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.json
+          retention-days: 30
+
+      - name: Post / update PR comment with findings
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const r = JSON.parse(fs.readFileSync('security-report.json','utf8'));
+            const sum = r.summary;
+            const status = sum.blocks > 0 ? '❌ BLOCK' : (sum.warns > 0 ? '⚠️ WARN' : '✅ PASS');
+            const top = r.findings.slice(0, 30).map(f =>
+              `- **${f.level.toUpperCase()}** \`${f.rule}\` — \`${f.path}${f.line ? ':' + f.line : ''}\` — ${f.detail}`
+            ).join('\n');
+            const body = `### Venus security check — ${status}\n\n` +
+                         `**Summary:** ${sum.blocks} block · ${sum.warns} warn · ${sum.infos} info\n\n` +
+                         (r.findings.length > 0 ? `**Top findings:**\n${top}\n` : '_No findings._\n') +
+                         (sum.blocks > 0 ? `\n> This PR cannot be marked **ready for review** until all blocking findings are resolved.` : '') +
+                         `\n\n<sub>Run locally before pushing:&nbsp;\`pwsh ./scripts/security-check.ps1\` or \`./scripts/security-check.sh\`</sub>` +
+                         `\n<!-- venus-security-check -->`;
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const prior = comments.find(c => c.body && c.body.includes('<!-- venus-security-check -->'));
+            if (prior) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: prior.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Convert PR back to draft on BLOCK
+        if: github.event_name == 'pull_request' && steps.scan.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            // GraphQL: convertPullRequestToDraft
+            const q = `mutation($id:ID!){ convertPullRequestToDraft(input:{pullRequestId:$id}){ pullRequest{ isDraft } } }`;
+            try {
+              await github.graphql(q, { id: pr.node_id });
+              core.info(`PR #${pr.number} moved to draft until security findings are resolved.`);
+            } catch (e) {
+              core.warning(`Could not convert PR to draft: ${e.message}`);
+            }
+
+      - name: Fail job on BLOCK
+        if: steps.scan.outputs.exit_code != '0'
+        run: |
+          echo "::error::Venus security check found blocking issues. See PR comment for details."
+          exit 1
