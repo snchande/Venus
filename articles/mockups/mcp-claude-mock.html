@@ -4,7 +4,19 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1600px; height: 1000px; background: #1a1a1a;
     font-family: -apple-system, 'Segoe UI', sans-serif; color: #e5e5e5;
-    display: flex; padding: 30px; gap: 30px; }
+    display: flex; flex-direction: column; padding: 30px; gap: 20px; }
+  .row { display: flex; gap: 30px; flex: 1; min-height: 0; }
+  /* Multi-CLI footer — any MCP client drives Arima locally */
+  .cli-footer { background: #161616; border: 1px solid #404040; border-radius: 12px;
+    padding: 16px 24px; display: flex; align-items: center; gap: 22px; }
+  .cli-footer .lead { font-size: 14px; color: #cbd5e1; font-weight: 600; white-space: nowrap; }
+  .cli-footer .clis { display: flex; gap: 12px; flex: 1; }
+  .cli-chip { display: flex; align-items: center; gap: 8px; background: #1f1f1f;
+    border: 1px solid #404040; border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #e5e5e5; }
+  .cli-chip b { color: #fff; } .cli-chip .cmd { font-family: 'Consolas', monospace; color: #94a3b8; font-size: 12px; }
+  .cli-chip .d { width: 9px; height: 9px; border-radius: 50%; }
+  .cli-footer .mcp { font-family: 'Consolas', monospace; font-size: 12px; color: #86efac;
+    background: #122; border: 1px solid #15803d; border-radius: 8px; padding: 8px 14px; white-space: nowrap; }
   /* Left — fake Claude Desktop window */
   .claude-win { flex: 1.4; background: #262626; border-radius: 12px;
     box-shadow: 0 25px 60px rgba(0,0,0,0.5);
@@ -77,10 +89,11 @@
     font-size: 60px; color: #06b6d4; opacity: 0.5; }
 </style></head>
 <body>
+  <div class="row">
   <div class="claude-win">
     <div class="titlebar">
       <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-      <div class="title">Claude Desktop · Conversation</div>
+      <div class="title">MCP client · Conversation  (Claude shown — Gemini &amp; Copilot CLI work identically)</div>
     </div>
     <div class="toolbar">
       <span>MCP Tools Active:</span>
@@ -156,5 +169,16 @@ Chart.<span class="fn">scatter</span>(points).<span class="fn">addLine</span>(fi
         </div>
       </div>
     </div>
+  </div>
+  </div>
+
+  <div class="cli-footer">
+    <div class="lead">Works with any MCP client</div>
+    <div class="clis">
+      <div class="cli-chip"><span class="d" style="background:#d97757"></span><b>Claude</b> <span class="cmd">claude</span></div>
+      <div class="cli-chip"><span class="d" style="background:#4285f4"></span><b>Gemini CLI</b> <span class="cmd">gemini</span></div>
+      <div class="cli-chip"><span class="d" style="background:#6cc644"></span><b>GitHub Copilot CLI</b> <span class="cmd">copilot</span></div>
+    </div>
+    <div class="mcp">local MCP · http://localhost:8585/api/mcp · agents + skills preconfigured</div>
   </div>
 </body></html>
