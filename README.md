@@ -340,10 +340,10 @@ Tutorials open in **read-only mode** — your personal notebooks are separate.
 Three launchers sit in the project root — pick whichever matches your shell. They all expose the same subcommands and share the same banner:
 
 ```
-        .           V E N U S   N O T E B O O K S
+        .           A R I M A   N O T E B O O K S
        /|\          ─────────────────────────────
       ( @ )         Java | JS | TS | C# | F# | C++
-     /|\_/|\        Powered by JShell + Spring Boot
+     /|\_/|\        Brewed by Barista · JShell + Spring Boot
     / |   | \       Port: 8585
 ```
 
