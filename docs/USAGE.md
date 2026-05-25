@@ -1,24 +1,24 @@
-# Venus Notebooks - Usage Guide
+# Arima Notebooks - Usage Guide
 
-## Starting Venus (Windows CLI)
+## Starting Arima (Windows CLI)
 
-`venus.cmd` in the project root is the quickest way to manage Venus Notebooks on Windows.
+`arima.cmd` in the project root is the quickest way to manage Arima Notebooks on Windows.
 
 ```cmd
-venus               # start server + open browser (auto-builds on first run)
-venus start --bg    # start in background
-venus stop          # stop the server
-venus status        # check if running
-venus help          # full command reference
+arima               # start server + open browser (auto-builds on first run)
+arima start --bg    # start in background
+arima stop          # stop the server
+arima status        # check if running
+arima help          # full command reference
 ```
 
-See [docs/SETUP.md](SETUP.md#venus-cli-windows) for the complete CLI reference.
+See [docs/SETUP.md](SETUP.md#arima-cli-windows) for the complete CLI reference.
 
 ---
 
 ## The Interface
 
-Venus Notebooks has five main tabs:
+Arima Notebooks has five main tabs:
 
 | Tab | Purpose |
 |-----|---------|
@@ -42,7 +42,7 @@ The browser has two sections:
 - Click **+ New Notebook** to create a blank notebook
 - Click any card to open it in a new tab
 
-**Venus Tutorials** — built-in read-only notebooks organized by language and level.
+**Arima Tutorials** — built-in read-only notebooks organized by language and level.
 - Tutorials are grouped by: `JShell` / `Java` / `JavaScript` / `TypeScript` / `C#` / `F#` / `C++`
 - Each group is sub-divided: **Basics & Foundations** → **Advanced** → **Data Science & Analytics**
 - Level badges (`101` → `601`) indicate progression within each language track
@@ -65,7 +65,7 @@ Tutorial tracks available: **JShell**, **Java**, **JavaScript**, **TypeScript**,
 
 ### Working with Cells
 
-Venus has four cell types, each visually distinct:
+Arima has four cell types, each visually distinct:
 
 | Type | Border | Badge | Purpose |
 |------|--------|-------|---------|
@@ -90,7 +90,7 @@ Venus has four cell types, each visually distinct:
 
 ```java
 // JShell mode (default) — snippets, shared state
-var greeting = "Hello, Venus!";
+var greeting = "Hello, Arima!";
 System.out.println(greeting);
 ```
 
@@ -118,30 +118,30 @@ Every code cell has a **mode button** on its header. Click it to **cycle through
 
 #### AI-powered language conversion
 
-When you switch a cell's language mode, Venus offers to **convert the existing code** to the new language. A banner appears below the cell header:
+When you switch a cell's language mode, Arima offers to **convert the existing code** to the new language. A banner appears below the cell header:
 
 ```
 Convert code from Java → C++?    [Convert]  [Keep as-is]
 ```
 
-- Click **Convert** — Venus sends the code to the active AI provider and rewrites it in the target language. The result replaces the cell contents.
+- Click **Convert** — Arima sends the code to the active AI provider and rewrites it in the target language. The result replaces the cell contents.
 - Click **Keep as-is** (or wait 15 seconds) — the banner dismisses and the original code stays unchanged.
 
 The mode switch is immediate; conversion is always optional.
 
 #### JavaScript mode built-in helpers
 
-Every JS cell has a `venus` object available automatically:
+Every JS cell has a `arima` object available automatically:
 
 ```javascript
 // Pretty-print an array of objects as a table
-venus.table([ { name: 'Alice', score: 95 }, { name: 'Bob', score: 87 } ]);
+barista.table([ { name: 'Alice', score: 95 }, { name: 'Bob', score: 87 } ]);
 
 // JSON display with indent
-venus.display({ key: 'value', nested: { x: 1 } });
+barista.display({ key: 'value', nested: { x: 1 } });
 
 // Quick statistics for a number array
-venus.stats([12, 45, 23, 67, 34, 56]);
+barista.stats([12, 45, 23, 67, 34, 56]);
 // → count: 6  min: 12  max: 67  mean: 39.5000  std: 18.5472
 ```
 
@@ -219,7 +219,7 @@ can all declare anchors and dependencies and be orchestrated together.
 //@ description: Loads the raw CSV file
 //@ depends: validateConfig
 
-Table data = VenusDisplay.loadCsv("data/sales.csv");
+Table data = BaristaDisplay.loadCsv("data/sales.csv");
 System.out.println("Rows: " + data.rowCount());
 ```
 
@@ -265,13 +265,13 @@ The picker only shows cells that have an anchor name (`//@ anchor: ...`). Cells 
 **Tips:**
 - You can pick multiple references — open the picker again for each additional dependency
 - To remove a cross-notebook dependency, edit the `//@ depends:` line directly in the cell source
-- Run cross-notebook dependencies with **→ Run with deps** (the arrow button) — Venus will execute the foreign cell first and inject its output/state
+- Run cross-notebook dependencies with **→ Run with deps** (the arrow button) — Arima will execute the foreign cell first and inject its output/state
 
 ---
 
 ## Data Science
 
-Venus includes a full data science stack pre-loaded in every JShell session. No install required.
+Arima includes a full data science stack pre-loaded in every JShell session. No install required.
 
 ### Built-in Libraries
 
@@ -282,53 +282,53 @@ Venus includes a full data science stack pre-loaded in every JShell session. No 
 | **Tablesaw** | 0.43.1 | `tech.tablesaw.api.*` |
 | **OpenCSV** | 5.9 | `com.opencsv.*` |
 
-All imports and the `VenusDisplay` helper class are automatically available.
+All imports and the `BaristaDisplay` helper class are automatically available.
 
-### VenusDisplay — Chart Rendering
+### BaristaDisplay — Chart Rendering
 
 Charts are rendered inline in cell output as PNG images.
 
 ```java
 // XY / Line chart
-var chart = VenusDisplay.xyChart("Title", "X", "Y");
+var chart = BaristaDisplay.xyChart("Title", "X", "Y");
 chart.addSeries("sin(x)", xData, yData);
-VenusDisplay.show(chart);
+BaristaDisplay.show(chart);
 
 // Bar chart
-var bar = VenusDisplay.barChart("Monthly Sales", "Month", "Revenue");
+var bar = BaristaDisplay.barChart("Monthly Sales", "Month", "Revenue");
 bar.addSeries("2024", months, values);
-VenusDisplay.show(bar);
+BaristaDisplay.show(bar);
 
 // Pie chart
-var pie = VenusDisplay.pieChart("Market Share");
+var pie = BaristaDisplay.pieChart("Market Share");
 pie.addSeries("Share", labels, percentages);
-VenusDisplay.show(pie);
+BaristaDisplay.show(pie);
 ```
 
-### VenusDisplay — DataFrame / Table Output
+### BaristaDisplay — DataFrame / Table Output
 
 Tables are rendered as styled HTML inline in cell output.
 
 ```java
 // Tablesaw DataFrame
-Table df = VenusDisplay.loadCsv("data/sales.csv");
-VenusDisplay.show(df);            // full table (max 50 rows)
-VenusDisplay.show(df, 10);        // first 10 rows
-VenusDisplay.info(df);            // column names, types, missing counts
-VenusDisplay.describe(df);        // numeric column statistics
+Table df = BaristaDisplay.loadCsv("data/sales.csv");
+BaristaDisplay.show(df);            // full table (max 50 rows)
+BaristaDisplay.show(df, 10);        // first 10 rows
+BaristaDisplay.info(df);            // column names, types, missing counts
+BaristaDisplay.describe(df);        // numeric column statistics
 
 // Custom HTML table from arrays
-VenusDisplay.table(
+BaristaDisplay.table(
     new String[][]{{"Alice","30"},{"Bob","25"}},
     "Name", "Age"
 );
 ```
 
-### VenusDisplay — Statistics Summary
+### BaristaDisplay — Statistics Summary
 
 ```java
 double[] data = {1.2, 3.4, 2.1, 5.0, 4.3};
-VenusDisplay.stats("My Dataset", data);
+BaristaDisplay.stats("My Dataset", data);
 // Displays: count, min, max, mean, median, std deviation
 ```
 
@@ -355,7 +355,7 @@ System.out.println("P(X < 1.96) = " + normal.cumulativeProbability(1.96));
 
 ```java
 // Load CSV
-Table df = VenusDisplay.loadCsv("data/sales.csv");
+Table df = BaristaDisplay.loadCsv("data/sales.csv");
 
 // Filter
 Table filtered = df.where(df.numberColumn("amount").isGreaterThan(100));
@@ -381,7 +381,7 @@ Open notebook **`java-601`** for comprehensive data science examples covering al
 ```java
 // Cell 1
 var x = 42;
-var name = "Venus";
+var name = "Arima";
 ```
 
 ```java
@@ -392,7 +392,7 @@ System.out.println(name + " says: " + x);
 ### No Class Wrapper Needed (JShell mode)
 
 ```java
-// This works directly in JShell/Venus:
+// This works directly in JShell/Arima:
 var list = List.of(1, 2, 3, 4, 5);
 list.stream().filter(n -> n > 2).forEach(System.out::println);
 ```
@@ -438,9 +438,9 @@ C# cells run as C# 9+ top-level programs via `dotnet run`. The .NET SDK must be 
 ### Built-in helpers
 
 ```csharp
-VenusHtml("<b>bold</b>");       // rendered as HTML in output
-VenusDisplay(myObject);          // Console.WriteLine
-VenusTable(myList);              // ASCII table for any IEnumerable<T>
+BaristaHtml("<b>bold</b>");       // rendered as HTML in output
+BaristaDisplay(myObject);          // Console.WriteLine
+BaristaTable(myList);              // ASCII table for any IEnumerable<T>
 ```
 
 ### Records, classes, and LINQ
@@ -454,7 +454,7 @@ var products = new List<Product> {
 };
 
 var expensive = products.Where(p => p.Price > 10).ToList();
-VenusTable(expensive);
+BaristaTable(expensive);
 ```
 
 ### NuGet packages
@@ -466,7 +466,7 @@ Install packages via the **Packages → NuGet** tab, or add an inline reference 
 #r "nuget: Newtonsoft.Json, 13.0.3"
 using Newtonsoft.Json;
 
-var json = JsonConvert.SerializeObject(new { name = "Venus", version = 1 });
+var json = JsonConvert.SerializeObject(new { name = "Arima", version = 1 });
 Console.WriteLine(json);
 ```
 
@@ -484,16 +484,16 @@ Console.WriteLine($"Loaded {sales.Count} rows");
 ```csharp
 //@ anchor: analyzeData
 //@ depends: loadData
-// Venus injects `loadData` source before this cell — `sales` is in scope
+// Arima injects `loadData` source before this cell — `sales` is in scope
 var total = sales.Sum(s => s.Amount);
 Console.WriteLine($"Total: ${total:N0}");
 ```
 
-> **How it works**: When `//@ depends: loadData` is declared, Venus prepends the source code from
+> **How it works**: When `//@ depends: loadData` is declared, Arima prepends the source code from
 > `loadData` (with its console output silenced) before compiling and running this cell.
 > All variables and types from ancestor cells are in scope.
 >
-> **Important**: Run ancestor cells first (or use **→ Run with deps**) — Venus caches each
+> **Important**: Run ancestor cells first (or use **→ Run with deps**) — Arima caches each
 > anchor's source on first successful run and reuses it for dependent cells.
 
 ---
@@ -505,9 +505,9 @@ F# cells run as `.fsx` scripts via `dotnet fsi`. The .NET SDK must be installed.
 ### Built-in helpers
 
 ```fsharp
-venusHtml "<b>bold</b>"        // rendered as HTML in output
-venusDisplay myObject           // printfn "%A"
-venusTable myList               // printfn "%A"
+baristaHtml "<b>bold</b>"        // rendered as HTML in output
+baristaDisplay myObject           // printfn "%A"
+baristaTable myList               // printfn "%A"
 ```
 
 ### Option and Result types
@@ -524,7 +524,7 @@ let safeDivide a b =
 Install packages via the **Packages → NuGet** tab, or use an inline `#r` directive in the cell:
 
 ```fsharp
-// Inline reference (Venus places it at the top of the script automatically):
+// Inline reference (Arima places it at the top of the script automatically):
 #r "nuget: Humanizer.Core, 2.14.1"
 open Humanizer
 
@@ -560,13 +560,13 @@ byCategory |> List.iter (fun (cat, ts) ->
 
 ## C++ Cells
 
-C++ cells compile and run with C++17. No `main()` function is needed — Venus wraps your code automatically.
+C++ cells compile and run with C++17. No `main()` function is needed — Arima wraps your code automatically.
 
-**Supported compilers** (Venus detects automatically, in order):
+**Supported compilers** (Arima detects automatically, in order):
 - `g++` / `clang++` on PATH — MinGW-w64, MSYS2, WinLibs, Homebrew, or system package
 - **Visual Studio / Build Tools (MSVC)** — detected automatically on Windows, no PATH setup needed
 
-> **First time?** Just run a C++ cell. If a compiler is found, it executes immediately. If not, Venus shows exact install instructions for your platform.
+> **First time?** Just run a C++ cell. If a compiler is found, it executes immediately. If not, Arima shows exact install instructions for your platform.
 
 ### What's available in every C++ cell
 
@@ -583,10 +583,10 @@ using namespace std;
 ### Built-in helpers
 
 ```cpp
-venusHtml("<b>bold</b>");         // rendered as HTML in output
-venusDisplay(value);              // cout << value << "\n"
-venusTable(myVector);             // prints item count
-venusTable(myMap);                // key/value ASCII table
+baristaHtml("<b>bold</b>");         // rendered as HTML in output
+baristaDisplay(value);              // cout << value << "\n"
+baristaTable(myVector);             // prints item count
+baristaTable(myMap);                // key/value ASCII table
 ```
 
 ### Writing a cell
@@ -607,7 +607,7 @@ cout << "\n";
 
 ### Complete programs
 
-If your cell contains `int main(`, Venus compiles it as a complete program (with the standard headers still prepended):
+If your cell contains `int main(`, Arima compiles it as a complete program (with the standard headers still prepended):
 
 ```cpp
 #include <fstream>    // additional headers work fine
@@ -652,7 +652,7 @@ cout << "Mean:  " << sum / data.size() << "\n";
 
 ### Installing C++ (if needed)
 
-If you see "C++ compiler not found", Venus shows platform-specific instructions. Quick reference:
+If you see "C++ compiler not found", Arima shows platform-specific instructions. Quick reference:
 
 | Platform | Easiest option |
 |----------|---------------|
@@ -727,7 +727,7 @@ The active runtime badge in the header shows which runtime is currently selected
 
 ### Inline Charts
 
-JavaScript cells can render charts directly in the console output using `venus.html()`:
+JavaScript cells can render charts directly in the console output using `barista.html()`:
 
 ```javascript
 const d3 = require('d3');
@@ -735,7 +735,7 @@ const svg = `<svg width="200" height="60">
   <rect x="10" y="10" width="80" height="40" fill="steelblue"/>
   <text x="50" y="36" fill="white" text-anchor="middle">Bar</text>
 </svg>`;
-venus.html(svg);
+barista.html(svg);
 ```
 
 ### Console vs Notebook
@@ -808,7 +808,7 @@ console.log('Std:', ss.standardDeviation(data).toFixed(2));
 2. Enter a **Package ID** (e.g. `Newtonsoft.Json`) and **Version** (e.g. `13.0.3`)
 3. Click **Install**
 
-The package is saved to `data/nuget-packages.json`. On next C# or F# cell execution, Venus prepends:
+The package is saved to `data/nuget-packages.json`. On next C# or F# cell execution, Arima prepends:
 ```
 #r "nuget: Newtonsoft.Json, 13.0.3"
 ```
@@ -882,9 +882,9 @@ Click **Generate Notebook** to have the active AI provider create a complete not
 
 ## Agentic Workflows — Use, Customize, Contribute
 
-Venus assumes an AI partner is in your loop and gives you three surfaces to work from. Pick whichever fits the moment.
+Arima assumes an AI partner is in your loop and gives you three surfaces to work from. Pick whichever fits the moment.
 
-### Surface 1 — The AI panel inside Venus (use)
+### Surface 1 — The AI panel inside Arima (use)
 
 For *this notebook, right now*. Generate cells, explain output, convert between languages, ask why something failed. Attach a cell with the 🤖 button so the AI sees the actual code. Code blocks in responses have an **Insert into notebook** button.
 
@@ -893,9 +893,9 @@ For *this notebook, right now*. Generate cells, explain output, convert between 
 - *"Convert the selected Java cell to TypeScript."* (then **Insert into notebook**)
 - *"Why is the pipeline saying `clean-data` is stale? Look at the dependency chain."*
 
-### Surface 2 — Your AI CLI in the Venus repo (customize)
+### Surface 2 — Your AI CLI in the Arima repo (customize)
 
-For *Venus itself*. Open `claude code`, `copilot`, or `gemini` inside the cloned repo. The agent reads [`AGENTS.md`](../AGENTS.md) for the architecture rules and edits the right files. Most one-feature changes take under an hour.
+For *Arima itself*. Open `claude code`, `copilot`, or `gemini` inside the cloned repo. The agent reads [`AGENTS.md`](../AGENTS.md) for the architecture rules and edits the right files. Most one-feature changes take under an hour.
 
 **Try:**
 - *"Add a 'Export as Markdown' button to the notebook toolbar. New endpoint, new UI button, update `docs/API.md`."*
@@ -906,23 +906,23 @@ When you're happy, close the contribution loop with one more prompt:
 
 > *"Run `pwsh ./scripts/security-check.ps1`, then push the branch and open a PR back to upstream with a clear description."*
 
-### Surface 3 — Any MCP-aware agent (drive Venus programmatically)
+### Surface 3 — Any MCP-aware agent (drive Arima programmatically)
 
-Venus publishes itself as an [MCP](https://modelcontextprotocol.io) server. Add it to Claude Code, Claude Desktop, or any MCP-aware agent and you can drive notebooks from outside the UI.
+Arima publishes itself as an [MCP](https://modelcontextprotocol.io) server. Add it to Claude Code, Claude Desktop, or any MCP-aware agent and you can drive notebooks from outside the UI.
 
 | MCP tool | What it does |
 |---|---|
-| `venus_create_notebook` | Create a notebook by name |
-| `venus_append_cell` | Append a cell (and optionally run it) |
-| `venus_read_notebook` | Read all cells (source, anchors, output) |
-| `venus_run_pipeline` | Execute a cell with its full dependency chain |
-| `venus_load_module` | Load `notebookId/anchor` into a session for cross-notebook reuse |
+| `barista_create_notebook` | Create a notebook by name |
+| `barista_append_cell` | Append a cell (and optionally run it) |
+| `barista_read_notebook` | Read all cells (source, anchors, output) |
+| `barista_run_pipeline` | Execute a cell with its full dependency chain |
+| `barista_load_module` | Load `notebookId/anchor` into a session for cross-notebook reuse |
 
 **Try (from inside Claude Desktop, after MCP setup):**
-- *"Create a Venus notebook that explores yesterday's API latency data — one cell to load the parquet, one to plot the p95 over time, one to flag outliers. Run it."*
-- *"Read the `pricing-experiment` notebook in Venus and summarize what each cell does."*
+- *"Create a Arima notebook that explores yesterday's API latency data — one cell to load the parquet, one to plot the p95 over time, one to flag outliers. Run it."*
+- *"Read the `pricing-experiment` notebook in Arima and summarize what each cell does."*
 
-The notebook is the shared artifact. You, the Venus UI, the AI panel, the CLI, and any MCP agent are all first-class users of it.
+The notebook is the shared artifact. You, the Arima UI, the AI panel, the CLI, and any MCP agent are all first-class users of it.
 
 ---
 

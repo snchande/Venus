@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — AI Assistant
+ * Arima Notebooks — AI Assistant
  *
  * Context-aware chat powered by the local Claude CLI (Pro plan).
  * Automatically includes the focused cell + notebook state in every message.
@@ -25,10 +25,10 @@ const AIAssistant = (() => {
         document.getElementById('btn-gen-cancel')?.addEventListener('click', () =>
             document.getElementById('gen-modal')?.classList.add('hidden'));
         document.getElementById('btn-gen-confirm')?.addEventListener('click', generateNotebook);
-        // Close button now routes through Venus.closeAi so the FAB + backdrop
+        // Close button now routes through Arima.closeAi so the FAB + backdrop
         // stay in sync. app.js also wires this handler; both call setOpen(false).
         document.getElementById('btn-ai-close')?.addEventListener('click', () =>
-            Venus.closeAi?.());
+            Arima.closeAi?.());
 
         document.getElementById('ai-input')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -57,7 +57,7 @@ const AIAssistant = (() => {
             const input = document.getElementById('ai-input');
             if (!input?.value.trim()) {
                 if (!cellContext) {
-                    Venus.setStatus('Click a cell first, then describe the update.');
+                    Arima.setStatus('Click a cell first, then describe the update.');
                     return;
                 }
                 input.value = 'Improve and update this cell, fix any issues and make it cleaner.';
@@ -152,9 +152,9 @@ const AIAssistant = (() => {
 
         try {
             // Save to settings
-            const current = await Venus.api('GET', '/settings');
-            await Venus.api('PUT', '/settings', { ...current, aiProvider: provider });
-            if (Venus.state?.settings) Venus.state.settings.aiProvider = provider;
+            const current = await Arima.api('GET', '/settings');
+            await Arima.api('PUT', '/settings', { ...current, aiProvider: provider });
+            if (Arima.state?.settings) Arima.state.settings.aiProvider = provider;
 
             _updateProviderUI();
 
@@ -162,7 +162,7 @@ const AIAssistant = (() => {
             const p = PROVIDERS[provider];
             _appendSwitchNotice(p.label, p.icon);
         } catch (e) {
-            Venus.setStatus('Failed to switch provider: ' + e.message);
+            Arima.setStatus('Failed to switch provider: ' + e.message);
         } finally {
             document.querySelectorAll('.ai-prov-btn').forEach(b => b.classList.remove('switching'));
         }
@@ -179,7 +179,7 @@ const AIAssistant = (() => {
     }
 
     function _updateProviderUI() {
-        Venus.api('GET', '/llm/provider').then(data => {
+        Arima.api('GET', '/llm/provider').then(data => {
             const p = PROVIDERS[data.provider] || { label: data.provider, icon: '🤖', color: '#888' };
 
             // Header title + icon + badge
@@ -196,7 +196,7 @@ const AIAssistant = (() => {
             });
 
             // Fetch availability for all providers and mark unavailable
-            Venus.api('GET', '/settings/status').then(status => {
+            Arima.api('GET', '/settings/status').then(status => {
                 const avail = {
                     claude_cli:  status.claudeCliAvailable,
                     copilot_cli: status.githubCopilotAvailable,
@@ -264,7 +264,7 @@ const AIAssistant = (() => {
         if (ctx?.cell) { cellContext = ctx.cell; nbContext = ctx; }
         else cellContext = { source: code, mode: 'jshell' };
         renderContextBadge();
-        Venus.openAi?.();
+        Arima.openAi?.();
         const input = document.getElementById('ai-input');
         if (input) { input.value = prompt || ''; input.focus(); }
     }
@@ -281,7 +281,7 @@ const AIAssistant = (() => {
             cpp:        'C++ (MSVC / GCC / Clang subprocess)',
         };
 
-        let sys = `You are the AI assistant embedded in **Venus Notebooks** — an interactive multi-language notebook environment.
+        let sys = `You are the AI assistant embedded in **Arima Notebooks** — an interactive multi-language notebook environment.
 
 ## Supported execution modes
 | Mode | Language | Notes |
@@ -294,7 +294,7 @@ const AIAssistant = (() => {
 | fsharp | F# | \`dotnet fsi\` script, functional style |
 
 ## Your role
-- Help the user write, debug, understand, and improve code in their Venus notebook cells
+- Help the user write, debug, understand, and improve code in their Arima notebook cells
 - When asked to fix/rewrite/improve code, output a **complete, runnable** code block in the same language as the focused cell
 - Answer questions about the notebook's structure, dependencies, and execution flow
 - If the user asks "why is this failing" check the last error in context before answering
@@ -310,13 +310,13 @@ const AIAssistant = (() => {
 \`\`\`
 Cross-notebook: \`//@ depends: notebook:notebookId/anchorName\`
 
-## Venus helpers
-- JShell/Java: \`VenusDisplay.show(chart)\` — inline XChart
-- C#: \`VenusHtml("html")\`, \`VenusDisplay(obj)\`, \`VenusTable(IEnumerable)\`
-- F#: \`venusHtml "html"\`, \`venusDisplay obj\`, \`venusTable list\`
+## Arima helpers
+- JShell/Java: \`ArimaDisplay.show(chart)\` — inline XChart
+- C#: \`ArimaHtml("html")\`, \`ArimaDisplay(obj)\`, \`ArimaTable(IEnumerable)\`
+- F#: \`baristaHtml "html"\`, \`baristaDisplay obj\`, \`baristaTable list\`
 
 ## C# / F# dependency injection
-When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor source (output suppressed) so types/variables are in scope. No shared process — each cell execution is self-contained.`;
+When a cell has \`//@ depends: anchor\`, Arima compiles and injects the ancestor source (output suppressed) so types/variables are in scope. No shared process — each cell execution is self-contained.`;
 
         // ── Notebook context ──
         if (nbContext) {
@@ -366,8 +366,8 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
 ## Responding with code
 - Wrap ALL code in fenced code blocks with the correct language tag (\`\`\`java, \`\`\`jshell, \`\`\`csharp, \`\`\`fsharp, \`\`\`js, \`\`\`ts, \`\`\`cpp)
 - Match the language/mode of the focused cell unless the user explicitly asks to change it
-- Venus shows **Apply to cell**, **Apply & Run**, and **Insert as new cell** buttons under every code block
-- Keep each block complete and immediately runnable as a Venus cell`;
+- Arima shows **Apply to cell**, **Apply & Run**, and **Insert as new cell** buttons under every code block
+- Keep each block complete and immediately runnable as a Arima cell`;
 
         return sys;
     }
@@ -407,7 +407,7 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
         appendLoadingMessage(loadingId);
 
         try {
-            const response = await Venus.api('POST', '/llm/chat', {
+            const response = await Arima.api('POST', '/llm/chat', {
                 history:      chatHistory,
                 message:      message,
                 systemPrompt: buildSystemPrompt()
@@ -419,23 +419,23 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
 
             const msgDiv = appendMessage('assistant', text);
             addCodeActions(msgDiv, text, autoMode);
-            Venus.setStatus('AI response received');
+            Arima.setStatus('AI response received');
         } catch (e) {
             removeLoadingMessage(loadingId);
             const errText = e.message || String(e);
             // Provider-aware error hint
-            const _ap = Venus.state?.settings?.aiProvider || 'claude_cli';
+            const _ap = Arima.state?.settings?.aiProvider || 'claude_cli';
             const providerHint = _ap === 'copilot_cli'
-                ? `Venus is configured to use **Copilot CLI**.\n` +
+                ? `Arima is configured to use **Copilot CLI**.\n` +
                   `Make sure the \`copilot\` command is on your PATH and authenticated.`
                 : _ap === 'gemini_cli'
-                ? `Venus is configured to use **Gemini CLI**.\n` +
+                ? `Arima is configured to use **Gemini CLI**.\n` +
                   `Make sure it is installed and authenticated:\n` +
                   `\`\`\`\nnpm install -g @google/gemini-cli\ngemini auth\n\`\`\``
-                : `Venus uses your local **Claude CLI** (Pro plan). Make sure it is installed and signed in:\n` +
+                : `Arima uses your local **Claude CLI** (Pro plan). Make sure it is installed and signed in:\n` +
                   `\`\`\`\nclaude auth\n\`\`\``;
             appendMessage('assistant', `**Error:** ${errText}\n\n${providerHint}`);
-            Venus.setStatus('AI error');
+            Arima.setStatus('AI error');
         }
     }
 
@@ -588,7 +588,7 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
         if (!prompt) { alert('Describe the notebook you want to generate.'); return; }
         const btn = document.getElementById('btn-gen-confirm');
         if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
-        Venus.setStatus('Generating notebook with AI…');
+        Arima.setStatus('Generating notebook with AI…');
         try {
             const response = await fetch('/api/llm/generate', {
                 method: 'POST',
@@ -603,13 +603,13 @@ When a cell has \`//@ depends: anchor\`, Venus compiles and injects the ancestor
             let nb;
             try { nb = JSON.parse(raw.replace(/^```json\s*/m,'').replace(/\s*```\s*$/m,'').trim()); }
             catch { throw new Error('AI returned invalid JSON. Try a clearer description.'); }
-            const saved = await Venus.api('POST', '/notebooks', { name: nb.name || 'AI Generated Notebook' });
+            const saved = await Arima.api('POST', '/notebooks', { name: nb.name || 'AI Generated Notebook' });
             nb.id = saved.id;
-            await Venus.api('PUT', `/notebooks/${saved.id}`, nb);
+            await Arima.api('PUT', `/notebooks/${saved.id}`, nb);
             document.getElementById('gen-modal')?.classList.add('hidden');
             document.querySelector('[data-tab="notebook"]')?.click();
             await NotebookEditor.loadNotebook(saved.id);
-            Venus.setStatus('Notebook generated: ' + (nb.name || 'AI Notebook'));
+            Arima.setStatus('Notebook generated: ' + (nb.name || 'AI Notebook'));
             if (document.getElementById('gen-prompt')) document.getElementById('gen-prompt').value = '';
         } catch (e) {
             alert('Failed to generate notebook: ' + e.message);

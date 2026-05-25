@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Venus Notebooks — PR Security & Architecture Check (POSIX)
+# Arima Notebooks — PR Security & Architecture Check (POSIX)
 #
 # Runs locally (pre-push) and in CI. Same rules as scripts/security-check.ps1.
 # Exit code:
@@ -36,7 +36,7 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   mapfile -t FILES < <(git ls-files | grep -E '\.(java|js|ts|cs|fs|cpp|h|hpp|html|css|xml|yml|yaml|md|json|properties|ps1|sh)$' | grep -v -E '^(target|node_modules|data|\.idea|\.vscode)/' || true)
 fi
 
-[[ $JSON -eq 0 ]] && echo "" && echo "Venus security check — scanning ${#FILES[@]} file(s)" && \
+[[ $JSON -eq 0 ]] && echo "" && echo "Arima security check — scanning ${#FILES[@]} file(s)" && \
   echo "───────────────────────────────────────────────────────"
 
 # ──────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ scan_rule warn  exec/process-builder-shell 'ProcessBuilder\s*\(\s*"cmd",\s*"/c"|
 # ──────────────────────────────────────────────────────────────
 scan_rule block ui/forbidden-framework \
   'from[[:space:]]+"(react|vue|svelte)"|require\("(jquery|lodash|axios)"\)' \
-  'Forbidden browser framework/library — Venus frontend is vanilla JS' no
+  'Forbidden browser framework/library — Arima frontend is vanilla JS' no
 scan_rule block ui/lombok \
   'import[[:space:]]+lombok\.|@Data\b|@Getter\b|@Setter\b|@Builder\b|@AllArgsConstructor\b|@NoArgsConstructor\b' \
   'Lombok is forbidden (removed for JDK 25 compatibility)' no
@@ -126,14 +126,14 @@ scan_rule info style/todo-fixme '\b(TODO|FIXME|XXX|HACK)\b' \
 # ──────────────────────────────────────────────────────────────
 for f in "${FILES[@]}"; do
   case "$f" in
-    src/main/java/com/venus/controller/*Controller.java)
-      if grep -qE 'import[[:space:]]+com\.venus\.controller\.[A-Za-z]+Controller[[:space:]]*;' "$f" 2>/dev/null; then
+    src/main/java/com/barista/controller/*Controller.java)
+      if grep -qE 'import[[:space:]]+com.barista\.controller\.[A-Za-z]+Controller[[:space:]]*;' "$f" 2>/dev/null; then
         add_finding block arch/controller-cycle "$f" 0 \
           'Controller imports another controller — must call through a service'
       fi
       ;;
     src/main/resources/static/*.js)
-      if grep -qE 'jdbc:|java\.sql\.|Connection\.|com\.venus\.shell\.' "$f" 2>/dev/null; then
+      if grep -qE 'jdbc:|java\.sql\.|Connection\.|com.barista\.shell\.' "$f" 2>/dev/null; then
         add_finding block arch/frontend-backend-leak "$f" 0 \
           'Frontend references backend internals — must use REST/STOMP only'
       fi

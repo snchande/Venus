@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks - Settings Panel
+ * Arima Notebooks - Settings Panel
  * Load and save application settings.
  */
 
@@ -12,7 +12,7 @@ const SettingsPanel = (() => {
 
     async function loadSettings() {
         try {
-            const settings = await Venus.api('GET', '/settings');
+            const settings = await Arima.api('GET', '/settings');
             populateForm(settings);
         } catch (e) {
             console.error('Failed to load settings:', e);
@@ -64,8 +64,8 @@ const SettingsPanel = (() => {
         };
 
         try {
-            const saved = await Venus.api('PUT', '/settings', settings);
-            Venus.state.settings = { ...Venus.state.settings, ...saved };
+            const saved = await Arima.api('PUT', '/settings', settings);
+            Arima.state.settings = { ...Arima.state.settings, ...saved };
 
             // Apply theme immediately
             applyThemeSwatch(saved.theme || 'dark');
@@ -84,7 +84,7 @@ const SettingsPanel = (() => {
                 setTimeout(() => flash.classList.add('hidden'), 3000);
             }
 
-            Venus.setStatus('Settings saved');
+            Arima.setStatus('Settings saved');
             // Refresh AI intro greeting to reflect the new provider
             if (typeof AIAssistant !== 'undefined' && AIAssistant._updateIntroProvider) {
                 AIAssistant._updateIntroProvider();
@@ -100,7 +100,7 @@ const SettingsPanel = (() => {
         container.innerHTML = '<div class="muted">Loading…</div>';
 
         try {
-            const status = await Venus.api('GET', '/settings/status');
+            const status = await Arima.api('GET', '/settings/status');
             const activeProvider = status.aiProvider || 'claude_cli';
             // Update status-bar version badge
             const vBadge = document.getElementById('sb-version');
@@ -152,12 +152,12 @@ const SettingsPanel = (() => {
     async function loadAuthSettings() {
         try {
             // User info (to show current user banner)
-            const user = await Venus.api('GET', '/user/me');
+            const user = await Arima.api('GET', '/user/me');
             _renderAuthBanner(user);
             _setAuthModeRadio(user.authMode || 'local');
 
             // OAuth credentials
-            const cfg = await Venus.api('GET', '/user/oauth-config');
+            const cfg = await Arima.api('GET', '/user/oauth-config');
             _populateOAuthFields(cfg);
         } catch (e) {
             console.warn('[Settings] Could not load auth settings:', e.message);
@@ -232,8 +232,8 @@ const SettingsPanel = (() => {
 
         try {
             const [modeResult, credsResult] = await Promise.all([
-                Venus.api('PUT', '/settings/auth-mode', { mode }),
-                Venus.api('PUT', '/user/oauth-config', creds),
+                Arima.api('PUT', '/settings/auth-mode', { mode }),
+                Arima.api('PUT', '/user/oauth-config', creds),
             ]);
 
             // Update provider status badges
@@ -249,7 +249,7 @@ const SettingsPanel = (() => {
             const flash = document.getElementById('auth-saved-flash');
             if (flash) { flash.classList.remove('hidden'); setTimeout(() => flash.classList.add('hidden'), 3000); }
 
-            Venus.setStatus(needsRestart ? 'Auth settings saved — restart to apply' : 'Auth settings saved');
+            Arima.setStatus(needsRestart ? 'Auth settings saved — restart to apply' : 'Auth settings saved');
         } catch (e) {
             alert('Failed to save auth settings: ' + e.message);
         }
@@ -289,7 +289,7 @@ const SettingsPanel = (() => {
     }
 
     function _refreshGhCliStatus() {
-        Venus.api('GET', '/settings/status').then(status => {
+        Arima.api('GET', '/settings/status').then(status => {
             _updateGhCliStatus(status.githubCopilotAvailable, status.githubCopilotStatus);
         }).catch(() => {});
     }
@@ -304,7 +304,7 @@ const SettingsPanel = (() => {
     }
 
     function _refreshGeminiCliStatus() {
-        Venus.api('GET', '/settings/status').then(status => {
+        Arima.api('GET', '/settings/status').then(status => {
             _updateGeminiCliStatus(status.geminiCliAvailable, status.geminiCliStatus);
         }).catch(() => {});
     }

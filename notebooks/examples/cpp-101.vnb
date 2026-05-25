@@ -6,7 +6,7 @@
     {
       "id": "cpp101-md-0",
       "type": "MARKDOWN",
-      "source": "# C++ 101 — Fundamentals\n\nWelcome to C++ in Venus Notebooks! Each cell is a C++ snippet — no `main()` function needed. Just write code and press **Shift+Enter** to run it.\n\n**What's pre-loaded in every cell:**\n- All standard headers (`iostream`, `string`, `vector`, `map`, `algorithm`, etc.)\n- `using namespace std;` — so you can write `cout` instead of `std::cout`\n- Venus helpers: `venusHtml()`, `venusDisplay()`, `venusTable()`\n\n**Prerequisites:** None — this is the starting point.",
+      "source": "# C++ 101 — Fundamentals\n\nWelcome to C++ in Arima Notebooks! Each cell is a C++ snippet — no `main()` function needed. Just write code and press **Shift+Enter** to run it.\n\n**What's pre-loaded in every cell:**\n- All standard headers (`iostream`, `string`, `vector`, `map`, `algorithm`, etc.)\n- `using namespace std;` — so you can write `cout` instead of `std::cout`\n- Arima helpers: `baristaHtml()`, `baristaDisplay()`, `baristaTable()`\n\n**Prerequisites:** None — this is the starting point.",
       "output": "",
       "executionCount": 0
     },
@@ -21,7 +21,7 @@
       "id": "cpp101-1",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: hello-world\n//@ description: Prints Hello, World!\ncout << \"Hello, World!\" << endl;\ncout << \"Welcome to C++ in Venus Notebooks!\" << endl;",
+      "source": "//@ anchor: hello-world\n//@ description: Prints Hello, World!\ncout << \"Hello, World!\" << endl;\ncout << \"Welcome to C++ in Arima Notebooks!\" << endl;",
       "output": "",
       "executionCount": 0,
       "anchor": "hello-world",
@@ -92,7 +92,7 @@
       "id": "cpp101-6",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: string-operations\n//@ description: String operations: length, substr, find, upper, append\nstring s = \"Hello, Venus Notebooks!\";\n\ncout << \"Length:    \" << s.length() << \"\\n\";\ncout << \"Empty?     \" << boolalpha << s.empty() << \"\\n\";\ncout << \"Char [0]:  \" << s[0]       << \"\\n\";\ncout << \"Substr:    \" << s.substr(7, 5) << \"\\n\";  // \"Venus\"\ncout << \"Find:      \" << s.find(\"Venus\") << \"\\n\"; // position 7\ncout << \"Upper:     \";\nstring upper = s;\nfor (char& c : upper) c = toupper(c);\ncout << upper << \"\\n\";\n\n// Concatenation\nstring first = \"C++\";\nstring second = \" is great!\";\nstring combined = first + second;\ncout << \"Combined:  \" << combined << \"\\n\";\n\n// String comparison\ncout << \"Equal?     \" << (first == \"C++\") << \"\\n\";\ncout << \"Less?      \" << (\"apple\" < \"banana\") << \"\\n\";\n\n// String to number\nstring numStr = \"42\";\nint num = stoi(numStr);\ncout << \"stoi:      \" << num << \"\\n\";\n\n// Number to string\ncout << \"to_string: \" << to_string(3.14) << \"\\n\";",
+      "source": "//@ anchor: string-operations\n//@ description: String operations: length, substr, find, upper, append\nstring s = \"Hello, Arima Notebooks!\";\n\ncout << \"Length:    \" << s.length() << \"\\n\";\ncout << \"Empty?     \" << boolalpha << s.empty() << \"\\n\";\ncout << \"Char [0]:  \" << s[0]       << \"\\n\";\ncout << \"Substr:    \" << s.substr(7, 5) << \"\\n\";  // \"Arima\"\ncout << \"Find:      \" << s.find(\"Arima\") << \"\\n\"; // position 7\ncout << \"Upper:     \";\nstring upper = s;\nfor (char& c : upper) c = toupper(c);\ncout << upper << \"\\n\";\n\n// Concatenation\nstring first = \"C++\";\nstring second = \" is great!\";\nstring combined = first + second;\ncout << \"Combined:  \" << combined << \"\\n\";\n\n// String comparison\ncout << \"Equal?     \" << (first == \"C++\") << \"\\n\";\ncout << \"Less?      \" << (\"apple\" < \"banana\") << \"\\n\";\n\n// String to number\nstring numStr = \"42\";\nint num = stoi(numStr);\ncout << \"stoi:      \" << num << \"\\n\";\n\n// Number to string\ncout << \"to_string: \" << to_string(3.14) << \"\\n\";",
       "output": "",
       "executionCount": 0,
       "anchor": "string-operations",

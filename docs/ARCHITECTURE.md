@@ -1,15 +1,15 @@
-# Venus Notebooks — Architecture
+# Arima Notebooks — Architecture
 
 ## Design Principles (Built for the Agentic Era)
 
-Venus is designed to be **reshaped by AI** — by the user themselves, in their own loop, with their own AI CLI. Every architectural decision below is in service of that goal. Read these before reading the rest:
+Arima is designed to be **reshaped by AI** — by the user themselves, in their own loop, with their own AI CLI. Every architectural decision below is in service of that goal. Read these before reading the rest:
 
 - **No build step on the frontend.** Plain HTML/CSS/vanilla JS served from the JAR. Any AI agent that can read HTML can extend the UI. No Webpack, no Vite, no React, no TypeScript transpile pipeline.
 - **Plain Java backend, no Lombok, no annotation magic.** Standard Spring Boot. Any agent that can read Java can extend it. Models are POJOs with manual builders.
 - **Subprocess-per-language.** Adding a new language = one new `*ExecutionService.java` file modeled on the existing seven. The pattern is deliberately copy-pasteable.
 - **Small conventions, not big frameworks.** Notebook format is plain JSON (`.vnb`). Cell metadata uses `//@ anchor` / `//@ depends` annotations. The MCP tool surface mirrors the REST API 1:1.
 - **One Spring Boot JAR, one port (8585).** No microservices, no databases, no message queues. There is exactly one place for an agent to look.
-- **MCP-native.** The whole system is exposed as MCP tools so external agents (Claude Code, Claude Desktop, custom) can drive Venus identically to how the UI does.
+- **MCP-native.** The whole system is exposed as MCP tools so external agents (Claude Code, Claude Desktop, custom) can drive Arima identically to how the UI does.
 
 > If a proposed change would force a new build step, a new framework, a new layer, or a new outbound dependency — the answer is almost always **no**. The simplicity is the feature: it's what makes the *use → customize → contribute* cycle take an hour instead of a weekend.
 
@@ -19,10 +19,10 @@ See [`AGENTS.md`](../AGENTS.md) for the hard rules every AI contributor must fol
 
 ## Overview
 
-Venus Notebooks is a **single-server Java application** that serves a browser-based notebook UI and exposes REST and WebSocket APIs for interactive code execution across **six runtimes**: JShell, Java, JavaScript, C#, F#, and C++. There is no frontend build step — the browser loads static HTML/CSS/JS directly from Spring Boot's static resource handler.
+Arima Notebooks is a **single-server Java application** that serves a browser-based notebook UI and exposes REST and WebSocket APIs for interactive code execution across **six runtimes**: JShell, Java, JavaScript, C#, F#, and C++. There is no frontend build step — the browser loads static HTML/CSS/JS directly from Spring Boot's static resource handler.
 
 ```
-Browser                          Venus Server (Spring Boot 3.2, Java 21)
+Browser                          Arima Server (Spring Boot 3.2, Java 21)
 ────────                         ──────────────────────────────────────
                                  ┌──────────────────────────┐
   HTTP GET /            ──────▶  │ Static Resource Handler  │
@@ -60,11 +60,11 @@ Browser                          Venus Server (Spring Boot 3.2, Java 21)
 
 ## Component Map
 
-### Backend (`src/main/java/com/venus/`)
+### Backend (`src/main/java/com/barista/`)
 
 ```
-com.venus/
-├── VenusApplication          Spring Boot entry point
+com.barista/
+├── BaristaApplication          Spring Boot entry point
 │
 ├── config/
 │   ├── WebSocketConfig       STOMP over SockJS endpoint (/ws)
@@ -76,7 +76,7 @@ com.venus/
 │   ├── CellType              CODE | MARKDOWN | PIPELINE
 │   ├── PackageInfo           Installed Maven package
 │   ├── NuGetPackageInfo      Installed NuGet package for C# / F#
-│   ├── VenusSettings         All application settings (model, theme, font size, …)
+│   ├── BaristaSettings         All application settings (model, theme, font size, …)
 │   └── ExecutionResult       Unified execution output (all runtimes, all modes)
 │
 ├── shell/                    JShell integration
@@ -108,7 +108,7 @@ com.venus/
 │   └── SettingsController    /api/settings/*
 │
 └── util/
-    └── VenusDisplay          Data science helpers: chart rendering, DataFrame display
+    └── BaristaDisplay          Data science helpers: chart rendering, DataFrame display
 ```
 
 ### Frontend (`src/main/resources/static/`)
@@ -116,7 +116,7 @@ com.venus/
 ```
 index.html                    Single-page app shell (all tabs, modals, overlays)
 css/
-└── venus.css                 All styles — dark theme, cell colour coding, step navigator
+└── arima.css                 All styles — dark theme, cell colour coding, step navigator
 js/
 ├── app.js                    Global init, tab navigation, WebSocket/STOMP, REST helpers
 ├── notebook.js               Notebook editor: cells, execution, step navigator, save
@@ -140,7 +140,7 @@ js/
 - Variables, imports, and method definitions persist across cell boundaries within a session
 - Session is reset only when the user clicks **Restart** or the server restarts
 - On every new session: server classpath is injected automatically (Maven packages, data science libs)
-- Pre-loaded imports: `java.util.*`, `java.util.stream.*`, `java.io.*`, `java.math.*`, `java.time.*`, all XChart / Commons Math / Tablesaw / OpenCSV classes, and `VenusDisplay`
+- Pre-loaded imports: `java.util.*`, `java.util.stream.*`, `java.io.*`, `java.math.*`, `java.time.*`, all XChart / Commons Math / Tablesaw / OpenCSV classes, and `BaristaDisplay`
 
 ### Java (compile-and-run)
 
@@ -152,7 +152,7 @@ js/
 
 - Each cell runs in a Node.js subprocess via `node -e <code>`
 - `require()` resolves packages from `data/npm-modules/node_modules/`
-- Built-in `venus` object provides `venus.table()`, `venus.display()`, `venus.html()`, `venus.stats()`
+- Built-in `arima` object provides `barista.table()`, `barista.display()`, `barista.html()`, `barista.stats()`
 
 ### C# (`dotnet run`)
 
@@ -169,24 +169,24 @@ js/
 - NuGet packages installed via the NuGet tab are prepended as `#r "nuget: ..."` directives
 - Inline `#r "nuget: ..."` directives in cells are **extracted** from the user's code and placed at the **top** of the script file (before any `open` statements), ensuring `dotnet fsi` resolves them before compilation
 - Pre-opened namespaces: `System`, `System.Linq`, `System.Collections.Generic`
-- Built-in helpers: `venusHtml`, `venusDisplay`, `venusTable`
+- Built-in helpers: `baristaHtml`, `baristaDisplay`, `baristaTable`
 
 ### C++ (`g++` / `clang++`)
 
 - Each cell is compiled by `g++` or `clang++` (auto-detected on PATH) with `-std=c++17 -Wall`
-- Cells run in **notebook mode** by default — Venus wraps the code in `main()` automatically; no boilerplate required
+- Cells run in **notebook mode** by default — Arima wraps the code in `main()` automatically; no boilerplate required
 - If the cell contains `int main(`, it is compiled as a **complete program** with the preamble prepended
-- **Preamble** injected into every cell: 25 standard headers (`<iostream>` through `<chrono>`) + `using namespace std;` + Venus helper functions
+- **Preamble** injected into every cell: 25 standard headers (`<iostream>` through `<chrono>`) + `using namespace std;` + Arima helper functions
 - **Declaration splitting**: lines/blocks that look like class, struct, function, or template definitions are extracted to global scope; statements go inside `main()`
 - **Pipeline dependency injection** (same `//@ anchor:` / `//@ depends:` DSL as C#/F#):
   - Ancestor **declarations** injected at global scope before current cell's declarations
-  - Ancestor **statements** injected inside `main()` with stdout suppressed via `__VenusNullBuf`
-- **Venus helpers** available in every cell:
+  - Ancestor **statements** injected inside `main()` with stdout suppressed via `__BaristaNullBuf`
+- **Arima helpers** available in every cell:
   ```cpp
-  venusHtml("...");              // outputs VENUS_HTML: sentinel → rendered HTML
-  venusDisplay(value);           // cout << value
-  venusTable(myVector);          // formatted item count
-  venusTable(myMap);             // key/value ASCII table
+  baristaHtml("...");              // outputs BARISTA_HTML: sentinel → rendered HTML
+  baristaDisplay(value);           // cout << value
+  baristaTable(myVector);          // formatted item count
+  baristaTable(myMap);             // key/value ASCII table
   ```
 - **Error normalisation**: temp file paths are replaced with `main.cpp`; line numbers are adjusted to subtract the preamble line count
 - **Timeout**: 60 seconds (compile + run combined)
@@ -236,10 +236,10 @@ When a C# or F# cell has `//@ depends: X`:
 1. `OrchestrationService` (or `DotNetExecutionService.resolveTransitiveDeps`) resolves the full transitive closure of anchor names in topological order
 2. For each ancestor cell's source, the **executable statements** are wrapped in output suppression:
    ```csharp
-   var __venusCtxOut = Console.Out;
+   var __baristaCtxOut = Console.Out;
    Console.SetOut(TextWriter.Null);
    // [ancestor code — variables and types are defined but output is silenced]
-   Console.SetOut(__venusCtxOut);
+   Console.SetOut(__baristaCtxOut);
    ```
 3. For C#: type declarations (`class`, `record`, etc.) from all ancestors are collected and placed **after** all executable statements (satisfying CS8803)
 4. The current cell's code follows with output fully active — only this cell's output is visible
@@ -263,7 +263,7 @@ sessionAnchorSources: Map<sessionId, Map<anchorKey, sourceCode>>
 
 ## Real-time Output (WebSocket)
 
-Venus uses **STOMP over SockJS** for streaming cell output.
+Arima uses **STOMP over SockJS** for streaming cell output.
 
 | Direction | Destination | Payload | Purpose |
 |-----------|-------------|---------|---------|
@@ -277,8 +277,8 @@ Special output sentinels parsed by `notebook.js`:
 
 | Sentinel | Rendered as |
 |----------|-------------|
-| `VENUS_HTML:<html>` | Inline HTML block in cell output |
-| `VENUS_IMG:data:image/png;base64,...` | Inline PNG chart image |
+| `BARISTA_HTML:<html>` | Inline HTML block in cell output |
+| `BARISTA_IMG:data:image/png;base64,...` | Inline PNG chart image |
 
 ---
 
@@ -304,16 +304,16 @@ Pre-loaded in every JShell session — no installation required:
 | **Tablesaw** | 0.43.1 | DataFrame (load CSV, filter, groupBy, aggregate) |
 | **OpenCSV** | 5.9 | Raw CSV parsing |
 
-`VenusDisplay` is the bridge between these libraries and the browser:
-- `VenusDisplay.show(chart)` → PNG → `VENUS_IMG:…` sentinel → `<img>` in cell output
-- `VenusDisplay.show(table)` → HTML → `VENUS_HTML:…` sentinel → rendered HTML in cell output
+`BaristaDisplay` is the bridge between these libraries and the browser:
+- `BaristaDisplay.show(chart)` → PNG → `BARISTA_IMG:…` sentinel → `<img>` in cell output
+- `BaristaDisplay.show(table)` → HTML → `BARISTA_HTML:…` sentinel → rendered HTML in cell output
 
 ---
 
 ## Storage Layout
 
 ```
-venus/
+arima/
 ├── notebooks/
 │   ├── examples/          Pre-built example notebooks (checked in)
 │   ├── tutorials/         Built-in tutorials: JShell, Java, JS, C#, F# series (checked in)
@@ -357,8 +357,8 @@ Cell `mode` values: `jshell` · `java` · `nodejs` · `typescript` · `csharp` �
 ## Security Model
 
 - **Local only**: no authentication by default. Bind to `127.0.0.1` only (default Spring Boot behaviour).
-- **No API keys in transit**: all three AI providers (Claude, Copilot, Gemini) are invoked as local CLI subprocesses — no credentials leave the machine through Venus.
-- **Code execution**: JShell, Java, Node.js, `dotnet run`, `dotnet fsi`, and `g++`/MSVC all run with the same OS-user permissions as the Venus server process. Do **not** expose Venus to untrusted network access.
+- **No API keys in transit**: all three AI providers (Claude, Copilot, Gemini) are invoked as local CLI subprocesses — no credentials leave the machine through Arima.
+- **Code execution**: JShell, Java, Node.js, `dotnet run`, `dotnet fsi`, and `g++`/MSVC all run with the same OS-user permissions as the Arima server process. Do **not** expose Arima to untrusted network access.
 - **CORS**: configured for `localhost` only. Restrict further in production.
 
 ---

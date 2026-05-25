@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — Notebook Editor
+ * Arima Notebooks — Notebook Editor
  *
  * Execution modes per CODE cell:
  *   jshell (default) — JShell snippets, variables shared across all cells in session
@@ -37,15 +37,15 @@ const NotebookEditor = (() => {
     return 'text/x-java';
   }
   function cmModeFor(mode) {
-    return { name: 'venus-semantic', base: _baseCmMode(mode) };
+    return { name: 'barista-semantic', base: _baseCmMode(mode) };
   }
 
   // ── Semantic overlay ─────────────────────────────────
   // Runs on top of the base mode to highlight function calls and type names.
-  (function registerVenusOverlay() {
+  (function registerArimaOverlay() {
     try {
-      if (CodeMirror.modes['venus-semantic']) return;
-      CodeMirror.defineMode('venus-semantic', function(config, modeConfig) {
+      if (CodeMirror.modes['barista-semantic']) return;
+      CodeMirror.defineMode('barista-semantic', function(config, modeConfig) {
         const base = CodeMirror.getMode(config, modeConfig.base || 'text/x-java');
         const overlay = {
           token(stream) {
@@ -79,7 +79,7 @@ const NotebookEditor = (() => {
       });
     } catch(e) {
       // overlay addon not loaded — fall back to base mode string
-      CodeMirror.defineMode('venus-semantic', function(config, modeConfig) {
+      CodeMirror.defineMode('barista-semantic', function(config, modeConfig) {
         return CodeMirror.getMode(config, modeConfig.base || 'text/x-java');
       });
     }
@@ -129,8 +129,8 @@ const NotebookEditor = (() => {
       listEl.innerHTML = '<div class="nb-browser-empty">Loading…</div>';
       try {
         [personal, tutorials] = await Promise.all([
-          Venus.api('GET', '/notebooks'),
-          Venus.api('GET', '/notebooks/tutorials')
+          Arima.api('GET', '/notebooks'),
+          Arima.api('GET', '/notebooks/tutorials')
         ]);
         renderBrowser('');
       } catch(e) {
@@ -252,10 +252,10 @@ const NotebookEditor = (() => {
         </div>`;
       }
 
-      // ── Venus Tutorials section ───────────────────────────────
+      // ── Arima Tutorials section ───────────────────────────────
       html += `<div class="nbb-section nbb-tutorials">
         <div class="nbb-section-hdr">
-          <span class="nbb-section-title">Venus Tutorials</span>
+          <span class="nbb-section-title">Arima Tutorials</span>
           <span class="nbb-section-note">${filtTutorials.length} notebooks · read-only</span>
         </div>`;
 
@@ -337,7 +337,7 @@ const NotebookEditor = (() => {
 
           const tags = newTags.split(',').map(t => t.trim()).filter(Boolean);
           try {
-            await Venus.api('PATCH', `/notebooks/${id}/metadata`, { folder: newFolder.trim(), tags });
+            await Arima.api('PATCH', `/notebooks/${id}/metadata`, { folder: newFolder.trim(), tags });
             const nb = personal.find(n => n.id === id);
             if (nb) {
               nb.metadata = nb.metadata || {};
@@ -345,7 +345,7 @@ const NotebookEditor = (() => {
               nb.metadata.tags   = tags;
             }
             renderBrowser(searchEl.value.toLowerCase());
-            Venus.setStatus(`Updated tags for: ${name}`);
+            Arima.setStatus(`Updated tags for: ${name}`);
           } catch (err) {
             alert('Could not update metadata: ' + (err.message || String(err)));
           }
@@ -360,12 +360,12 @@ const NotebookEditor = (() => {
           const name = btn.dataset.deleteName;
           if (!confirm(`Delete "${name}"?\n\nThis cannot be undone.`)) return;
           try {
-            await Venus.api('DELETE', `/notebooks/${id}`);
+            await Arima.api('DELETE', `/notebooks/${id}`);
             if (tabStore.has(id)) closeTab(id);
             personal = personal.filter(n => n.id !== id);
             await refreshList();
             renderBrowser(searchEl.value.toLowerCase());
-            Venus.setStatus(`Deleted: ${name}`);
+            Arima.setStatus(`Deleted: ${name}`);
           } catch (err) {
             alert('Could not delete notebook: ' + (err.message || String(err)));
           }
@@ -377,7 +377,7 @@ const NotebookEditor = (() => {
         overlay.classList.remove('open');
         const name = prompt('Notebook name:', 'Untitled Notebook');
         if (!name) return;
-        const nb = await Venus.api('POST', '/notebooks', { name });
+        const nb = await Arima.api('POST', '/notebooks', { name });
         await refreshList(); loadNotebook(nb.id);
       });
     }
@@ -409,7 +409,7 @@ const NotebookEditor = (() => {
   /* ── Notebook list ────────────────────────────────── */
   async function refreshList() {
     try {
-      const list = await Venus.api('GET', '/notebooks');
+      const list = await Arima.api('GET', '/notebooks');
       const sel  = document.getElementById('notebook-selector');
       const cur  = sel.value;
       sel.innerHTML = '<option value="">— select notebook —</option>';
@@ -427,21 +427,21 @@ const NotebookEditor = (() => {
     // If already open, just switch to it
     if (tabStore.has(id)) { switchTab(id); return; }
 
-    Venus.setStatus('Loading…');
+    Arima.setStatus('Loading…');
     try {
       let nb, readOnly = false;
       if (isTutorial) {
         // Check if user already has a saved copy (e.g. from prior execution)
         // If so, load that instead of the clean template — output will be preserved
         try {
-          nb = await Venus.api('GET', `/notebooks/${id}`);
+          nb = await Arima.api('GET', `/notebooks/${id}`);
           readOnly = false; // user's own copy — writable
         } catch (_) {
-          nb = await Venus.api('GET', `/notebooks/tutorials/${id}`);
+          nb = await Arima.api('GET', `/notebooks/tutorials/${id}`);
           readOnly = true;  // original template — read-only until first save
         }
       } else {
-        nb = await Venus.api('GET', `/notebooks/${id}`);
+        nb = await Arima.api('GET', `/notebooks/${id}`);
         readOnly = false;
       }
       nb._readOnly = readOnly;
@@ -457,9 +457,9 @@ const NotebookEditor = (() => {
       // Hide the delete button for tutorials — they are read-only shared resources
       const delBtn = document.getElementById('btn-delete-notebook');
       if (delBtn) { delBtn.style.display = isTutorial ? 'none' : ''; }
-      Venus.setStatus(`Loaded: ${nb.name}${isTutorial ? ' (tutorial — read-only)' : ''}`);
+      Arima.setStatus(`Loaded: ${nb.name}${isTutorial ? ' (tutorial — read-only)' : ''}`);
     } catch(e) {
-      Venus.setStatus('Load error: ' + e.message);
+      Arima.setStatus('Load error: ' + e.message);
     }
   }
 
@@ -467,20 +467,20 @@ const NotebookEditor = (() => {
   async function loadNotebookBackground(id) {
     if (tabStore.has(id)) return;
     try {
-      const nb = await Venus.api('GET', `/notebooks/${id}`);
+      const nb = await Arima.api('GET', `/notebooks/${id}`);
       if (!tabStore.has(id)) {
         tabOrder.push(id);
         tabStore.set(id, nb);
         renderTabStrip();
-        Venus.setStatus(`Opened background tab: ${nb.name}`);
+        Arima.setStatus(`Opened background tab: ${nb.name}`);
       }
     } catch(e) { /* silently ignore background load failures */ }
   }
 
   /** Shared logic for making a tab active (notebook var must already be set). */
   function _activateTab(id) {
-    Venus.state.currentNotebookId = id;
-    Venus.state.currentSessionId  = `nb-${id}`;
+    Arima.state.currentNotebookId = id;
+    Arima.state.currentSessionId  = `nb-${id}`;
     document.getElementById('notebook-selector').value = id;
     document.getElementById('sb-session').textContent  = `Session: nb-${id}`;
     document.getElementById('empty-state')?.remove();
@@ -502,7 +502,7 @@ const NotebookEditor = (() => {
     if (!notebook._readOnly) setupAutoSave();
     const delBtn = document.getElementById('btn-delete-notebook');
     if (delBtn) delBtn.style.display = notebook._readOnly ? 'none' : '';
-    Venus.setStatus(`Switched to: ${notebook.name}`);
+    Arima.setStatus(`Switched to: ${notebook.name}`);
   }
 
   /** Close a tab. Switches to nearest neighbor if it was active. */
@@ -524,8 +524,8 @@ const NotebookEditor = (() => {
         setupAutoSave();
       } else {
         // No more tabs — show empty state
-        Venus.state.currentNotebookId = null;
-        Venus.state.currentSessionId  = null;
+        Arima.state.currentNotebookId = null;
+        Arima.state.currentSessionId  = null;
         document.getElementById('notebook-selector').value = '';
         document.getElementById('sb-session').textContent = 'No session';
         const container = document.getElementById('cells-container');
@@ -854,7 +854,7 @@ const NotebookEditor = (() => {
       syncAnchorToSource(cell);
       rebuildAnchorMap();
       render(); // re-render to update badge display
-      Venus.markDirty(true);
+      Arima.markDirty(true);
     }
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', e => {
@@ -897,9 +897,9 @@ const NotebookEditor = (() => {
     editorDiv.appendChild(ta);
     bodyWrap.appendChild(editorDiv);
 
-    const settings = Venus.state.settings || {};
+    const settings = Arima.state.settings || {};
     const cm = CodeMirror.fromTextArea(ta, {
-      mode: cmModeFor(cell.mode), theme: 'venus-dark',
+      mode: cmModeFor(cell.mode), theme: 'barista-dark',
       lineNumbers: settings.showLineNumbers !== false,
       matchBrackets: true, autoCloseBrackets: true,
       styleActiveLine: true,
@@ -929,7 +929,7 @@ const NotebookEditor = (() => {
     // Parse annotations and update dep badges on every change (debounced)
     let annotationTimer = null;
     cm.on('change', () => {
-      Venus.markDirty(true);
+      Arima.markDirty(true);
       // If cell had been run, mark stale when source changes
       if (cell.anchor && cell.executionCount) Orchestration.markStale(cell.anchor);
       clearTimeout(annotationTimer);
@@ -1003,7 +1003,7 @@ const NotebookEditor = (() => {
       const cm = editors[cell.id];
       if (cm) cm.setOption('mode', cmModeFor(cell.mode));
 
-      Venus.markDirty(true);
+      Arima.markDirty(true);
 
       // Offer AI code conversion if cell has meaningful content
       const src = cm?.getValue().trim() || '';
@@ -1021,8 +1021,8 @@ const NotebookEditor = (() => {
       const source = cm.getValue();
       try {
         await navigator.clipboard.writeText(source);
-        Venus.setStatus('Cell code copied to clipboard');
-      } catch(e) { Venus.setStatus('Copy failed: ' + e.message); }
+        Arima.setStatus('Cell code copied to clipboard');
+      } catch(e) { Arima.setStatus('Copy failed: ' + e.message); }
     });
 
     div.querySelector('.dup-btn')?.addEventListener('click', () => {
@@ -1037,9 +1037,9 @@ const NotebookEditor = (() => {
       };
       notebook.cells.splice(idx + 1, 0, dup);
       render();
-      Venus.markDirty(true);
+      Arima.markDirty(true);
       setTimeout(() => document.getElementById(`cell-${dup.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
-      Venus.setStatus('Cell duplicated');
+      Arima.setStatus('Cell duplicated');
     });
   }
 
@@ -1056,7 +1056,7 @@ const NotebookEditor = (() => {
     bodyWrap.appendChild(editorWrap);
 
     const cm = CodeMirror.fromTextArea(ta, {
-      mode: cmModeFor('jshell'), theme: 'venus-dark',
+      mode: cmModeFor('jshell'), theme: 'barista-dark',
       lineNumbers: false, viewportMargin: Infinity,
       extraKeys: { 'Escape': () => togglePipelineEditor(cell, div, false) }
     });
@@ -1069,7 +1069,7 @@ const NotebookEditor = (() => {
       cell.pipelineSteps = ann.pipelineSteps;
       rebuildAnchorMap();
       renderPipelineSteps(cell, div);
-      Venus.markDirty(true);
+      Arima.markDirty(true);
     });
 
     // Visual pipeline steps display
@@ -1244,7 +1244,7 @@ const NotebookEditor = (() => {
       cell.source = editor.value;
       rendered.innerHTML = editor.value ? marked.parse(editor.value) : '<span style="color:var(--text-3)">Click to edit…</span>';
       rendered.classList.remove('editing'); editor.classList.remove('editing');
-      Venus.markDirty(true);
+      Arima.markDirty(true);
     });
     editor.addEventListener('keydown', e => { if (e.key === 'Escape') editor.blur(); });
     div.querySelector('.ai-btn')?.addEventListener('click', () => {
@@ -1554,7 +1554,7 @@ const NotebookEditor = (() => {
 
   /* ── Execute a single cell ────────────────────────── */
   async function executeCell(cellId) {
-    if (!notebook || !Venus.state.currentSessionId) { alert('Open a notebook first.'); return; }
+    if (!notebook || !Arima.state.currentSessionId) { alert('Open a notebook first.'); return; }
     const cell = notebook.cells.find(c => c.id === cellId);
     if (!cell || cell.type !== 'CODE') return;
 
@@ -1577,18 +1577,18 @@ const NotebookEditor = (() => {
 
     if (cell.anchor) Orchestration.markRunning(cell.anchor);
     const modeLabel = modeLabelFor(cell.mode);
-    Venus.setStatus(`Running [${modeLabel}]…`);
+    Arima.setStatus(`Running [${modeLabel}]…`);
     document.getElementById('kernel-info').textContent = `${modeLabel} running…`;
 
     // ── Interactive stdin via WebSocket ──────────────────────────────────
     // Subscribe to the session topic BEFORE sending the REST request.
     // The server fires partial_output / input_needed events while the REST
     // call is still in flight (the HTTP thread blocks on JShell execution).
-    const sessionId = Venus.state.currentSessionId;
+    const sessionId = Arima.state.currentSessionId;
     let hadInteractiveInput = false;
     const bodyWrap = document.getElementById(`body-${cellId}`);
 
-    const unsubWs = Venus.subscribeToSession(sessionId, (msg) => {
+    const unsubWs = Arima.subscribeToSession(sessionId, (msg) => {
       if (msg.cellId !== cellId) return; // ignore other cells
       if (msg.type === 'input_needed') {
         // Stop the running animation — the terminal prompt is the new "waiting" indicator
@@ -1602,7 +1602,7 @@ const NotebookEditor = (() => {
     });
 
     try {
-      const result = await Venus.api('POST', '/shell/execute', {
+      const result = await Arima.api('POST', '/shell/execute', {
         sessionId,
         code: cell.source, cellId, mode: cell.mode || 'jshell',
         stdin: ''
@@ -1628,7 +1628,7 @@ const NotebookEditor = (() => {
       }
       const statusLabel = result.status === 'COMPILE_ERROR' ? 'Compile error'
                         : result.success ? 'Done' : 'Runtime error';
-      Venus.setStatus(`[${modeLabel}] ${statusLabel} — ${result.executionTimeMs}ms`);
+      Arima.setStatus(`[${modeLabel}] ${statusLabel} — ${result.executionTimeMs}ms`);
       document.getElementById('kernel-info').textContent =
         result.success ? `[${result.executionCount}] OK` : `[${result.executionCount}] Error`;
     } catch(e) {
@@ -1640,7 +1640,7 @@ const NotebookEditor = (() => {
       updateTimingBadge(cellId, 'error', null);
       if (cell.anchor) Orchestration.markError(cell.anchor);
       const errMsg = e.message || 'Unknown error';
-      Venus.setStatus('Error: ' + errMsg);
+      Arima.setStatus('Error: ' + errMsg);
       ErrorLog.add(cell.anchor || cellId, errMsg, null);
     }
   }
@@ -1695,8 +1695,8 @@ const NotebookEditor = (() => {
       echo.textContent = line;
       row.replaceWith(echo);
 
-      // Send the line to the server → unblocks VenusInput.take()
-      Venus.sendToShell(sessionId, 'input', { line });
+      // Send the line to the server → unblocks ArimaInput.take()
+      Arima.sendToShell(sessionId, 'input', { line });
     });
   }
 
@@ -1777,7 +1777,7 @@ const NotebookEditor = (() => {
       });
     }
 
-    save().catch(() => Venus.markDirty(true));
+    save().catch(() => Arima.markDirty(true));
   }
 
   /* ── Run with declared dependencies ──────────────── */
@@ -1786,17 +1786,17 @@ const NotebookEditor = (() => {
     const cell = notebook.cells.find(c => c.id === cellId);
     if (!cell || !cell.anchor) { await executeCell(cellId); return; }
 
-    Venus.setStatus(forceRun ? 'Clean run — re-executing all dependencies…' : 'Resolving dependencies…');
+    Arima.setStatus(forceRun ? 'Clean run — re-executing all dependencies…' : 'Resolving dependencies…');
     const div = document.getElementById(`cell-${cellId}`);
     div?.classList.add('running');
     setRunningIndicator(cellId, cell.source || '');
     updateTimingBadge(cellId, 'running');
     try {
       await save(); // save current state before orchestration
-      const resp = await Venus.api('POST', '/shell/execute-with-deps', {
+      const resp = await Arima.api('POST', '/shell/execute-with-deps', {
         notebookId: notebook.id,
         cellId,
-        sessionId: Venus.state.currentSessionId,
+        sessionId: Arima.state.currentSessionId,
         forceRun: forceRun ? 'true' : 'false'
       });
       div?.classList.remove('running');
@@ -1809,7 +1809,7 @@ const NotebookEditor = (() => {
       updateTimingBadge(cellId, 'err-net', null);
       if (cell.anchor) Orchestration.markError(cell.anchor);
       const errMsg = e.message || 'Dependency run failed';
-      Venus.setStatus('Dependency run failed: ' + errMsg);
+      Arima.setStatus('Dependency run failed: ' + errMsg);
       ErrorLog.add(cell.anchor || cellId, 'Dependency run failed: ' + errMsg, null);
     }
   }
@@ -1817,7 +1817,7 @@ const NotebookEditor = (() => {
   /* ── Run pipeline cell ────────────────────────────── */
   async function runPipeline(cellId, forceRun = false) {
     if (!notebook) return;
-    Venus.setStatus(forceRun ? 'Clean run pipeline — re-executing all steps…' : 'Running pipeline…');
+    Arima.setStatus(forceRun ? 'Clean run pipeline — re-executing all steps…' : 'Running pipeline…');
     const pipelineCell = notebook.cells.find(c => c.id === cellId);
     const div = document.getElementById(`cell-${cellId}`);
     div?.classList.add('running');
@@ -1825,10 +1825,10 @@ const NotebookEditor = (() => {
     updateTimingBadge(cellId, 'running');
     try {
       await save();
-      const resp = await Venus.api('POST', '/shell/execute-pipeline', {
+      const resp = await Arima.api('POST', '/shell/execute-pipeline', {
         notebookId: notebook.id,
         pipelineCellId: cellId,
-        sessionId: Venus.state.currentSessionId,
+        sessionId: Arima.state.currentSessionId,
         forceRun: forceRun ? 'true' : 'false'
       });
       div?.classList.remove('running');
@@ -1848,7 +1848,7 @@ const NotebookEditor = (() => {
       updateTimingBadge(cellId, 'err-net', null);
       if (pipelineCell?.anchor) Orchestration.markError(pipelineCell.anchor);
       const errMsg = e.message || 'Pipeline failed';
-      Venus.setStatus('Pipeline failed: ' + errMsg);
+      Arima.setStatus('Pipeline failed: ' + errMsg);
       ErrorLog.add(pipelineCell?.anchor || cellId, 'Pipeline failed: ' + errMsg, null);
     }
   }
@@ -1856,7 +1856,7 @@ const NotebookEditor = (() => {
   /* ── Run to here ──────────────────────────────────── */
   async function runToHere(cellId) {
     if (!notebook) return;
-    Venus.setStatus('Running to here…');
+    Arima.setStatus('Running to here…');
     document.getElementById('kernel-info').textContent = 'Running…';
     // Collect cells from top up to and including target
     const cells = [];
@@ -1865,7 +1865,7 @@ const NotebookEditor = (() => {
       if (cell.id === cellId) break;
     }
     const stats = await runAllSequential(cells, { delay: 2500 });
-    Venus.setStatus(`Run to here — ${stats.ok} OK, ${stats.errors} error(s), ${(stats.totalMs/1000).toFixed(2)}s`);
+    Arima.setStatus(`Run to here — ${stats.ok} OK, ${stats.errors} error(s), ${(stats.totalMs/1000).toFixed(2)}s`);
     showNotebookStats(stats);
   }
 
@@ -1930,11 +1930,11 @@ const NotebookEditor = (() => {
       const summary = cachedCount > 0
         ? `${freshCount} run, ${cachedCount} from cache`
         : `${results.length} cell(s) executed`;
-      Venus.setStatus(`Pipeline complete — ${summary}`);
+      Arima.setStatus(`Pipeline complete — ${summary}`);
       document.getElementById('kernel-info').textContent = `Pipeline OK (${results.length})`;
     } else {
       const errMsg = resp.error || 'unknown error';
-      Venus.setStatus(`Pipeline stopped: ${errMsg}`);
+      Arima.setStatus(`Pipeline stopped: ${errMsg}`);
       document.getElementById('kernel-info').textContent = 'Pipeline error';
       ErrorLog.add('pipeline', errMsg, null);
     }
@@ -1945,7 +1945,7 @@ const NotebookEditor = (() => {
     });
 
     // Save all cell state (output + timestamps) immediately
-    save().catch(() => Venus.markDirty(true));
+    save().catch(() => Arima.markDirty(true));
   }
 
   /** Build a plain-text summary of pipeline results for storage in cell.output */
@@ -2179,7 +2179,7 @@ const NotebookEditor = (() => {
     }
 
     // Save immediately so output persists if the user closes the notebook
-    save().catch(() => Venus.markDirty(true));
+    save().catch(() => Arima.markDirty(true));
   }
 
   function clearOutput(cellId) {
@@ -2219,7 +2219,7 @@ const NotebookEditor = (() => {
     if (result.output && result.output.trim()) {
       const el = document.createElement('div');
       el.className = 'cell-output stdout';
-      // Split output into lines — detect VENUS_IMG / VENUS_HTML sentinels
+      // Split output into lines — detect BARISTA_IMG / BARISTA_HTML sentinels
       const lines = result.output.split('\n');
       let textBuf = [];
       const flushText = () => {
@@ -2228,17 +2228,17 @@ const NotebookEditor = (() => {
         textBuf = [];
       };
       lines.forEach(line => {
-        if (line.startsWith('VENUS_IMG:')) {
+        if (line.startsWith('BARISTA_IMG:')) {
           flushText();
           const img = document.createElement('img');
           img.src = line.slice(10);
-          img.className = 'venus-chart-img';
+          img.className = 'barista-chart-img';
           img.alt = 'Chart output';
           el.appendChild(img);
-        } else if (line.startsWith('VENUS_HTML:')) {
+        } else if (line.startsWith('BARISTA_HTML:')) {
           flushText();
           const wrap = document.createElement('div');
-          wrap.className = 'venus-html-output';
+          wrap.className = 'barista-html-output';
           wrap.innerHTML = line.slice(11);   // already sanitised server-side
           el.appendChild(wrap);
         } else {
@@ -2277,9 +2277,9 @@ const NotebookEditor = (() => {
   /* ── Run all cells sequentially ──────────────────── */
   async function runAll() {
     if (!notebook) return;
-    Venus.setStatus('Running all cells…');
+    Arima.setStatus('Running all cells…');
     const stats = await runAllSequential(notebook.cells, { delay: 2500 });
-    Venus.setStatus(`Done — ${stats.ok} OK, ${stats.errors} error(s), ${(stats.totalMs/1000).toFixed(2)}s`);
+    Arima.setStatus(`Done — ${stats.ok} OK, ${stats.errors} error(s), ${(stats.totalMs/1000).toFixed(2)}s`);
     showNotebookStats(stats);
   }
 
@@ -2289,10 +2289,10 @@ const NotebookEditor = (() => {
     syncSources();
     syncAnnotations();
     try {
-      await Venus.api('PUT', `/notebooks/${notebook.id}`, notebook);
-      Venus.markDirty(false);
-      Venus.setStatus(`Saved: ${notebook.name}`);
-    } catch(e) { Venus.setStatus('Save failed: ' + e.message); }
+      await Arima.api('PUT', `/notebooks/${notebook.id}`, notebook);
+      Arima.markDirty(false);
+      Arima.setStatus(`Saved: ${notebook.name}`);
+    } catch(e) { Arima.setStatus('Save failed: ' + e.message); }
   }
 
   function syncSources() {
@@ -2319,7 +2319,7 @@ const NotebookEditor = (() => {
     container.querySelector('.empty-state')?.remove();
     renderCell(cell, notebook.cells.length - 1, container);
     document.getElementById(`cell-${cell.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    Venus.markDirty(true);
+    Arima.markDirty(true);
 
     // Open pipeline editor immediately so user can start editing
     if (type === 'PIPELINE') {
@@ -2342,7 +2342,7 @@ const NotebookEditor = (() => {
     container.querySelector('.empty-state')?.remove();
     renderCell(cell, notebook.cells.length - 1, container);
     document.getElementById(`cell-${cell.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    Venus.markDirty(true);
+    Arima.markDirty(true);
   }
 
   /* ── Cell operations ──────────────────────────────── */
@@ -2351,7 +2351,7 @@ const NotebookEditor = (() => {
     syncSources();
     notebook.cells = notebook.cells.filter(c => c.id !== cellId);
     delete editors[cellId];
-    render(); Venus.markDirty(true);
+    render(); Arima.markDirty(true);
   }
 
   function moveUp(cellId) {
@@ -2360,7 +2360,7 @@ const NotebookEditor = (() => {
     const idx = notebook.cells.findIndex(c => c.id === cellId);
     if (idx <= 0) return;
     [notebook.cells[idx-1], notebook.cells[idx]] = [notebook.cells[idx], notebook.cells[idx-1]];
-    render(); Venus.markDirty(true);
+    render(); Arima.markDirty(true);
   }
 
   function moveDown(cellId) {
@@ -2369,7 +2369,7 @@ const NotebookEditor = (() => {
     const idx = notebook.cells.findIndex(c => c.id === cellId);
     if (idx < 0 || idx >= notebook.cells.length - 1) return;
     [notebook.cells[idx], notebook.cells[idx+1]] = [notebook.cells[idx+1], notebook.cells[idx]];
-    render(); Venus.markDirty(true);
+    render(); Arima.markDirty(true);
   }
 
   function clearOutputs() {
@@ -2382,7 +2382,7 @@ const NotebookEditor = (() => {
   /* ── Auto-save ────────────────────────────────────── */
   function setupAutoSave() {
     clearInterval(autoSave);
-    const interval = (Venus.state.settings?.autoSaveIntervalSecs || 30) * 1000;
+    const interval = (Arima.state.settings?.autoSaveIntervalSecs || 30) * 1000;
     if (interval > 0) {
       autoSave = setInterval(() => {
         if (document.getElementById('dirty-dot')?.classList.contains('visible')) save();
@@ -2403,8 +2403,8 @@ const NotebookEditor = (() => {
     container.querySelector('.empty-state')?.remove();
     renderCell(cell, notebook.cells.length - 1, container);
     document.getElementById(`cell-${cell.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    Venus.markDirty(true);
-    Venus.setStatus('Code inserted from AI');
+    Arima.markDirty(true);
+    Arima.setStatus('Code inserted from AI');
   }
 
   /* ── Toolbar bindings ─────────────────────────────── */
@@ -2412,13 +2412,13 @@ const NotebookEditor = (() => {
     document.getElementById('btn-new')?.addEventListener('click', async () => {
       const name = prompt('Notebook name:', 'Untitled Notebook');
       if (!name) return;
-      const nb = await Venus.api('POST', '/notebooks', { name });
+      const nb = await Arima.api('POST', '/notebooks', { name });
       await refreshList(); loadNotebook(nb.id);
     });
     document.getElementById('btn-create-first')?.addEventListener('click', async () => {
       const name = prompt('Notebook name:', 'My Notebook');
       if (!name) return;
-      const nb = await Venus.api('POST', '/notebooks', { name });
+      const nb = await Arima.api('POST', '/notebooks', { name });
       await refreshList(); loadNotebook(nb.id);
     });
     document.getElementById('btn-save')?.addEventListener('click', save);
@@ -2429,35 +2429,35 @@ const NotebookEditor = (() => {
       if (!notebook) { alert('Open a notebook first.'); return; }
       try {
         const text = await navigator.clipboard.readText();
-        if (!text?.trim()) { Venus.setStatus('Clipboard is empty'); return; }
+        if (!text?.trim()) { Arima.setStatus('Clipboard is empty'); return; }
         addCellWithSource('CODE', text.trim());
-        Venus.setStatus('Cell pasted from clipboard');
-      } catch(e) { Venus.setStatus('Clipboard read failed — check browser permissions'); }
+        Arima.setStatus('Cell pasted from clipboard');
+      } catch(e) { Arima.setStatus('Clipboard read failed — check browser permissions'); }
     });
     document.getElementById('btn-add-pipeline')?.addEventListener('click', () => addCell('PIPELINE'));
     document.getElementById('btn-clear-out')?.addEventListener('click', clearOutputs);
     document.getElementById('btn-restart')?.addEventListener('click', async () => {
-      if (!Venus.state.currentSessionId) return;
+      if (!Arima.state.currentSessionId) return;
       if (!confirm('Restart the JShell kernel? All variables will be lost.')) return;
-      await Venus.api('POST', `/shell/${Venus.state.currentSessionId}/restart`);
+      await Arima.api('POST', `/shell/${Arima.state.currentSessionId}/restart`);
       // Reset all dep statuses to pending
       Object.keys(depStatus || {}).forEach(k => delete depStatus[k]);
       clearOutputs();
-      Venus.setStatus('Kernel restarted — run cells again to restore state');
+      Arima.setStatus('Kernel restarted — run cells again to restore state');
     });
     // Validate dep graph
     document.getElementById('btn-validate-graph')?.addEventListener('click', async () => {
       if (!notebook) return;
       await save();
       try {
-        const r = await Venus.api('GET', `/shell/validate-graph/${notebook.id}`);
+        const r = await Arima.api('GET', `/shell/validate-graph/${notebook.id}`);
         if (r.valid) {
-          Venus.setStatus('✓ Dependency graph is valid — no cycles or missing anchors');
+          Arima.setStatus('✓ Dependency graph is valid — no cycles or missing anchors');
         } else {
           alert('Dependency graph issues:\n\n' + r.errors.join('\n'));
-          Venus.setStatus('⚠ Graph has ' + r.errors.length + ' issue(s)');
+          Arima.setStatus('⚠ Graph has ' + r.errors.length + ' issue(s)');
         }
-      } catch(e) { Venus.setStatus('Validation failed: ' + e.message); }
+      } catch(e) { Arima.setStatus('Validation failed: ' + e.message); }
     });
 
     document.getElementById('btn-delete-notebook')?.addEventListener('click', async () => {
@@ -2626,8 +2626,8 @@ const NotebookEditor = (() => {
     const cm = editors[targetId];
     if (cm) {
       cm.setValue(code);
-      Venus.markDirty(true);
-      Venus.setStatus('Cell updated from AI');
+      Arima.markDirty(true);
+      Arima.setStatus('Cell updated from AI');
       document.getElementById(`cell-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
@@ -2659,8 +2659,8 @@ const NotebookEditor = (() => {
         const converted = await _convertCode(fromMode, toMode, code);
         if (converted && cm) cm.setValue(converted);
         banner.remove();
-        Venus.setStatus(`Converted to ${toLabel}`);
-        Venus.markDirty(true);
+        Arima.setStatus(`Converted to ${toLabel}`);
+        Arima.markDirty(true);
       } catch (err) {
         banner.innerHTML =
           `<span style="color:#f38ba8">Conversion failed: ${err.message}</span>` +
@@ -2677,7 +2677,7 @@ const NotebookEditor = (() => {
   async function _convertCode(fromMode, toMode, code) {
     const fromLabel = modeLabelFor(fromMode);
     const toLabel   = modeLabelFor(toMode);
-    const resp = await Venus.api('POST', '/llm/chat', {
+    const resp = await Arima.api('POST', '/llm/chat', {
       message: `Convert the following ${fromLabel} code to ${toLabel}.\nReturn ONLY the converted code inside a single code block — no explanation.\n\n\`\`\`\n${code}\n\`\`\``,
       systemPrompt: 'You are a precise code converter. Faithfully translate code between languages, preserving all logic and structure. Respond with exactly one fenced code block containing the converted code and nothing else.'
     });
@@ -2691,10 +2691,10 @@ const NotebookEditor = (() => {
   async function deleteNotebook(id) {
     const nb = tabStore.get(id);
     const name = nb?.name || id;
-    await Venus.api('DELETE', `/notebooks/${id}`);
+    await Arima.api('DELETE', `/notebooks/${id}`);
     if (tabStore.has(id)) closeTab(id);
     await refreshList();
-    Venus.setStatus(`Deleted: ${name}`);
+    Arima.setStatus(`Deleted: ${name}`);
   }
 
   /* ── Cross-notebook dependency picker ──────────────── */
@@ -2714,7 +2714,7 @@ const NotebookEditor = (() => {
     preview.textContent = '';
     insertBtn.disabled  = true;
     modal.classList.remove('hidden');
-    Venus.api('GET', '/notebooks').then(list => {
+    Arima.api('GET', '/notebooks').then(list => {
       const others = (list || []).filter(nb => nb.id !== notebook?.id);
       nbSel.innerHTML = '<option value="">Select notebook…</option>' +
         others.map(nb => `<option value="${_escAttr(nb.id)}">${_escHtml(nb.name)}</option>`).join('');
@@ -2737,7 +2737,7 @@ const NotebookEditor = (() => {
     preview.textContent = '';
     if (!nbId) { ancSel.innerHTML = '<option value="">Select cell anchor…</option>'; return; }
     try {
-      const nb = await Venus.api('GET', `/notebooks/${nbId}`);
+      const nb = await Arima.api('GET', `/notebooks/${nbId}`);
       const anchored = (nb.cells || []).filter(c => c.anchor && (c.type === 'CODE' || c.type === 'PIPELINE'));
       if (!anchored.length) {
         ancSel.innerHTML = '<option value="">No anchored cells in this notebook</option>';
@@ -2790,9 +2790,9 @@ const NotebookEditor = (() => {
     const cleanBtn = document.getElementById(`clean-run-btn-${_crossNbTargetCellId}`);
     if (depsBtn)  depsBtn.style.display = '';
     if (cleanBtn) cleanBtn.style.display = '';
-    Venus.markDirty(true);
+    Arima.markDirty(true);
     _closeCrossNbPicker();
-    Venus.setStatus('Cross-notebook reference added: ' + ref);
+    Arima.setStatus('Cross-notebook reference added: ' + ref);
   }
 
   function _escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }

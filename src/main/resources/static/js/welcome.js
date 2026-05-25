@@ -1,9 +1,9 @@
 /* ════════════════════════════════════════════════════════════════
-   Venus Notebooks — Welcome / User Guide / What's New
+   Arima Notebooks — Welcome / User Guide / What's New
    ----------------------------------------------------------------
    • Shows automatically on first run.
    • Shows a "What's New" panel when the bundled version changes
-     (i.e. after the user updates Venus from the repo).
+     (i.e. after the user updates Arima from the repo).
    • Reopenable any time from the Help button in the top bar, or by
      clicking the version in the status bar.
    ════════════════════════════════════════════════════════════════ */
@@ -12,15 +12,15 @@
 
   // Bump this with every release. Changing it makes returning users see
   // the What's New panel on their next load.
-  const VENUS_VERSION = '3.0.0';
+  const ARIMA_VERSION = '3.1.0';
 
   // Link to the full changelog (release-by-release history lives in-app below,
   // and in this file for those who want the raw detail).
   const CHANGELOG_URL = 'https://github.com/snchande/Venus/blob/master/CHANGELOG.md';
 
-  const LS_SEEN    = 'venus.guide.seen';      // "1" once the user has seen the welcome
-  const LS_VERSION = 'venus.guide.version';   // last version the user acknowledged
-  const LS_MUTE    = 'venus.guide.mute';      // "1" = don't auto-show the welcome
+  const LS_SEEN    = 'barista.guide.seen';      // "1" once the user has seen the welcome
+  const LS_VERSION = 'barista.guide.version';   // last version the user acknowledged
+  const LS_MUTE    = 'barista.guide.mute';      // "1" = don't auto-show the welcome
 
   // ── Highlights (short) ──────────────────────────────────────────
   const HIGHLIGHTS = [
@@ -34,14 +34,24 @@
   // "See all releases" view. Keep each item short.
   const RELEASES = [
     {
+      version: "3.1.0", date: "2026-05-25",
+      title: "Rebrand — Arima Notebooks, brewed by Barista",
+      items: [
+        "New name: Venus is now Arima Notebooks, with a coffee identity (the mark is a roasted bean).",
+        "The pure-Java engine that serves notebooks is now branded Barista.",
+        "Runtime cell API is now barista.table() / display() / html() / stats(); built-in tutorials updated.",
+        "CLI launcher renamed to arima (arima.ps1 / arima.sh / arima.cmd) — same subcommands."
+      ]
+    },
+    {
       version: '3.0.0', date: '2026-05-24',
-      title: 'Major release — Venus goes AI-native & agentic',
+      title: 'Major release — Arima goes AI-native & agentic',
       items: [
         'AI is multi-provider and local-first: Claude, GitHub Copilot, and Gemini run as local CLIs — no API keys.',
-        'Venus is now an MCP server — drive notebooks, cells, packages, and pipelines from any agent.',
+        'Arima is now an MCP server — drive notebooks, cells, packages, and pipelines from any agent.',
         'Authentication: local (default) and OAuth2 modes.',
-        'Cross-platform venus CLI: start · stop · status · welcome · docs · agents.',
-        'Agentic contributor stack: AGENTS.md guardrails, the venus agent, a PR security gate, and a product brochure.',
+        'Cross-platform barista CLI: start · stop · status · welcome · docs · agents.',
+        'Agentic contributor stack: AGENTS.md guardrails, the barista agent, a PR security gate, and a product brochure.',
         'Variable inspector extended to all subprocess languages (JS, TS, C#, F#, C++) + tab UX.',
         'This in-app Welcome & User Guide — reopen anytime from Help.'
       ]
@@ -51,12 +61,12 @@
       title: 'TypeScript — the seventh language',
       items: [
         'TypeScript cells via Node.js built-in type-stripping (Node 22.6+); no extra runtime.',
-        'Typed Venus helpers; shares npm modules with JavaScript; tsc --noEmit diagnostics optional.'
+        'Typed Arima helpers; shares npm modules with JavaScript; tsc --noEmit diagnostics optional.'
       ]
     },
     {
       version: '2.0.0', date: '2026-04-17',
-      title: 'C# and F# — .NET comes to Venus',
+      title: 'C# and F# — .NET comes to Arima',
       items: [
         'C# cells via dotnet run (C# 9+ top-level programs); F# cells via dotnet fsi.',
         'NuGet package management and pipeline dependency injection across all modes.'
@@ -93,24 +103,24 @@
   const TRACKS = {
     overview: {
       label: 'Overview',
-      blurb: 'New to Venus? Start here.',
+      blurb: 'New to Arima? Start here.',
       icon: 'M8 1l2 4 4 .5-3 3 .8 4.5L8 11l-3.8 2 .8-4.5-3-3L6 5z',
       steps: [
         { do: 'Write code in a cell, then run it with Ctrl+Enter.', where: 'The notebook canvas (center).' },
         { do: 'Switch a cell between 7 languages with its mode badge.', where: 'Top-right of each cell.' },
         { do: 'Ask AI to generate, explain, or convert code.', where: 'AI panel — press Ctrl+\\.' },
-        { do: 'Learn by example from 28 built-in tutorials.', where: 'Notebook Browser → Venus Tutorials.' },
+        { do: 'Learn by example from 28 built-in tutorials.', where: 'Notebook Browser → Arima Tutorials.' },
         { do: 'Save and Run All from the toolbar.', where: 'Notebook toolbar (top).' }
       ]
     },
     admin: {
       label: 'Admin',
-      blurb: 'Run, configure, and secure Venus.',
+      blurb: 'Run, configure, and secure Arima.',
       icon: 'M8 1.5l5.5 2.4v3.6c0 3.3-2.3 5.6-5.5 6.6-3.2-1-5.5-3.3-5.5-6.6V3.9z',
       steps: [
-        { do: 'Start/stop/restart the server.', where: 'Shutdown button (top bar) · or venus start / stop / status.' },
+        { do: 'Start/stop/restart the server.', where: 'Shutdown button (top bar) · or barista start / stop / status.' },
         { do: 'Pick your AI provider — Claude, Copilot, or Gemini (local CLI, no API key).', where: 'Settings → AI Provider.' },
-        { do: 'Choose auth: local (default) or OAuth2.', where: 'venus.auth.mode · data/oauth-config.json.' },
+        { do: 'Choose auth: local (default) or OAuth2.', where: 'barista.auth.mode · data/oauth-config.json.' },
         { do: 'Install Maven, npm, and NuGet packages.', where: 'Packages and NuGet tabs.' },
         { do: 'Notebooks live in notebooks/ (.vnb); app data in data/ — never commit data/.', where: 'Project root.' }
       ]
@@ -120,20 +130,20 @@
       blurb: 'Build, chain, and automate.',
       icon: 'M5 4L2 8l3 4M11 4l3 4-3 4M9 2L7 14',
       steps: [
-        { do: 'Use built-in helpers: venus.table(), venus.display(), venus.html().', where: 'Any code cell.' },
+        { do: 'Use built-in helpers: barista.table(), barista.display(), barista.html().', where: 'Any code cell.' },
         { do: 'Chain cells with //@ anchor and //@ depends — works across all 7 languages.', where: 'Pipeline cells · Run with Dependencies.' },
         { do: 'Install a package and use it immediately on the classpath.', where: 'Packages tab.' },
-        { do: 'Drive Venus from your editor/agent over MCP.', where: 'GET /api/mcp/sse · POST /api/mcp/messages.' },
-        { do: 'Extend Venus itself: run claude / copilot / gemini in the repo and ask the venus agent.', where: 'Terminal + AGENTS.md.' }
+        { do: 'Drive Arima from your editor/agent over MCP.', where: 'GET /api/mcp/sse · POST /api/mcp/messages.' },
+        { do: 'Extend Arima itself: run claude / copilot / gemini in the repo and ask the barista agent.', where: 'Terminal + AGENTS.md.' }
       ]
     },
     architecture: {
       label: 'Architecture',
-      blurb: 'How Venus is built.',
+      blurb: 'How Arima is built.',
       icon: 'M2 14V6l6-4 6 4v8M2 14h12M6 14V9h4v5',
       steps: [
         { do: 'One Spring Boot app on Java 21; the UI is static HTML/CSS/JS — no build step.', where: 'src/main/resources/static.' },
-        { do: 'Layered backend: controller → service → shell/model.', where: 'src/main/java/com/venus.' },
+        { do: 'Layered backend: controller → service → shell/model.', where: 'src/main/java/com/barista.' },
         { do: 'One execution service per language; all return a unified ExecutionResult.', where: 'service/*ExecutionService.' },
         { do: 'Real-time output streams over STOMP /ws.', where: 'WebSocketConfig + the UI.' },
         { do: 'See the full picture and diagrams.', where: 'docs/ARCHITECTURE.md · brochure PDF.' }
@@ -220,7 +230,7 @@
       const o = overlay();
       if (!o) return;
       const tag = el('welcome-version-tag');
-      if (tag) tag.textContent = 'v' + VENUS_VERSION;
+      if (tag) tag.textContent = 'v' + ARIMA_VERSION;
       const mute = el('welcome-dontshow');
       if (mute) mute.checked = localStorage.getItem(LS_MUTE) === '1';
       renderChips();
@@ -241,7 +251,7 @@
       const o = overlay();
       if (!o) return;
       const tag = el('welcome-version-tag');
-      if (tag) tag.textContent = 'v' + VENUS_VERSION;
+      if (tag) tag.textContent = 'v' + ARIMA_VERSION;
       renderChips();
       renderTracks(null);
       renderWhatsNew();
@@ -272,10 +282,10 @@
 
     _markSeen() {
       localStorage.setItem(LS_SEEN, '1');
-      localStorage.setItem(LS_VERSION, VENUS_VERSION);
+      localStorage.setItem(LS_VERSION, ARIMA_VERSION);
     },
 
-    version: VENUS_VERSION
+    version: ARIMA_VERSION
   };
 
   function escClose(e) { if (e.key === 'Escape') Welcome.close(); }
@@ -291,7 +301,7 @@
       Welcome.open('overview');
       return;
     }
-    if (lastVer !== VENUS_VERSION) {
+    if (lastVer !== ARIMA_VERSION) {
       // Returning user who just updated from the repo → What's New.
       Welcome.openReleaseNotes();
       return;

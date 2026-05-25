@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Venus Notebooks — Documentation</title>
+<title>Arima Notebooks — Documentation</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   :root {
@@ -57,7 +57,7 @@
 
 <nav id="sidebar">
   <div id="sidebar-header">
-    <h1>Venus Notebooks</h1>
+    <h1>Arima Notebooks</h1>
     <p>Documentation</p>
   </div>
 
@@ -78,7 +78,7 @@
   </div>
 
   <div class="nav-back">
-    <a href="http://localhost:8585">← Back to Venus</a>
+    <a href="http://localhost:8585">← Back to Arima</a>
     &nbsp;&nbsp;
     <a href="../cheatsheet.html">Cheatsheet</a>
   </div>
@@ -88,19 +88,19 @@
 
 <!-- Raw markdown content embedded as plain text -->
 <script type="text/plain" id="src-readme">
-# Venus Notebooks
+# Arima Notebooks
 
 > **Interactive Java notebooks in your browser — powered by JShell, Spring Boot, and Claude AI**
 
-Venus Notebooks is a **locally-hosted, browser-based notebook environment for Java developers** — like Jupyter, but built for the JVM. Write and run Java, JShell, and JavaScript cells side by side, manage Maven and npm dependencies, chain cells with pipeline orchestration, and get AI assistance from Claude — all without leaving your browser.
+Arima Notebooks is a **locally-hosted, browser-based notebook environment for Java developers** — like Jupyter, but built for the JVM. Write and run Java, JShell, and JavaScript cells side by side, manage Maven and npm dependencies, chain cells with pipeline orchestration, and get AI assistance from Claude — all without leaving your browser.
 
 No cloud account. No data sent anywhere. Runs entirely on your machine.
 
 ---
 
-## Why Venus?
+## Why Arima?
 
-Java developers have always been second-class citizens in the notebook world. Jupyter supports Python natively; everything else is a plugin or a workaround. Venus was built from the ground up for Java:
+Java developers have always been second-class citizens in the notebook world. Jupyter supports Python natively; everything else is a plugin or a workaround. Arima was built from the ground up for Java:
 
 - **JShell-native** — the official Java REPL, not a workaround
 - **Full class compilation** — switch any cell to full `javac` compile+run mode
@@ -146,12 +146,12 @@ Java developers have always been second-class citizens in the notebook world. Ju
 
 ```bash
 git clone https://github.com/snchande/Venus.git
-cd Venus
+cd Arima
 ```
 
 ### Step 2 — Start
 
-**Windows:** `venus`
+**Windows:** `arima`
 
 **Unix/Mac:** `./scripts/start.sh`
 
@@ -163,7 +163,7 @@ Navigate to **http://localhost:8585**
 
 ### Step 4 — Enable AI
 
-Install Claude Code from [claude.ai/code](https://claude.ai/code) and run `claude auth` in a terminal. Venus uses the local Claude CLI — no API key needed.
+Install Claude Code from [claude.ai/code](https://claude.ai/code) and run `claude auth` in a terminal. Arima uses the local Claude CLI — no API key needed.
 
 ---
 
@@ -180,9 +180,9 @@ Install Claude Code from [claude.ai/code](https://claude.ai/code) and run `claud
 </script>
 
 <script type="text/plain" id="src-changelog">
-# Venus Notebooks — Changelog
+# Arima Notebooks — Changelog
 
-All notable changes to Venus Notebooks are documented here.
+All notable changes to Arima Notebooks are documented here.
 
 ---
 
@@ -215,7 +215,7 @@ All notable changes to Venus Notebooks are documented here.
 - `POST /api/shell/complete` — JShell completion endpoint
 
 ### Notebook Browser Redesign
-- Two-section browser: My Notebooks + Venus Tutorials
+- Two-section browser: My Notebooks + Arima Tutorials
 - Tutorial grouping by language and subcategory
 - Filter search across both sections
 
@@ -261,15 +261,15 @@ All notable changes to Venus Notebooks are documented here.
 </script>
 
 <script type="text/plain" id="src-contributing">
-# Contributing to Venus Notebooks
+# Contributing to Arima Notebooks
 
-Thank you for your interest in contributing to Venus Notebooks.
+Thank you for your interest in contributing to Arima Notebooks.
 
 ---
 
 ## Why Contribute?
 
-Venus Notebooks fills a real gap: **Java developers have never had a first-class notebook environment**. By contributing, you help Java developers learn, explore, and prototype faster.
+Arima Notebooks fills a real gap: **Java developers have never had a first-class notebook environment**. By contributing, you help Java developers learn, explore, and prototype faster.
 
 ---
 
@@ -367,7 +367,7 @@ Open a [GitHub Discussion](../../discussions) for ideas and questions. Issues ar
 </script>
 
 <script type="text/plain" id="src-maintainer">
-# Venus Notebooks — Maintainer Guide
+# Arima Notebooks — Maintainer Guide
 
 This document covers the maintainer hierarchy, responsibilities, review process, release process, and community management.
 
@@ -469,16 +469,16 @@ Require for `main`:
 </script>
 
 <script type="text/plain" id="src-usage">
-# Venus Notebooks — Usage Guide
+# Arima Notebooks — Usage Guide
 
-## Starting Venus (Windows CLI)
+## Starting Arima (Windows CLI)
 
 ```cmd
-venus               # start server + open browser
-venus start --bg    # start in background
-venus stop          # stop the server
-venus status        # check if running
-venus help          # full command reference
+arima               # start server + open browser
+arima start --bg    # start in background
+arima stop          # stop the server
+arima status        # check if running
+arima help          # full command reference
 ```
 
 ---
@@ -542,7 +542,7 @@ Click the **Step** button (▶) in the toolbar to walk through cells one by one.
 //@ description: Load the raw CSV file
 //@ depends: validateConfig
 
-Table data = VenusDisplay.loadCsv("data/sales.csv");
+Table data = BaristaDisplay.loadCsv("data/sales.csv");
 ```
 
 | Annotation | Purpose |
@@ -570,17 +570,17 @@ Pre-loaded in every JShell session — no install required.
 ### Charts
 
 ```java
-var chart = VenusDisplay.xyChart("Title", "X", "Y");
+var chart = BaristaDisplay.xyChart("Title", "X", "Y");
 chart.addSeries("sin(x)", xData, yData);
-VenusDisplay.show(chart);
+BaristaDisplay.show(chart);
 ```
 
 ### DataFrames
 
 ```java
-Table df = VenusDisplay.loadCsv("data/sales.csv");
-VenusDisplay.show(df);          // full table
-VenusDisplay.describe(df);      // statistics
+Table df = BaristaDisplay.loadCsv("data/sales.csv");
+BaristaDisplay.show(df);          // full table
+BaristaDisplay.describe(df);      // statistics
 ```
 
 ---
@@ -632,7 +632,7 @@ AI requires the Claude CLI to be installed and authenticated (`claude auth`).
 </script>
 
 <script type="text/plain" id="src-setup">
-# Venus Notebooks — Setup Guide
+# Arima Notebooks — Setup Guide
 
 ## Prerequisites
 
@@ -659,7 +659,7 @@ AI requires the Claude CLI to be installed and authenticated (`claude auth`).
 
 ```bash
 git clone https://github.com/snchande/Venus.git
-cd Venus
+cd Arima
 ```
 
 ### Step 2: Verify Java
@@ -680,7 +680,7 @@ mvn clean package -DskipTests
 
 **Windows (recommended):**
 ```cmd
-venus
+arima
 ```
 
 **Unix/Mac:**
@@ -699,7 +699,7 @@ java \
   --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \
   --add-opens=java.base/java.lang=ALL-UNNAMED \
   --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \
-  -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+  -jar target/arima-notebooks-1.0.0-SNAPSHOT.jar
 ```
 
 ### Step 5: Open Browser
@@ -710,27 +710,27 @@ Navigate to: **http://localhost:8585**
 
 ## Claude AI Setup
 
-Venus uses the local **Claude CLI** — no API key required.
+Arima uses the local **Claude CLI** — no API key required.
 
 1. Install Claude Code: [claude.ai/code](https://claude.ai/code)
 2. Authenticate: run `claude auth` in a terminal
-3. Start Venus — AI features work automatically
+3. Start Arima — AI features work automatically
 
 ---
 
-## Venus CLI (Windows)
+## Arima CLI (Windows)
 
 | Command | Description |
 |---------|-------------|
-| `venus` | Start server, auto-build if needed, open browser |
-| `venus start --bg` | Start in background |
-| `venus stop` | Stop the server |
-| `venus status` | Show running state |
-| `venus build` | Build JAR |
-| `venus rebuild` | Force clean rebuild |
-| `venus open` | Open browser |
-| `venus logs` | Tail background logs |
-| `venus help` | Show help |
+| `arima` | Start server, auto-build if needed, open browser |
+| `arima start --bg` | Start in background |
+| `arima stop` | Stop the server |
+| `arima status` | Show running state |
+| `arima build` | Build JAR |
+| `arima rebuild` | Force clean rebuild |
+| `arima open` | Open browser |
+| `arima logs` | Tail background logs |
+| `arima help` | Show help |
 
 ---
 
@@ -764,7 +764,7 @@ Add to `.vscode/launch.json`:
 
 ### Port 8585 is already in use
 ```bash
-java ... -jar venus-notebooks.jar --server.port=8586
+java ... -jar arima-notebooks.jar --server.port=8586
 ```
 
 ### WebSocket connection failed
@@ -782,7 +782,7 @@ java ... -jar venus-notebooks.jar --server.port=8586
 </script>
 
 <script type="text/plain" id="src-api">
-# Venus Notebooks — REST API Reference
+# Arima Notebooks — REST API Reference
 
 Base URL: `http://localhost:8585/api`
 
@@ -989,21 +989,21 @@ GET /api/mcp/sse?sessionId={optional-id}
 
 | Tool | Description |
 |------|-------------|
-| `venus_execute_code` | Execute Java in a JShell session |
-| `venus_list_notebooks` | List all notebooks |
-| `venus_read_notebook` | Read all cells from a notebook |
-| `venus_run_pipeline` | Run a pipeline cell |
-| `venus_search_cells` | Search cells by content or anchor |
-| `venus_load_module` | Load a notebook module into session |
-| `venus_create_notebook` | Create new notebook with optional cells |
-| `venus_append_cell` | Append a cell, optionally execute |
+| `barista_execute_code` | Execute Java in a JShell session |
+| `barista_list_notebooks` | List all notebooks |
+| `barista_read_notebook` | Read all cells from a notebook |
+| `barista_run_pipeline` | Run a pipeline cell |
+| `barista_search_cells` | Search cells by content or anchor |
+| `barista_load_module` | Load a notebook module into session |
+| `barista_create_notebook` | Create new notebook with optional cells |
+| `barista_append_cell` | Append a cell, optionally execute |
 
 ### Connect Claude Desktop
 
 ```json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "url": "http://localhost:8585/api/mcp/sse"
     }
   }
@@ -1012,14 +1012,14 @@ GET /api/mcp/sse?sessionId={optional-id}
 </script>
 
 <script type="text/plain" id="src-architecture">
-# Venus Notebooks — Architecture
+# Arima Notebooks — Architecture
 
 ## Overview
 
-Venus Notebooks is a **single-server Java application** that serves a web UI and exposes REST/WebSocket APIs for interactive Java code execution. There is no separate frontend build process — the browser loads static HTML/CSS/JS directly from Spring Boot's resource handler.
+Arima Notebooks is a **single-server Java application** that serves a web UI and exposes REST/WebSocket APIs for interactive Java code execution. There is no separate frontend build process — the browser loads static HTML/CSS/JS directly from Spring Boot's resource handler.
 
 ```
-Browser                          Venus Server (Spring Boot)
+Browser                          Arima Server (Spring Boot)
 ────────                         ─────────────────────────
   HTTP GET /            ──────▶  Static Resource Handler
   REST /api/*           ──────▶  Spring MVC Controllers
@@ -1034,14 +1034,14 @@ Browser                          Venus Server (Spring Boot)
 ### Backend (Java 21 + Spring Boot 3.2)
 
 ```
-com.venus/
-├── VenusApplication          # Spring Boot entry point
+com.barista/
+├── BaristaApplication          # Spring Boot entry point
 ├── config/
 │   ├── WebSocketConfig       # STOMP endpoint configuration
 │   └── CorsConfig            # Cross-origin policy
 ├── model/
 │   ├── Notebook, Cell, CellType
-│   ├── PackageInfo, VenusSettings, ExecutionResult
+│   ├── PackageInfo, BaristaSettings, ExecutionResult
 ├── shell/
 │   ├── JShellManager         # Manages JShell sessions
 │   └── ShellSession          # Single JShell instance
@@ -1066,7 +1066,7 @@ com.venus/
 ```
 static/
 ├── index.html           # Single-page app shell
-├── css/venus.css        # All styles
+├── css/arima.css        # All styles
 └── js/
     ├── app.js           # Global init, tab nav, WebSocket
     ├── notebook.js      # Notebook editor, cell management
@@ -1096,7 +1096,7 @@ Each CODE cell has a `mode` field: `"jshell"` (default), `"java"`, or `"nodejs"`
 
 ### Node.js Mode
 - `NodeJsExecutionService` runs JavaScript via `node` subprocess
-- `venus` helper object available (`venus.table()`, `venus.html()`, etc.)
+- `arima` helper object available (`barista.table()`, `barista.html()`, etc.)
 
 ---
 
@@ -1128,9 +1128,9 @@ No direct HTTP calls to Anthropic's API. This avoids API rate limits, content-fi
 
 | Library | Purpose | Rendering |
 |---------|---------|-----------|
-| **XChart 3.8.6** | Charts (XY, bar, pie) | PNG via `VENUS_IMG:base64` sentinel |
+| **XChart 3.8.6** | Charts (XY, bar, pie) | PNG via `BARISTA_IMG:base64` sentinel |
 | **Commons Math 3.6.1** | Statistics, regression | Text output |
-| **Tablesaw 0.43.1** | DataFrame | HTML via `VENUS_HTML:` sentinel |
+| **Tablesaw 0.43.1** | DataFrame | HTML via `BARISTA_HTML:` sentinel |
 | **OpenCSV 5.9** | CSV parsing | Text output |
 
 ---
@@ -1179,7 +1179,7 @@ function showDoc(key) {
 
   // Update page title
   const h1 = content.querySelector('h1');
-  document.title = 'Venus — ' + (h1 ? h1.textContent : key);
+  document.title = 'Arima — ' + (h1 ? h1.textContent : key);
 }
 
 // Wire up nav buttons

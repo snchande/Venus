@@ -1,11 +1,11 @@
 ---
 name: add-execution-language
-description: Scaffold a new language execution service in Venus following the existing seven-service pattern. Use when the user asks to add support for a new language (e.g. "add Python support" or "add Kotlin"). Creates the service, wires it into ShellController, adds a CellType mode, and registers the cell badge in the frontend — all preserving the unified ExecutionResult contract.
+description: Scaffold a new language execution service in Arima following the existing seven-service pattern. Use when the user asks to add support for a new language (e.g. "add Python support" or "add Kotlin"). Creates the service, wires it into ShellController, adds a CellType mode, and registers the cell badge in the frontend — all preserving the unified ExecutionResult contract.
 ---
 
 # add-execution-language — scaffold a new runtime
 
-This skill walks through the steps needed to add a new language to Venus. Read [`AGENTS.md`](../../../AGENTS.md) first.
+This skill walks through the steps needed to add a new language to Arima. Read [`AGENTS.md`](../../../AGENTS.md) first.
 
 ## Prerequisites
 
@@ -17,9 +17,9 @@ This skill walks through the steps needed to add a new language to Venus. Read [
 
 | File | Purpose | Pattern to copy |
 |------|---------|-----------------|
-| `src/main/java/com/venus/service/<Lang>ExecutionService.java` | New service | Copy `NodeJsExecutionService.java` for interpreted; `CppExecutionService.java` for compiled |
-| `src/main/java/com/venus/controller/ShellController.java` | Routes by cell mode | Add a `case` in `executeCell()` switch |
-| `src/main/java/com/venus/model/Cell.java` | Mode enum/string | Add a constant if you use an enum |
+| `src/main/java/com/barista/service/<Lang>ExecutionService.java` | New service | Copy `NodeJsExecutionService.java` for interpreted; `CppExecutionService.java` for compiled |
+| `src/main/java/com/barista/controller/ShellController.java` | Routes by cell mode | Add a `case` in `executeCell()` switch |
+| `src/main/java/com/barista/model/Cell.java` | Mode enum/string | Add a constant if you use an enum |
 | `src/main/resources/static/index.html` | Cell badge + mode-class CSS | Add `.cell.mode-<lang>` and `.cell-badge.<lang>` blocks |
 | `src/main/resources/static/js/notebook.js` | Mode-cycle button | Add the new mode to the cycle list |
 | `src/main/resources/static/js/ai-assistant.js` | Conversion prompts | Add the new language to AI conversion pairs |

@@ -1,8 +1,8 @@
 /**
- * Venus Notebooks — Core App
+ * Arima Notebooks — Core App
  * Tab navigation · WebSocket · REST helpers · global state
  */
-const Venus = (() => {
+const Arima = (() => {
   const state = {
     stompClient: null,
     connected:   false,
@@ -101,10 +101,10 @@ const Venus = (() => {
     });
 
     // Public API — other modules drive the overlays through these.
-    Venus.openAi          = () => setAiOpen(true);
-    Venus.closeAi         = () => setAiOpen(false);
-    Venus.openInspector   = () => setInspectorOpen(true);
-    Venus.closeInspector  = () => setInspectorOpen(false);
+    Arima.openAi          = () => setAiOpen(true);
+    Arima.closeAi         = () => setAiOpen(false);
+    Arima.openInspector   = () => setInspectorOpen(true);
+    Arima.closeInspector  = () => setInspectorOpen(false);
 
     initFabDrag(fab);
   }
@@ -252,7 +252,7 @@ const Venus = (() => {
         document.documentElement.setAttribute('data-theme', 'light');
       }
     } catch (e) {
-      console.warn('[Venus] Could not load settings:', e.message);
+      console.warn('[Arima] Could not load settings:', e.message);
     }
   }
 
@@ -266,7 +266,7 @@ const Venus = (() => {
       if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
         e.preventDefault();
         const open = !document.getElementById('ai-sidebar')?.classList.contains('hidden');
-        open ? Venus.closeAi?.() : Venus.openAi?.();
+        open ? Arima.closeAi?.() : Arima.openAi?.();
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
         e.preventDefault();
@@ -307,7 +307,7 @@ const Venus = (() => {
   }
 
   function hideSplash() {
-    const splash = document.getElementById('venus-splash');
+    const splash = document.getElementById('barista-splash');
     if (!splash || splash.style.display === 'none') return;
     splash.style.transition = 'opacity 0.6s ease';
     splash.style.opacity = '0';
@@ -316,7 +316,7 @@ const Venus = (() => {
   }
 
   function showShutdownSplash() {
-    const splash = document.getElementById('venus-splash');
+    const splash = document.getElementById('barista-splash');
     if (!splash) return;
     // Ensure splash is visible and styled as shutdown
     splash.style.display = '';
@@ -330,9 +330,9 @@ const Venus = (() => {
       const bar = splash.querySelector('.splash-loader-bar');
       if (bar) bar.classList.add('draining');
     }, 100);
-    // After server stops, show "Venus is Off" state with restart instructions
+    // After server stops, show "Arima is Off" state with restart instructions
     setTimeout(() => {
-      setSplashMsg('Venus is Off');
+      setSplashMsg('Arima is Off');
       const brand = splash.querySelector('.splash-brand');
       if (!brand || brand.querySelector('.splash-shutdown-info')) return;
 
@@ -342,7 +342,7 @@ const Venus = (() => {
       info.innerHTML = `
         <p class="shutdown-subtitle">The server has stopped gracefully.</p>
         <div class="shutdown-restart-box">
-          <span class="shutdown-restart-label">To restart Venus Notebooks:</span>
+          <span class="shutdown-restart-label">To restart Arima Notebooks:</span>
           <code class="shutdown-cmd">scripts\\start.bat</code>
           <span class="shutdown-restart-or">or from project root:</span>
           <code class="shutdown-cmd">mvn spring-boot:run</code>
@@ -381,7 +381,7 @@ const Venus = (() => {
 
   function initShutdown() {
     document.getElementById('btn-shutdown')?.addEventListener('click', async () => {
-      if (!confirm('Shut down Venus Notebooks?\n\nThe server will stop and this page will go offline.')) return;
+      if (!confirm('Shut down Arima Notebooks?\n\nThe server will stop and this page will go offline.')) return;
 
       const btn = document.getElementById('btn-shutdown');
       btn.disabled = true;
@@ -425,7 +425,7 @@ const Venus = (() => {
       setSplashMsg('Ready ✦');
     } catch (e) {
       setSplashMsg('Error — retrying…');
-      console.error('[Venus] Init error:', e);
+      console.error('[Arima] Init error:', e);
     } finally {
       // Always hide the splash — even if something above threw
       setTimeout(hideSplash, 700);
@@ -471,9 +471,9 @@ const Venus = (() => {
 
 // Run init — works whether DOM is already ready or still loading
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => Venus.init());
+  document.addEventListener('DOMContentLoaded', () => Arima.init());
 } else {
-  Venus.init();
+  Arima.init();
 }
 
 /* ── Variable Inspector ────────────────────────────────────────────
@@ -625,14 +625,14 @@ const VarInspector = (() => {
   function open() {
     _renderAll();
     _renderTab();
-    Venus.openInspector?.();
+    Arima.openInspector?.();
   }
 
   /** Hide the drawer AND the tab. Tab returns on the next cell run. */
   function dismissTab() {
     _byCell.clear();
     document.getElementById('var-tab')?.classList.add('hidden');
-    Venus.closeInspector?.();
+    Arima.closeInspector?.();
     _renderAll();
   }
 
@@ -738,7 +738,7 @@ const UserAuth = (() => {
   /* Called once during boot — resolves identity and updates the UI */
   async function init() {
     try {
-      const data = await Venus.api('GET', '/user/me');
+      const data = await Arima.api('GET', '/user/me');
       _authMode = data.authMode || 'local';
 
       if (data.authenticated) {
@@ -831,7 +831,7 @@ const UserAuth = (() => {
     const container = document.getElementById('login-providers');
     if (!container) return;
     try {
-      const cfg = await Venus.api('GET', '/user/oauth-config');
+      const cfg = await Arima.api('GET', '/user/oauth-config');
       const providers = [
         { id: 'google',    label: 'Continue with Google',    configured: cfg.googleConfigured,
           icon: `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>` },
@@ -888,18 +888,18 @@ const UserAuth = (() => {
     const email = inp?.value?.trim();
     if (!email) return;
     try {
-      const resp = await Venus.api('PUT', '/user/me/email', { email });
+      const resp = await Arima.api('PUT', '/user/me/email', { email });
       if (_user) _user.email = resp.email;
       document.getElementById('udd-email').textContent = resp.email;
       hideEmailPrompt();
-      Venus.setStatus('Email saved ✓');
+      Arima.setStatus('Email saved ✓');
     } catch (e) {
-      Venus.setStatus('Could not save email: ' + e.message);
+      Arima.setStatus('Could not save email: ' + e.message);
     }
   }
 
   async function logout() {
-    try { await Venus.api('POST', '/user/logout'); } catch { /* ignore */ }
+    try { await Arima.api('POST', '/user/logout'); } catch { /* ignore */ }
     _user = null;
     // In oauth mode: show login modal so user can pick their account again
     // In local mode: there's no session to clear so just reload for safety
@@ -916,7 +916,7 @@ const UserAuth = (() => {
     _menuOpen = false;
     const dd = document.getElementById('user-dropdown');
     if (dd) dd.style.display = 'none';
-    try { await Venus.api('POST', '/user/logout'); } catch { /* ignore */ }
+    try { await Arima.api('POST', '/user/logout'); } catch { /* ignore */ }
     _user = null;
     _resetWidget();
     await showLogin();

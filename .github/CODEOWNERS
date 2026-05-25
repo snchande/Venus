@@ -1,4 +1,4 @@
-# Venus Notebooks — CODEOWNERS
+# Arima Notebooks — CODEOWNERS
 #
 # Every PR against master requires review by the founding contributor.
 # Specific paths add review requirements on top of this default.
@@ -15,6 +15,6 @@
 /.github/workflows/                     @snchande
 /scripts/security-check.ps1             @snchande
 /scripts/security-check.sh              @snchande
-/src/main/java/com/venus/shell/         @snchande
-/src/main/java/com/venus/service/       @snchande
+/src/main/java/com/barista/shell/         @snchande
+/src/main/java/com/barista/service/       @snchande
 /src/main/resources/application.properties  @snchande

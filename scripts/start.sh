@@ -1,15 +1,15 @@
 #!/bin/bash
-# Venus Notebooks — Unix/Mac startup script
+# Arima Notebooks — Unix/Mac startup script
 # Exit code 42 from the JVM means "restart requested" — loop handles that automatically.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-JAR="$PROJECT_DIR/target/venus-notebooks-1.0.0-SNAPSHOT.jar"
+JAR="$PROJECT_DIR/target/arima-notebooks-1.0.0-SNAPSHOT.jar"
 
 cd "$PROJECT_DIR"
 
 echo "======================================="
-echo "  Venus Notebooks v1.0"
+echo "  Arima Notebooks v1.0"
 echo "  Java | JavaScript | C# | F# | JShell"
 echo "======================================="
 echo ""
@@ -40,18 +40,18 @@ else
 fi
 
 # ── AI co-pilot context ─────────────────────────────────────────────────────
-# Export the guardrail + skill + agent paths so the Venus JVM (and any CLI it
+# Export the guardrail + skill + agent paths so the Arima JVM (and any CLI it
 # spawns for the in-UI AI panel) resolves them regardless of launch dir.
-export VENUS_HOME="$PROJECT_DIR"
-[ -f "$PROJECT_DIR/AGENTS.md" ]        && export VENUS_AGENTS_GUIDE="$PROJECT_DIR/AGENTS.md"
-[ -d "$PROJECT_DIR/.claude/skills" ]   && export VENUS_SKILLS_DIR="$PROJECT_DIR/.claude/skills"
-[ -d "$PROJECT_DIR/.claude/agents" ]   && export VENUS_AGENTS_DIR="$PROJECT_DIR/.claude/agents"
+export BARISTA_HOME="$PROJECT_DIR"
+[ -f "$PROJECT_DIR/AGENTS.md" ]        && export BARISTA_AGENTS_GUIDE="$PROJECT_DIR/AGENTS.md"
+[ -d "$PROJECT_DIR/.claude/skills" ]   && export BARISTA_SKILLS_DIR="$PROJECT_DIR/.claude/skills"
+[ -d "$PROJECT_DIR/.claude/agents" ]   && export BARISTA_AGENTS_DIR="$PROJECT_DIR/.claude/agents"
 AI_FOUND=""
 for c in claude copilot github-copilot-cli gemini; do
     command -v "$c" &>/dev/null && AI_FOUND="$AI_FOUND $c"
 done
 if [ -n "$AI_FOUND" ]; then
-    echo "AI:     $AI_FOUND  (co-pilot ready — AGENTS.md + .claude skills/agents loaded; run ./venus.sh agents)"
+    echo "AI:     $AI_FOUND  (co-pilot ready — AGENTS.md + .claude skills/agents loaded; run ./arima.sh agents)"
 else
     echo "AI:     no CLI found  (install Claude / Copilot / Gemini CLI for AI features)"
 fi
@@ -63,11 +63,11 @@ if [ ! -f "$JAR" ]; then
         echo "ERROR: Maven not found. Please install Maven 3.8+."
         exit 1
     fi
-    echo "Building Venus Notebooks..."
+    echo "Building Arima Notebooks..."
     mvn clean package -DskipTests -q
 fi
 
-echo "Starting Venus Notebooks..."
+echo "Starting Arima Notebooks..."
 echo "Open http://localhost:8585 in your browser"
 echo ""
 echo "Press Ctrl+C to stop   |   Use Restart in the UI to apply code changes"
@@ -90,11 +90,11 @@ while true; do
     if [ "$EXIT_CODE" -eq "$RESTART_CODE" ]; then
         echo ""
         echo "---------------------------------------"
-        echo "  Restarting Venus Notebooks..."
+        echo "  Restarting Arima Notebooks..."
         echo "---------------------------------------"
         sleep 1
         # Re-run any pending Maven build if sources changed
-        if [ "$VENUS_AUTO_BUILD" = "1" ] && command -v mvn &>/dev/null; then
+        if [ "$BARISTA_AUTO_BUILD" = "1" ] && command -v mvn &>/dev/null; then
             echo "  Auto-building before restart..."
             mvn package -DskipTests -q
         fi
@@ -104,7 +104,7 @@ while true; do
     # Normal exit (0) or error — stop looping
     if [ "$EXIT_CODE" -ne 0 ]; then
         echo ""
-        echo "Venus Notebooks exited with code $EXIT_CODE."
+        echo "Arima Notebooks exited with code $EXIT_CODE."
     fi
     break
 done

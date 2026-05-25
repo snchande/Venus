@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
-    <!-- Planet gradient: matches splash screen exactly -->
+    <!-- Roasted-bean gradient -->
     <radialGradient id="pg" cx="36%" cy="30%" r="68%">
       <stop offset="0%"   stop-color="#fff5b0"/>
       <stop offset="38%"  stop-color="#f5a623"/>
@@ -12,7 +12,6 @@
       <stop offset="0%"   stop-color="rgba(0,0,0,0.45)"/>
       <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
     </radialGradient>
-    <!-- Ambient glow -->
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -22,24 +21,20 @@
   <!-- Ambient glow halo -->
   <circle cx="16" cy="16" r="14" fill="rgba(245,166,35,0.20)" filter="url(#glow)"/>
 
-  <!-- Orbital ring (tilted ellipse) -->
-  <ellipse cx="16" cy="16" rx="15.5" ry="4.8" fill="none"
-           stroke="rgba(245,166,35,0.55)" stroke-width="0.9"
-           transform="rotate(-22,16,16)"/>
+  <!-- Coffee-bean body (tilted) — the Arima mark, brewed by Barista -->
+  <g transform="rotate(-18,16,16)">
+    <ellipse cx="16" cy="16" rx="11" ry="12.5" fill="url(#pg)"/>
+    <ellipse cx="16" cy="16" rx="11" ry="12.5" fill="url(#sh)"/>
+    <!-- Center crease: the coffee bean's groove -->
+    <path d="M16 4.2 C12.3 9 19.7 13 16 16 C12.3 19 19.7 23 16 27.8"
+          fill="none" stroke="#4a2410" stroke-opacity="0.55"
+          stroke-width="1.7" stroke-linecap="round"/>
+    <!-- Soft highlight -->
+    <path d="M11 8 C9.6 11 9.6 14 10.6 16" fill="none"
+          stroke="rgba(255,245,176,0.45)" stroke-width="1.1" stroke-linecap="round"/>
+  </g>
 
-  <!-- Planet body -->
-  <circle cx="16" cy="16" r="11.5" fill="url(#pg)"/>
-  <!-- Depth shadow overlay -->
-  <circle cx="16" cy="16" r="11.5" fill="url(#sh)"/>
-
-  <!-- Venus ♀ symbol: circle + stem + crossbar -->
-  <circle cx="16" cy="12.5" r="4"   fill="none" stroke="rgba(255,255,255,0.50)"
-          stroke-width="1.6" stroke-linecap="round"/>
-  <line   x1="16" y1="16.5" x2="16" y2="21.5"  stroke="rgba(255,255,255,0.50)"
-          stroke-width="1.6" stroke-linecap="round"/>
-  <line   x1="13" y1="19.5" x2="19" y2="19.5"  stroke="rgba(255,255,255,0.50)"
-          stroke-width="1.6" stroke-linecap="round"/>
-
-  <!-- Small star marker on the orbital ring -->
-  <circle cx="28.8" cy="13.8" r="1.1" fill="#f5a623" opacity="0.9"/>
+  <!-- A single rising steam wisp -->
+  <path d="M24 7.2 C26 5.6 22.6 4.2 24.4 2.4" fill="none"
+        stroke="rgba(245,166,35,0.7)" stroke-width="1" stroke-linecap="round"/>
 </svg>

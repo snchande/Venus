@@ -1,13 +1,37 @@
-# Venus Notebooks — Changelog
+# Arima Notebooks — Changelog
 
-All notable changes to Venus Notebooks are documented here.
+All notable changes to Arima Notebooks are documented here.
 Dates are in `YYYY-MM-DD` format.
+
+---
+
+## [3.1.0] — 2026-05-25
+
+**Rebrand — Venus is now Arima Notebooks, brewed by the Barista engine.** The product
+name changes everywhere; the pure-Java engine that serves notebooks and provides the core
+capabilities is now branded **Barista**, with a coffee identity (the mark is a roasted coffee
+bean; tagline *"Interactive notebooks, freshly brewed"*).
+
+### Product → Arima
+- "Venus Notebooks" → **Arima Notebooks** across the UI, splash, docs, brochure, and articles
+- Coffee-bean brand mark replaces the planet/♀ symbol (favicon, splash, top bar, login, welcome hero)
+- CLI launcher renamed `venus` → **`arima`** (`arima.ps1` / `arima.sh` / `arima.cmd`); same subcommands
+- Front-end app namespace `Venus.*` → `Arima.*`; stylesheet `venus.css` → `arima.css`
+
+### Engine / system → Barista
+- Java package `com.venus` → **`com.barista`**; `VenusApplication` → `BaristaApplication`, and all `Venus*` engine classes → `Barista*`
+- Runtime cell API `venus.table()/display()/html()/stats()` → **`barista.*`**; C#/F#/C++ helpers `VenusHtml`/`venusTable` → `Barista*`/`barista*` (all built-in tutorials updated)
+- Output-protocol sentinels `VENUS_*` → `BARISTA_*`; environment variables `VENUS_*` → `BARISTA_*`
+- MCP tool names `venus_*` → **`barista_*`**; build artifact `venus-notebooks` → `arima-notebooks`
+- `.claude` agents renamed: primary `venus` → `arima`; `venus-architect`/`venus-security` → `barista-architect`/`barista-security`; `venus-tutorial-writer` → `arima-tutorial-writer`
+
+> The GitHub repository remains `snchande/Venus` for now; a repo move is planned as a follow-up.
 
 ---
 
 ## [3.0.0] — 2026-05-24
 
-**Major release.** Venus becomes an AI-native, locally-hosted notebook platform — built for the
+**Major release.** Arima becomes an AI-native, locally-hosted notebook platform — built for the
 agentic era. Beyond the seven languages, this release adds a built-in MCP server, multi-provider
 local-CLI AI, authentication, a cross-platform CLI, and a full agentic contributor stack.
 Highlights below; the detailed entries from this release follow.
@@ -15,31 +39,31 @@ Highlights below; the detailed entries from this release follow.
 ### Why this is a major version
 - **Seven languages** now run side by side — JShell, Java, JavaScript, **TypeScript**, C#, F#, and **C++** (TypeScript and C++ are new in the 2.x line).
 - **AI is multi-provider and local-first** — Claude, GitHub Copilot, and Gemini all run as local CLI subprocesses. The stored Anthropic API key and direct HTTP path were removed.
-- **Venus is now an MCP server** — any MCP client or agent can drive notebooks, cells, packages, and pipelines programmatically.
+- **Arima is now an MCP server** — any MCP client or agent can drive notebooks, cells, packages, and pipelines programmatically.
 - **Authentication** — Spring Security with `local` (default) and `oauth` modes.
-- **Cross-platform `venus` CLI** — one launcher per shell with `start/stop/status/build/rebuild/open/logs/version/welcome/docs/agents`.
-- **Agentic contributor stack** — `AGENTS.md` guardrails, the `venus` agent + specialist subagents and skills, a PR security gate, a CODEOWNERS founder review, and a 12-page product brochure.
+- **Cross-platform `arima` CLI** — one launcher per shell with `start/stop/status/build/rebuild/open/logs/version/welcome/docs/agents`.
+- **Agentic contributor stack** — `AGENTS.md` guardrails, the `arima` agent + specialist subagents and skills, a PR security gate, a CODEOWNERS founder review, and a 12-page product brochure.
 - **In-app Welcome & User Guide** — a first-run overlay with Overview / Admin / Developer / Architecture tracks, reopenable anytime from **Help**, plus a **What's New** panel that appears automatically after you update from the repo.
 
 ### Welcome, User Guide & Release Notes (in-app)
-- New **Welcome / User Guide** overlay (`static/js/welcome.js`): short Venus highlights and four guided tracks — **Overview**, **Admin**, **Developer**, **Architecture** — each a quick flow through the relevant parts of the UI
+- New **Welcome / User Guide** overlay (`static/js/welcome.js`): short Arima highlights and four guided tracks — **Overview**, **Admin**, **Developer**, **Architecture** — each a quick flow through the relevant parts of the UI
 - Shows automatically on **first run**; reopen anytime from the **Help** button in the top bar
 - **What's New** panel surfaces this changelog's highlights automatically whenever the bundled app version changes (i.e. after you pull a new version from the repo)
-- The same welcome is available in the terminal via `venus welcome`, and as the **venus** AI agent in Claude/Copilot/Gemini — one consistent entry point everywhere
+- The same welcome is available in the terminal via `arima welcome`, and as the **arima** AI agent in Claude/Copilot/Gemini — one consistent entry point everywhere
 
-### Cross-Platform Venus CLI
-- New launchers in the repo root — `venus.cmd` (Windows CMD), `venus.ps1` (PowerShell), `venus.sh` (Linux/macOS) — sharing the same subcommands: `start [--bg]`, `stop`, `status`, `build`, `rebuild`, `open`, `logs`, `version`, `help`
+### Cross-Platform Arima CLI
+- New launchers in the repo root — `arima.cmd` (Windows CMD), `arima.ps1` (PowerShell), `arima.sh` (Linux/macOS) — sharing the same subcommands: `start [--bg]`, `stop`, `status`, `build`, `rebuild`, `open`, `logs`, `version`, `help`
 - `start` auto-builds the JAR if missing, launches with the required JShell `--add-opens`/`--add-exports` flags, opens `http://localhost:8585`, and re-launches on exit code 42 (UI-requested restart)
-- Background mode (`--bg` / `-Bg`) detaches the server and streams to `venus.log`; `status`/`version` report Java, Node.js, .NET, and Maven
-- All three launchers add `welcome` (common entry experience — open the UI, drive Venus over MCP, or personalize via an agentic CLI), `docs` (open the brochure + list documentation), and `agents`/`ai` (detected AI co-pilots, guardrail files, skills, and the **venus** agent wired into the repo)
-- Launchers export AI context (`VENUS_HOME`, `VENUS_AGENTS_GUIDE`, `VENUS_SKILLS_DIR`, `VENUS_AGENTS_DIR`, `VENUS_AI_COPILOTS`) so the in-UI AI panel and any spawned CLI inherit the architecture guardrails
+- Background mode (`--bg` / `-Bg`) detaches the server and streams to `arima.log`; `status`/`version` report Java, Node.js, .NET, and Maven
+- All three launchers add `welcome` (common entry experience — open the UI, drive Arima over MCP, or personalize via an agentic CLI), `docs` (open the brochure + list documentation), and `agents`/`ai` (detected AI co-pilots, guardrail files, skills, and the **arima** agent wired into the repo)
+- Launchers export AI context (`BARISTA_HOME`, `BARISTA_AGENTS_GUIDE`, `BARISTA_SKILLS_DIR`, `BARISTA_AGENTS_DIR`, `BARISTA_AI_COPILOTS`) so the in-UI AI panel and any spawned CLI inherit the architecture guardrails
 
 ### AI Contributors — Guardrails, Agent, Skills & Security Gate
 - **`AGENTS.md`** at the repo root — single source of truth for the architecture/contribution rules every contributor (human or AI) must follow; mirrored by `CLAUDE.md`, `.github/copilot-instructions.md`, and `GEMINI.md`
-- **`venus` agent** — the primary full-functionality AI assistant (welcome, operate, document, and extend Venus), with specialist subagents `venus-architect`, `venus-security`, `venus-tutorial-writer` and auto-invoking skills `architecture-check`, `add-execution-language`, `add-tutorial`, `add-rest-endpoint` (registered in `.claude/`)
+- **`arima` agent** — the primary full-functionality AI assistant (welcome, operate, document, and extend Arima), with specialist subagents `arima-architect`, `arima-security`, `arima-tutorial-writer` and auto-invoking skills `architecture-check`, `add-execution-language`, `add-tutorial`, `add-rest-endpoint` (registered in `.claude/`)
 - **PR security gate** — `scripts/security-check.ps1` / `.sh` + `.github/workflows/security-check.yml`: scans for secrets, command injection, forbidden frontend deps, Lombok, unknown outbound hosts, and layer-crossings; converts a PR back to draft until findings are resolved
 - **`.github/CODEOWNERS`** — every PR requires founding-contributor review before merge to `master`
-- **Product brochure** — branded 12-page PDF at `docs/brochure/venus-brochure.pdf`
+- **Product brochure** — branded 12-page PDF at `docs/brochure/arima-brochure.pdf`
 
 ### AI Providers — Local CLI, Multi-Provider
 - AI now runs exclusively through **local CLI subprocesses**; the direct Anthropic HTTP API path and the stored API key were removed (eliminates content-filter policy errors and a second credential to manage)
@@ -50,11 +74,11 @@ Highlights below; the detailed entries from this release follow.
 
 ### MCP Tool Server
 - Built-in **Model Context Protocol** server over HTTP+SSE (JSON-RPC 2.0) at `/api/mcp/sse` + `/api/mcp/messages` (`McpController`)
-- Eight tools: `venus_execute_code`, `venus_list_notebooks`, `venus_read_notebook`, `venus_run_pipeline`, `venus_search_cells`, `venus_load_module`, `venus_create_notebook`, `venus_append_cell`
-- Any MCP client (Claude Desktop, Claude Code, custom agents) can drive Venus programmatically — see `docs/API.md` for client setup
+- Eight tools: `barista_execute_code`, `barista_list_notebooks`, `barista_read_notebook`, `barista_run_pipeline`, `barista_search_cells`, `barista_load_module`, `barista_create_notebook`, `barista_append_cell`
+- Any MCP client (Claude Desktop, Claude Code, custom agents) can drive Arima programmatically — see `docs/API.md` for client setup
 
 ### Authentication — Local & OAuth2
-- Spring Security added with two modes via `venus.auth.mode`: `local` (default — OS username, no login) and `oauth` (OAuth2 social login)
+- Spring Security added with two modes via `barista.auth.mode`: `local` (default — OS username, no login) and `oauth` (OAuth2 social login)
 - OAuth client config stored in `data/oauth-config.json` (gitignored); `SecurityConfig`, `OAuthClientConfig`, `OAuthConfigService`, `UserService`, `AuthProvider`, `OAuthConfig`, `UserProfile` added
 - New endpoints: `/api/user/me`, `/api/user/me/email`, `/api/user/oauth-config`, `/api/user/logout`, and `PUT /api/settings/auth-mode`
 - Notebooks are scoped per user (`notebooks/{userId}/`)
@@ -70,13 +94,13 @@ Highlights below; the detailed entries from this release follow.
 
 ### Documentation — Agentic Workflow Framing
 
-- **README.md** — new "Built for the Agentic Era" section explaining the *use → customize → contribute* loop, with three surfaces (Venus UI, AI CLI in repo, MCP-aware agents) and sample prompts for each
+- **README.md** — new "Built for the Agentic Era" section explaining the *use → customize → contribute* loop, with three surfaces (Arima UI, AI CLI in repo, MCP-aware agents) and sample prompts for each
 - **CONTRIBUTING.md** — new "Contributing in an Agentic Cycle" section at the top; the recommended path is now `ask AI CLI in the repo` → `try locally` → `ask AI to package the PR`. Traditional fork-edit-PR still works.
-- **docs/USAGE.md** — new "Agentic Workflows — Use, Customize, Contribute" section in the AI Assistant chapter; documents the three surfaces and the MCP tool surface (`venus_create_notebook`, `venus_append_cell`, `venus_read_notebook`, `venus_run_pipeline`, `venus_load_module`)
+- **docs/USAGE.md** — new "Agentic Workflows — Use, Customize, Contribute" section in the AI Assistant chapter; documents the three surfaces and the MCP tool surface (`barista_create_notebook`, `barista_append_cell`, `barista_read_notebook`, `barista_run_pipeline`, `barista_load_module`)
 - **docs/ARCHITECTURE.md** — new "Design Principles (Built for the Agentic Era)" preamble that names the six constraints (no frontend build, no Lombok, subprocess-per-language, small conventions, single JAR/port, MCP-native) and explains *why* — they're what makes the customize-in-an-hour promise real
 - **docs/SETUP.md** — new "Recommended: an AI CLI" section; positions installing Claude / Copilot / Gemini CLI as the standard setup step, not an optional extra
 - **Articles** — long-form articles in `articles/medium-article.md` and `articles/linkedin-article.md` (with rendered PDFs and embedded SVG diagrams) telling the same story in long-form
-- **`.ipynb` interop** — clarified everywhere that Venus ↔ Jupyter round-tripping is *planned for the next update*, not currently shipped
+- **`.ipynb` interop** — clarified everywhere that Arima ↔ Jupyter round-tripping is *planned for the next update*, not currently shipped
 
 ### Variable Inspector & Tab UX
 - **Variable inspector** extended to **all subprocess languages** — JavaScript, TypeScript, C#, F#, and C++ (previously JShell-only), via `util/VariableInspector`; inspect live types, values, and structure without printing
@@ -86,19 +110,19 @@ Highlights below; the detailed entries from this release follow.
 
 ## [2.1.0] — 2026-05-10
 
-Venus 2.1 adds **TypeScript** as a full first-class language — bringing the total to **seven execution modes** (JShell · Java · JavaScript · TypeScript · C# · F# · C++). The integration leverages Node.js's built-in type-stripping (Node 22.6+), so no additional runtime is required beyond the existing Node.js dependency.
+Arima 2.1 adds **TypeScript** as a full first-class language — bringing the total to **seven execution modes** (JShell · Java · JavaScript · TypeScript · C# · F# · C++). The integration leverages Node.js's built-in type-stripping (Node 22.6+), so no additional runtime is required beyond the existing Node.js dependency.
 
 ### TypeScript Language Support
 
 - **TypeScript cells** — new `typescript` mode using Node.js's built-in type-stripping
   - Each cell runs as a per-cell isolated `node --experimental-strip-types script.ts` subprocess (Node 22.6+; Node 24+ runs `.ts` files natively)
-  - Built-in **typed** Venus preamble: `venus.table(rows)`, `venus.display(value)`, `venus.html(content)`, `venus.stats(arr)` — full TS signatures injected at the top of every cell
+  - Built-in **typed** Arima preamble: `barista.table(rows)`, `barista.display(value)`, `barista.html(content)`, `barista.stats(arr)` — full TS signatures injected at the top of every cell
   - Shares `data/npm-modules/` with JavaScript cells — `import * as ss from "simple-statistics"` works without any extra setup
   - Line-number correction on errors (preamble offset removed)
   - CodeMirror syntax highlighting uses `text/typescript`
   - TS blue (`#3178c6`) cell badge and `◆` icon
 
-- **Optional `tsc` type-check** — if the TypeScript compiler is on the PATH, Venus runs `tsc --noEmit` before each cell with relaxed-strict settings:
+- **Optional `tsc` type-check** — if the TypeScript compiler is on the PATH, Arima runs `tsc --noEmit` before each cell with relaxed-strict settings:
   - Type errors (e.g. `Type 'string' is not assignable to type 'number'`) reported **before** execution starts
   - Type-check failures are folded into the cell's error stream alongside runtime errors
   - Without `tsc`, cells still run — only the type-check pass is skipped
@@ -141,14 +165,14 @@ Venus 2.1 adds **TypeScript** as a full first-class language — bringing the to
 
 ## [2.0.0] — 2026-04-17
 
-Venus 2.0 adds **C# and F#** as full first-class languages — including pipeline dependency injection, NuGet package management, and cross-notebook cell references across all five execution modes. This is a **major feature release**.
+Arima 2.0 adds **C# and F#** as full first-class languages — including pipeline dependency injection, NuGet package management, and cross-notebook cell references across all five execution modes. This is a **major feature release**.
 
 ### C# Language Support
 
 - **C# cells** — new `csharp` mode using `dotnet run` (standard .NET SDK, no extra tools)
   - Each cell runs as a **C# 9+ top-level program** compiled and executed per cell
   - Auto-injects standard usings: `System`, `System.Linq`, `System.Collections.Generic`, `System.Text`, `System.IO`
-  - Built-in helpers: `VenusHtml(html)`, `VenusDisplay(obj)`, `VenusTable<T>(list)`
+  - Built-in helpers: `BaristaHtml(html)`, `BaristaDisplay(obj)`, `BaristaTable<T>(list)`
   - Line-number correction on compiler errors (preamble offset removed)
   - Type declarations (`class`, `record`, `struct`, `enum`, `namespace`) are automatically re-ordered to satisfy the C# 9+ CS8803 rule
   - Inline `#r "nuget:"` directives are stripped — use the NuGet tab instead
@@ -164,7 +188,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 - **F# cells** — new `fsharp` mode using `dotnet fsi --exec` (built into .NET SDK 6+)
   - Each cell runs as an `.fsx` script; no `dotnet-script` required
   - Pre-opened namespaces: `System`, `System.Linq`, `System.Collections.Generic`
-  - Built-in helpers: `venusHtml`, `venusDisplay`, `venusTable`
+  - Built-in helpers: `baristaHtml`, `baristaDisplay`, `baristaTable`
   - Inline `#r "nuget:"` directives are extracted from user code and placed at the top of the script file (before any `open` statements), ensuring correct resolution order
 
 - **F# pipeline dependency injection** — full `//@ depends:` support:
@@ -175,7 +199,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 
 - `//@ depends: notebook:{notebookId}/{anchorName}` syntax now works in **C# and F# cells**
 - **JShell / Java**: foreign cell executed in the shared session (as before)
-- **C# / F#**: Venus builds an **expanded source** — the full transitive dependency chain of the foreign cell, annotation-stripped and concatenated in topological order — and caches it under the cross-notebook key; when the dependent cell runs, this expanded source is injected with output suppressed
+- **C# / F#**: Arima builds an **expanded source** — the full transitive dependency chain of the foreign cell, annotation-stripped and concatenated in topological order — and caches it under the cross-notebook key; when the dependent cell runs, this expanded source is injected with output suppressed
 - New example notebooks demonstrating cross-notebook C# references:
   - `csharp-shared-utils` — reusable types (`Transaction`, `Product`) and helpers (`Stats`, `Format`)
   - `csharp-cross-notebook` — finance analysis pipeline importing from `csharp-shared-utils`
@@ -239,7 +263,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
   - Completion **hint box** drops up above the input; clickable items + keyboard cycling
   - Press Tab repeatedly to cycle through suggestions; any other key hides the box
 - Input placeholder text updates dynamically to match the selected runtime
-- Console output now supports `VENUS_HTML:` sentinel — inline SVG/HTML charts render in the console, same as in notebook cells
+- Console output now supports `BARISTA_HTML:` sentinel — inline SVG/HTML charts render in the console, same as in notebook cells
 - Input prefix icon reflects the active runtime (`[☕]`, `[♨]`, `[⬡]`)
 - History buffer expanded to 500 entries
 
@@ -252,7 +276,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 - `JShellManager.complete(sessionId, source, cursor)` — new method wrapping `SourceCodeAnalysis`
 - `ShellSession.getJShell()` — new accessor needed by JShellManager completion
 
-#### CSS Changes (`venus.css`)
+#### CSS Changes (`arima.css`)
 - `.console-runtime-bar` / `.console-runtime-btn` / `.console-runtime-btn.active`
 - `.console-runtime-badge`
 - `.console-hint-box` / `.hint-item` / `.hint-item.active` / `.hint-more`
@@ -266,7 +290,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 #### New Features
 - **Notebook Browser** (click the folder icon) now shows two distinct sections:
   - **My Notebooks** — personal notebooks with a `+ New Notebook` button
-  - **Venus Tutorials** — built-in read-only tutorials (separate from user notebooks)
+  - **Arima Tutorials** — built-in read-only tutorials (separate from user notebooks)
 - Tutorial notebooks are grouped by **language** (JShell / Java / JavaScript), then **subcategory**:
   - Basics & Foundations
   - Advanced
@@ -279,7 +303,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 - Tutorial notebooks open in a read-only tab — auto-save is disabled; status bar notes `(tutorial — read-only)`
 - `loadNotebook(id, isTutorial)` now routes tutorial IDs to `/api/notebooks/tutorials/{id}`
 
-#### CSS Changes (`venus.css`)
+#### CSS Changes (`arima.css`)
 - `.nbb-section` / `.nbb-section-hdr` / `.nbb-section-title` / `.nbb-section-note`
 - `.nbb-action-btn`
 - `.nbb-lang-group` / `.nbb-lang-hdr`
@@ -345,9 +369,9 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 - Cell mode button cycles: JShell → Java → JavaScript → JShell
 
 ### In-line Chart Output
-- `VENUS_HTML:` sentinel: output lines starting with this prefix are rendered as inline HTML/SVG
-- `venus.html(content)` helper function available in all JavaScript cells
-- `VenusDisplay` (Java) renders XChart charts as base64 PNG inline in cell output
+- `BARISTA_HTML:` sentinel: output lines starting with this prefix are rendered as inline HTML/SVG
+- `barista.html(content)` helper function available in all JavaScript cells
+- `BaristaDisplay` (Java) renders XChart charts as base64 PNG inline in cell output
 
 ### Data Science Stack (Built-in, no install)
 - XChart 3.8.6 — chart rendering
@@ -387,7 +411,7 @@ Venus 2.0 adds **C# and F#** as full first-class languages — including pipelin
 
 ## Versioning
 
-Venus Notebooks follows [Semantic Versioning](https://semver.org/):
+Arima Notebooks follows [Semantic Versioning](https://semver.org/):
 
 - **MAJOR** — breaking changes to notebook file format or API
 - **MINOR** — new features, new tabs, new endpoints, new cell types

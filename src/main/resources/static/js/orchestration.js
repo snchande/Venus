@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — Cell Orchestration Engine (client-side)
+ * Arima Notebooks — Cell Orchestration Engine (client-side)
  *
  * Mirrors the server-side OrchestrationService but runs in the browser for:
  *   - Instant annotation parsing as the user types

@@ -1,12 +1,12 @@
 {
   "id": "ts-101",
   "name": "TypeScript Introduction",
-  "description": "Introduction to TypeScript in Venus Notebooks — types, interfaces, generics primer, and the typed Venus helpers",
+  "description": "Introduction to TypeScript in Arima Notebooks — types, interfaces, generics primer, and the typed Arima helpers",
   "cells": [
     {
       "id": "ts-101-md-1",
       "type": "MARKDOWN",
-      "source": "# TypeScript in Venus Notebooks\n\nVenus supports **TypeScript** alongside JavaScript, JShell, Java, C#, F#, and C++.\n\n- Click the mode button on any code cell to cycle: **JShell → Java → JS → TS → C# → F# → C++**\n- TypeScript cells run via **Node.js's built-in type-stripping** (Node 22.6+, recommended Node 24)\n- If `tsc` is installed (`npm install -g typescript`), Venus also runs `tsc --noEmit` for type-checking\n- Each TS cell is independent (per-cell isolation, same as JS)\n- Built-in **typed** `venus` helpers: `venus.table()`, `venus.display()`, `venus.stats()`, `venus.html()`\n\n> **Install npm packages** in the Packages tab → npm section. They are shared between JS and TS cells.",
+      "source": "# TypeScript in Arima Notebooks\n\nArima supports **TypeScript** alongside JavaScript, JShell, Java, C#, F#, and C++.\n\n- Click the mode button on any code cell to cycle: **JShell → Java → JS → TS → C# → F# → C++**\n- TypeScript cells run via **Node.js's built-in type-stripping** (Node 22.6+, recommended Node 24)\n- If `tsc` is installed (`npm install -g typescript`), Arima also runs `tsc --noEmit` for type-checking\n- Each TS cell is independent (per-cell isolation, same as JS)\n- Built-in **typed** `barista` helpers: `barista.table()`, `barista.display()`, `barista.stats()`, `barista.html()`\n\n> **Install npm packages** in the Packages tab → npm section. They are shared between JS and TS cells.",
       "output": "",
       "executed": false
     },
@@ -14,7 +14,7 @@
       "id": "ts-101-1",
       "type": "CODE",
       "mode": "typescript",
-      "source": "//@ anchor: hello-typescript\n//@ description: Hello World with explicit types\n\nconst greeting: string = \"Hello from TypeScript in Venus!\";\nconst version: string  = process.version;\nconst platform: string = process.platform;\n\nconsole.log(greeting);\nconsole.log(`Node ${version} on ${platform}`);",
+      "source": "//@ anchor: hello-typescript\n//@ description: Hello World with explicit types\n\nconst greeting: string = \"Hello from TypeScript in Arima!\";\nconst version: string  = process.version;\nconst platform: string = process.platform;\n\nconsole.log(greeting);\nconsole.log(`Node ${version} on ${platform}`);",
       "output": "",
       "executed": false,
       "anchor": "hello-typescript",
@@ -31,7 +31,7 @@
       "id": "ts-101-2",
       "type": "CODE",
       "mode": "typescript",
-      "source": "//@ anchor: primitive-types\n//@ description: Primitives, inference, and unknown\n\nconst name: string = \"Venus\";\nconst orbitDays: number = 224.7;\nconst hasAtmosphere: boolean = true;\nconst unknownThing: unknown = JSON.parse('{\"surface\":\"rocky\"}');\n\n// Type inference — explicit annotation not required\nconst inferredNumber = 42;        // typed as `number`\nconst inferredArray  = [1, 2, 3]; // typed as `number[]`\n\n// To use `unknown` you must narrow first\nif (typeof unknownThing === \"object\" && unknownThing && \"surface\" in unknownThing) {\n  console.log(\"Narrowed unknown to object — surface:\", (unknownThing as { surface: string }).surface);\n}\n\nconsole.log(`${name}: orbit ${orbitDays} days, atmosphere=${hasAtmosphere}`);\nconsole.log(\"inferredNumber * 2 =\", inferredNumber * 2);",
+      "source": "//@ anchor: primitive-types\n//@ description: Primitives, inference, and unknown\n\nconst name: string = \"Arima\";\nconst orbitDays: number = 224.7;\nconst hasAtmosphere: boolean = true;\nconst unknownThing: unknown = JSON.parse('{\"surface\":\"rocky\"}');\n\n// Type inference — explicit annotation not required\nconst inferredNumber = 42;        // typed as `number`\nconst inferredArray  = [1, 2, 3]; // typed as `number[]`\n\n// To use `unknown` you must narrow first\nif (typeof unknownThing === \"object\" && unknownThing && \"surface\" in unknownThing) {\n  console.log(\"Narrowed unknown to object — surface:\", (unknownThing as { surface: string }).surface);\n}\n\nconsole.log(`${name}: orbit ${orbitDays} days, atmosphere=${hasAtmosphere}`);\nconsole.log(\"inferredNumber * 2 =\", inferredNumber * 2);",
       "output": "",
       "executed": false,
       "anchor": "primitive-types",
@@ -48,7 +48,7 @@
       "id": "ts-101-3",
       "type": "CODE",
       "mode": "typescript",
-      "source": "//@ anchor: interfaces-types\n//@ description: Interfaces, type aliases, literal types\n\ninterface Planet {\n  name: string;\n  distanceAU: number;\n  moons: number;\n  category: \"terrestrial\" | \"gas-giant\" | \"ice-giant\";\n}\n\ntype Catalog = ReadonlyArray<Planet>;\n\nconst planets: Catalog = [\n  { name: \"Mercury\", distanceAU: 0.39, moons: 0,  category: \"terrestrial\" },\n  { name: \"Venus\",   distanceAU: 0.72, moons: 0,  category: \"terrestrial\" },\n  { name: \"Earth\",   distanceAU: 1.00, moons: 1,  category: \"terrestrial\" },\n  { name: \"Mars\",    distanceAU: 1.52, moons: 2,  category: \"terrestrial\" },\n  { name: \"Jupiter\", distanceAU: 5.20, moons: 95, category: \"gas-giant\"   },\n  { name: \"Saturn\",  distanceAU: 9.54, moons: 146,category: \"gas-giant\"   },\n];\n\nvenus.table(planets.map(p => ({ Planet: p.name, AU: p.distanceAU, Moons: p.moons, Cat: p.category })));",
+      "source": "//@ anchor: interfaces-types\n//@ description: Interfaces, type aliases, literal types\n\ninterface Planet {\n  name: string;\n  distanceAU: number;\n  moons: number;\n  category: \"terrestrial\" | \"gas-giant\" | \"ice-giant\";\n}\n\ntype Catalog = ReadonlyArray<Planet>;\n\nconst planets: Catalog = [\n  { name: \"Mercury\", distanceAU: 0.39, moons: 0,  category: \"terrestrial\" },\n  { name: \"Arima\",   distanceAU: 0.72, moons: 0,  category: \"terrestrial\" },\n  { name: \"Earth\",   distanceAU: 1.00, moons: 1,  category: \"terrestrial\" },\n  { name: \"Mars\",    distanceAU: 1.52, moons: 2,  category: \"terrestrial\" },\n  { name: \"Jupiter\", distanceAU: 5.20, moons: 95, category: \"gas-giant\"   },\n  { name: \"Saturn\",  distanceAU: 9.54, moons: 146,category: \"gas-giant\"   },\n];\n\nbarista.table(planets.map(p => ({ Planet: p.name, AU: p.distanceAU, Moons: p.moons, Cat: p.category })));",
       "output": "",
       "executed": false,
       "anchor": "interfaces-types",
@@ -91,7 +91,7 @@
     {
       "id": "ts-101-md-6",
       "type": "MARKDOWN",
-      "source": "## 5. The typed Venus helpers\n\nEvery TS cell has access to a typed `venus` object — the same one as JS cells, but with proper TypeScript signatures.\n\n| Helper | Signature |\n|--------|-----------|\n| `venus.table(rows)` | `(data: Record<string, unknown>[]) => void` |\n| `venus.display(value)` | `(obj: unknown) => void` |\n| `venus.html(html)` | `(content: string) => void` |\n| `venus.stats(arr)` | `(arr: number[]) => void` |",
+      "source": "## 5. The typed Arima helpers\n\nEvery TS cell has access to a typed `barista` object — the same one as JS cells, but with proper TypeScript signatures.\n\n| Helper | Signature |\n|--------|-----------|\n| `barista.table(rows)` | `(data: Record<string, unknown>[]) => void` |\n| `barista.display(value)` | `(obj: unknown) => void` |\n| `barista.html(html)` | `(content: string) => void` |\n| `barista.stats(arr)` | `(arr: number[]) => void` |",
       "output": "",
       "executed": false
     },
@@ -99,16 +99,16 @@
       "id": "ts-101-6",
       "type": "CODE",
       "mode": "typescript",
-      "source": "//@ anchor: venus-helpers-typed\n//@ description: Typed venus helpers in action\n\ninterface Sample { id: number; reading: number; status: \"ok\" | \"warn\" | \"err\"; }\n\nconst samples: Sample[] = [\n  { id: 1, reading: 23.4, status: \"ok\"   },\n  { id: 2, reading: 24.1, status: \"ok\"   },\n  { id: 3, reading: 27.8, status: \"warn\" },\n  { id: 4, reading: 22.9, status: \"ok\"   },\n  { id: 5, reading: 31.2, status: \"err\"  },\n];\n\nvenus.table(samples as unknown as Record<string, unknown>[]);\nvenus.stats(samples.map(s => s.reading));\nvenus.display({ probe: \"Venus-1\", samples: samples.length });",
+      "source": "//@ anchor: barista-helpers-typed\n//@ description: Typed barista helpers in action\n\ninterface Sample { id: number; reading: number; status: \"ok\" | \"warn\" | \"err\"; }\n\nconst samples: Sample[] = [\n  { id: 1, reading: 23.4, status: \"ok\"   },\n  { id: 2, reading: 24.1, status: \"ok\"   },\n  { id: 3, reading: 27.8, status: \"warn\" },\n  { id: 4, reading: 22.9, status: \"ok\"   },\n  { id: 5, reading: 31.2, status: \"err\"  },\n];\n\nbarista.table(samples as unknown as Record<string, unknown>[]);\nbarista.stats(samples.map(s => s.reading));\nbarista.display({ probe: \"Arima-1\", samples: samples.length });",
       "output": "",
       "executed": false,
-      "anchor": "venus-helpers-typed",
-      "description": "Typed venus helpers in action"
+      "anchor": "barista-helpers-typed",
+      "description": "Typed barista helpers in action"
     },
     {
       "id": "ts-101-md-7",
       "type": "MARKDOWN",
-      "source": "## 6. Try it — intentional type error\n\nUncomment the line below and run again. With `tsc` installed (`npm install -g typescript`) you'll see Venus surface the type error **before** the runtime even starts. Without `tsc`, the cell still runs because Node strips the types and trusts the assignment.",
+      "source": "## 6. Try it — intentional type error\n\nUncomment the line below and run again. With `tsc` installed (`npm install -g typescript`) you'll see Arima surface the type error **before** the runtime even starts. Without `tsc`, the cell still runs because Node strips the types and trusts the assignment.",
       "output": "",
       "executed": false
     },

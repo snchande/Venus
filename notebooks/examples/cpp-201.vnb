@@ -92,7 +92,7 @@
       "id": "cpp201-6",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: map-sorted-key-value-store\n//@ description: map — sorted key/value store\n// map — sorted key/value store\nmap<string, double> prices;\nprices[\"apple\"]  = 0.99;\nprices[\"banana\"] = 0.59;\nprices[\"cherry\"] = 3.49;\nprices[\"date\"]   = 5.99;\n\ncout << \"All prices (sorted by key):\\n\";\nfor (const auto& [fruit, price] : prices)  // structured binding (C++17)\n    cout << \"  \" << setw(8) << left << fruit\n         << \" $\" << fixed << setprecision(2) << price << \"\\n\";\n\n// Find\nif (auto it = prices.find(\"cherry\"); it != prices.end())\n    cout << \"Cherry price: $\" << it->second << \"\\n\";\n\n// count — check existence\ncout << \"Has 'grape': \" << boolalpha << (prices.count(\"grape\") > 0) << \"\\n\";\n\n// emplace — more efficient than operator[]\nprices.emplace(\"elderberry\", 8.99);\ncout << \"After add: \" << prices.size() << \" items\\n\";\n\nvenusTable(prices);",
+      "source": "//@ anchor: map-sorted-key-value-store\n//@ description: map — sorted key/value store\n// map — sorted key/value store\nmap<string, double> prices;\nprices[\"apple\"]  = 0.99;\nprices[\"banana\"] = 0.59;\nprices[\"cherry\"] = 3.49;\nprices[\"date\"]   = 5.99;\n\ncout << \"All prices (sorted by key):\\n\";\nfor (const auto& [fruit, price] : prices)  // structured binding (C++17)\n    cout << \"  \" << setw(8) << left << fruit\n         << \" $\" << fixed << setprecision(2) << price << \"\\n\";\n\n// Find\nif (auto it = prices.find(\"cherry\"); it != prices.end())\n    cout << \"Cherry price: $\" << it->second << \"\\n\";\n\n// count — check existence\ncout << \"Has 'grape': \" << boolalpha << (prices.count(\"grape\") > 0) << \"\\n\";\n\n// emplace — more efficient than operator[]\nprices.emplace(\"elderberry\", 8.99);\ncout << \"After add: \" << prices.size() << \" items\\n\";\n\nbaristaTable(prices);",
       "output": "",
       "executionCount": 0,
       "anchor": "map-sorted-key-value-store",
@@ -155,7 +155,7 @@
     {
       "id": "cpp201-md-7",
       "type": "MARKDOWN",
-      "source": "## 7. Venus Pipeline — Sharing Data Between Cells\n\nUse `//@ anchor:` to name a cell and `//@ depends:` to inject it into another.",
+      "source": "## 7. Arima Pipeline — Sharing Data Between Cells\n\nUse `//@ anchor:` to name a cell and `//@ depends:` to inject it into another.",
       "output": "",
       "executionCount": 0
     },

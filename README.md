@@ -1,27 +1,27 @@
-# Venus Notebooks
+# Arima Notebooks
 
 > **Interactive multi-language notebooks in your browser — Java, C++, C#, F#, JavaScript, TypeScript — with AI assistance**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-3.0.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.0-informational.svg)](CHANGELOG.md)
 
-Venus Notebooks is a **locally-hosted, browser-based notebook environment** for seven languages — JShell, Java, JavaScript, TypeScript, C#, F#, and C++ — with three AI co-pilots (Claude, GitHub Copilot, Gemini) wired in as **local CLI subprocesses** and the **whole system exposed via MCP** so any agent can drive it programmatically.
+Arima Notebooks is a **locally-hosted, browser-based notebook environment** for seven languages — JShell, Java, JavaScript, TypeScript, C#, F#, and C++ — with three AI co-pilots (Claude, GitHub Copilot, Gemini) wired in as **local CLI subprocesses** and the **whole system exposed via MCP** so any agent can drive it programmatically.
 
 No cloud account. No data sent anywhere. Runs entirely on your machine.
 
-> 📄 **[Product Brochure (PDF)](docs/brochure/venus-brochure.pdf)** — 12 pages, branded, with architecture diagrams.
+> 📄 **[Product Brochure (PDF)](docs/brochure/arima-brochure.pdf)** — 12 pages, branded, with architecture diagrams.
 > 🛡 **AI-contributor rules** live in **[AGENTS.md](AGENTS.md)** — read this before you (or your CLI) write code.
 > 🔍 **Pre-flight security check:** `pwsh ./scripts/security-check.ps1` or `./scripts/security-check.sh`.
 
-![Venus Notebooks UI](docs/screenshots/00-cover-medium.png)
+![Arima Notebooks UI](docs/screenshots/00-cover-medium.png)
 
 ---
 
-## Why Venus?
+## Why Arima?
 
-Java developers have always been second-class citizens in the notebook world. Jupyter supports Python natively; everything else is a plugin or a workaround. Venus was built from the ground up for Java:
+Java developers have always been second-class citizens in the notebook world. Jupyter supports Python natively; everything else is a plugin or a workaround. Arima was built from the ground up for Java:
 
 - **JShell-native** — the official Java REPL, not a workaround
 - **Full class compilation** — switch any cell to full `javac` compile+run mode
@@ -38,7 +38,7 @@ Java developers have always been second-class citizens in the notebook world. Ju
 
 ## Built for the Agentic Era
 
-Venus is designed to be **used**, **customized**, and **contributed back to** — entirely through agentic prompts. The product, the docs, and the contribution workflow all assume an AI partner is in your loop.
+Arima is designed to be **used**, **customized**, and **contributed back to** — entirely through agentic prompts. The product, the docs, and the contribution workflow all assume an AI partner is in your loop.
 
 ### The Agentic Cycle
 
@@ -47,16 +47,16 @@ Venus is designed to be **used**, **customized**, and **contributed back to** �
     │           │              │
     │           │              └── "Package this as a PR." → AI opens a PR upstream
     │           └──────────────── "Add a violin-plot helper." → AI edits the code in your fork
-    └──────────────────────────── "Generate a notebook that fits a polynomial to this data." → AI builds it in Venus
+    └──────────────────────────── "Generate a notebook that fits a polynomial to this data." → AI builds it in Arima
 ```
 
 Three surfaces, one workflow:
 
 | Surface | What you do | How AI helps |
 |---|---|---|
-| **Venus UI** | Write and run cells | The built-in AI panel (Claude / Copilot / Gemini CLI) generates cells, explains errors, converts between languages |
-| **Your terminal** | `claude code` / `copilot` / `gemini` inside the Venus repo | Reshape Venus itself — add a language, change a theme, fix a bug, write a tutorial |
-| **Any MCP-aware agent** | Claude Code, Claude Desktop, custom agents | Drive Venus over MCP — create notebooks, add cells, run pipelines, install packages programmatically |
+| **Arima UI** | Write and run cells | The built-in AI panel (Claude / Copilot / Gemini CLI) generates cells, explains errors, converts between languages |
+| **Your terminal** | `claude code` / `copilot` / `gemini` inside the Arima repo | Reshape Arima itself — add a language, change a theme, fix a bug, write a tutorial |
+| **Any MCP-aware agent** | Claude Code, Claude Desktop, custom agents | Drive Arima over MCP — create notebooks, add cells, run pipelines, install packages programmatically |
 
 ### Sample Agentic Prompts
 
@@ -65,9 +65,9 @@ Three surfaces, one workflow:
 - *"Convert this Java stream pipeline to a C# LINQ query."* (then click **Insert into notebook**)
 - *"Why is this cell's output empty? Look at the dependency chain."*
 
-**While customizing Venus itself (in your terminal, inside the repo):**
+**While customizing Arima itself (in your terminal, inside the repo):**
 - *"Add an Excel export option for notebooks — a button in the toolbar that downloads the current notebook as `.xlsx`."*
-- *"The dark theme is too contrasty. Tweak `venus.css` so the cell borders are softer."*
+- *"The dark theme is too contrasty. Tweak `arima.css` so the cell borders are softer."*
 - *"Add a tutorial notebook `java-701.vnb` covering Java 21 virtual threads — five cells, beginner-friendly."*
 
 **Closing the contribution loop:**
@@ -94,7 +94,7 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 | **Pipeline Orchestration** | Chain cells with `//@ depends:` annotations — works across all 7 languages |
 | **Multi-provider AI** | Claude · GitHub Copilot · Gemini — all via local CLI, no API key needed |
 | **AI Language Conversion** | Switch a cell's language and AI converts the code automatically |
-| **MCP Server** | Expose Venus as an MCP tool server for Claude Code, Claude Desktop, and custom agents |
+| **MCP Server** | Expose Arima as an MCP tool server for Claude Code, Claude Desktop, and custom agents |
 | **Built-in Data Science** | XChart · Commons Math · Tablesaw · simple-statistics · mathjs — pre-installed |
 | **Tutorial Library** | 28 built-in tutorials across JShell, Java, JavaScript, TypeScript, C#, F#, and C++ |
 | **Interactive Console** | Full REPL console with tab completion |
@@ -115,7 +115,7 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 | **AI CLI** | Latest | Optional — Claude CLI, GitHub Copilot CLI, or Gemini CLI for AI features |
 | **Internet** | — | For Maven Central, npm registry, NuGet downloads |
 
-> **Quick launch**: the `venus` CLI (`venus.cmd` for CMD, `venus.ps1` for PowerShell, `venus.sh` for Linux/macOS) handles everything — build, start, stop, status, and browser open in one command.
+> **Quick launch**: the `arima` CLI (`arima.cmd` for CMD, `arima.ps1` for PowerShell, `arima.sh` for Linux/macOS) handles everything — build, start, stop, status, and browser open in one command.
 
 ---
 
@@ -125,31 +125,31 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 
 ```bash
 git clone https://github.com/snchande/Venus.git
-cd Venus
+cd Arima
 ```
 
-### Step 2 — Start Venus
+### Step 2 — Start Arima
 
 Pick the CLI for your shell — all three accept the same subcommands (`start`, `stop`, `status`, `build`, `rebuild`, `open`, `logs`, `version`, `help`):
 
 **Windows — Command Prompt**
 ```cmd
-venus
+arima
 ```
 
 **Windows — PowerShell**
 ```powershell
-./venus.ps1
+./arima.ps1
 ```
 > If PowerShell blocks the script with an execution-policy error, run once:
 > `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
 
 **Linux / macOS**
 ```bash
-./venus.sh
+./arima.sh
 ```
 
-All three CLIs detect if the JAR exists, build it if needed, start the server, and open your browser automatically. Run `venus help` (or `./venus.sh help` / `./venus.ps1 help`) for the full command list.
+All three CLIs detect if the JAR exists, build it if needed, start the server, and open your browser automatically. Run `arima help` (or `./arima.sh help` / `./arima.ps1 help`) for the full command list.
 
 **Maven dev mode (all platforms):**
 ```bash
@@ -161,18 +161,18 @@ mvn spring-boot:run
 java --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \
      --add-opens=java.base/java.lang=ALL-UNNAMED \
      --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \
-     -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+     -jar target/arima-notebooks-1.0.0-SNAPSHOT.jar
 ```
 
 ### Step 3 — Open your browser
 
 Navigate to **[http://localhost:8585](http://localhost:8585)**
 
-The `venus` CLI opens this automatically on every platform.
+The `arima` CLI opens this automatically on every platform.
 
 ### Step 4 — (Optional) Enable AI features
 
-Venus supports three AI providers — all run as local CLI subprocesses, no API key needed:
+Arima supports three AI providers — all run as local CLI subprocesses, no API key needed:
 
 | Provider | Install | Auth |
 |----------|---------|------|
@@ -201,13 +201,13 @@ Each code cell has a **mode button** (top-right of the cell) that cycles between
 |------|-------|-------------|
 | **JShell** | `◈ JShell` | Runs as a Java snippet. Variables persist across cells in the same notebook. |
 | **Java** | `◈ Java` | Compiles and runs a full Java class. Per-cell isolation — perfect for class definitions. |
-| **JavaScript** | `◈ JS` | Runs via Node.js. Built-in helpers: `venus.table()`, `venus.html()`, `venus.display()`. |
+| **JavaScript** | `◈ JS` | Runs via Node.js. Built-in helpers: `barista.table()`, `barista.html()`, `barista.display()`. |
 | **TypeScript** | `◆ TS` | Runs via Node.js's built-in type-stripping (Node 22.6+). Optional `tsc --noEmit` type-check. Same helpers as JS, with full TypeScript type signatures. |
 | **C#** | `◈ C#` | Compiled as a C# 9+ top-level program via `dotnet run`. NuGet packages auto-injected. |
 | **F#** | `◈ F#` | Runs as an F# script via `dotnet fsi`. Inline `#r "nuget:"` directives supported. |
 | **C++** | `◈ C++` | Compiled and run with MSVC/GCC/Clang. 26 standard headers pre-included. |
 
-When you switch a cell's language, Venus offers to **convert the existing code** using AI.
+When you switch a cell's language, Arima offers to **convert the existing code** using AI.
 
 **To run a cell:** Click **Run** or press `Ctrl+Enter`.
 
@@ -219,7 +219,7 @@ JShell cells in the same notebook share a session. Variables declared in cell 1 
 
 ```java
 // Cell 1 (JShell)
-var name = "Venus";
+var name = "Arima";
 var version = 1.2;
 
 // Cell 2 (JShell) — can use name and version directly
@@ -298,7 +298,7 @@ Click **Run with Dependencies** on any cell to automatically execute its full de
 
 ## Tutorial Library
 
-Venus ships with 28 built-in tutorials. Open the Notebook Browser and click **Venus Tutorials**.
+Arima ships with 28 built-in tutorials. Open the Notebook Browser and click **Arima Tutorials**.
 
 | ID | Title | Mode | Level |
 |----|-------|------|-------|
@@ -335,7 +335,7 @@ Tutorials open in **read-only mode** — your personal notebooks are separate.
 
 ---
 
-## Venus CLI
+## Arima CLI
 
 Three launchers sit in the project root — pick whichever matches your shell. They all expose the same subcommands and share the same banner:
 
@@ -349,33 +349,33 @@ Three launchers sit in the project root — pick whichever matches your shell. T
 
 | Shell | Launcher | Background flag |
 |---|---|---|
-| Windows CMD | `venus` (`venus.cmd`) | `venus start --bg` |
-| Windows PowerShell | `./venus.ps1` | `./venus.ps1 start -Bg` |
-| Linux / macOS bash | `./venus.sh` | `./venus.sh start --bg` |
+| Windows CMD | `arima` (`arima.cmd`) | `arima start --bg` |
+| Windows PowerShell | `./arima.ps1` | `./arima.ps1 start -Bg` |
+| Linux / macOS bash | `./arima.sh` | `./arima.sh start --bg` |
 
 | Subcommand | Description |
 |---|---|
 | `start` | Start server, auto-build if needed, open browser |
-| `start` *(background)* | Start detached; logs to `venus.log` |
+| `start` *(background)* | Start detached; logs to `arima.log` |
 | `stop` | Stop the running server |
 | `status` | Show running state, PID, Java / Node.js / .NET versions, JAR state |
 | `build` | Build JAR (skips if already built) |
 | `rebuild` | Force clean rebuild |
 | `open` | Open browser (server must be running) |
-| `logs` | Tail `venus.log` (background mode only) |
+| `logs` | Tail `arima.log` (background mode only) |
 | `version` | Show project, Java, Node.js, .NET, and Maven versions |
-| `agents` *(alias `ai`)* | List detected AI co-pilots (Claude/Copilot/Gemini), guardrail files, skills, and subagents wired into the repo — *available in the CMD launcher (`venus.cmd`) today; PowerShell/bash parity planned* |
+| `agents` *(alias `ai`)* | List detected AI co-pilots (Claude/Copilot/Gemini), guardrail files, skills, and subagents wired into the repo — *available in the CMD launcher (`arima.cmd`) today; PowerShell/bash parity planned* |
 | `help` | Show help screen |
 
-> **PowerShell note**: if `./venus.ps1` is blocked, run once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+> **PowerShell note**: if `./arima.ps1` is blocked, run once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ---
 
 ## Project Structure
 
 ```
-venus/
-├── src/main/java/com/venus/
+arima/
+├── src/main/java/com/barista/
 │   ├── controller/          # REST + WebSocket endpoints
 │   ├── service/             # Business logic (JShell, Java, Node.js, TypeScript, C#, F#, C++, AI, Maven, npm)
 │   ├── shell/               # JShell session management
@@ -390,9 +390,9 @@ venus/
 ├── scripts/
 │   ├── start.sh             # Minimal Unix/Mac launcher (watchdog loop)
 │   └── start.bat            # Minimal Windows launcher
-├── venus.cmd                # Full CLI — Windows CMD
-├── venus.ps1                # Full CLI — Windows PowerShell
-├── venus.sh                 # Full CLI — Linux / macOS bash
+├── arima.cmd                # Full CLI — Windows CMD
+├── arima.ps1                # Full CLI — Windows PowerShell
+├── arima.sh                 # Full CLI — Linux / macOS bash
 └── docs/
     ├── API.md               # REST API reference
     ├── ARCHITECTURE.md      # System architecture
@@ -409,8 +409,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full system design.
 | Property | Default | Description |
 |----------|---------|-------------|
 | `server.port` | `8585` | HTTP server port |
-| `venus.notebooks.dir` | `notebooks` | Where notebooks are stored |
-| `venus.data.dir` | `data` | App data directory (packages, settings) |
+| `barista.notebooks.dir` | `notebooks` | Where notebooks are stored |
+| `barista.data.dir` | `data` | App data directory (packages, settings) |
 
 Edit `src/main/resources/application.properties` or set environment variables before starting.
 
@@ -457,7 +457,7 @@ Edit `src/main/resources/application.properties` or set environment variables be
 
 ## Contributing
 
-Venus Notebooks is open source and contributions are welcome.
+Arima Notebooks is open source and contributions are welcome.
 
 Whether you want to fix a bug, add a new tutorial, improve documentation, or build a new feature — read [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide including development setup, coding standards, and the PR review process.
 

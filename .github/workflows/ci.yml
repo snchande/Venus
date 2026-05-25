@@ -36,6 +36,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: venus-notebooks-jar
-          path: target/venus-notebooks-*.jar
+          name: arima-notebooks-jar
+          path: target/arima-notebooks-*.jar
           retention-days: 7

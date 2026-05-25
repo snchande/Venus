@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Venus Notebooks</title>
+  <title>Arima Notebooks</title>
   <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <link rel="shortcut icon" href="/img/favicon.svg">
 
@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/one-dark.min.css">
 
-  <!-- Venus styles -->
-  <link rel="stylesheet" href="/css/venus.css">
+  <!-- Arima styles -->
+  <link rel="stylesheet" href="/css/arima.css">
   <style>
     /* JavaScript cell mode */
     .cell.mode-nodejs { border-left-color: #22c55e; }
@@ -114,7 +114,7 @@
 <div id="reconnect-overlay" class="reconnect-overlay hidden" role="status" aria-live="polite">
   <div class="reconnect-box">
     <div class="reconnect-spinner"></div>
-    <div class="reconnect-title" id="reconnect-title">Restarting Venus…</div>
+    <div class="reconnect-title" id="reconnect-title">Restarting Arima…</div>
     <div class="reconnect-sub"  id="reconnect-sub">Your notebooks are saved. Reconnecting automatically.</div>
     <div class="reconnect-dots" id="reconnect-dots">
       <span></span><span></span><span></span>
@@ -128,14 +128,14 @@
   </div>
 </div>
 
-<!-- ═══════════════ VENUS SPLASH SCREEN ═══════════════ -->
-<div id="venus-splash" class="splash-visible">
+<!-- ═══════════════ BARISTA SPLASH SCREEN ═══════════════ -->
+<div id="barista-splash" class="splash-visible">
   <div class="splash-stars" id="splash-stars"></div>
   <div class="splash-center">
     <div class="splash-planet-wrap">
       <div class="splash-ring ring-outer"></div>
       <div class="splash-ring ring-inner"></div>
-      <div class="splash-planet"><span class="planet-symbol">♀</span></div>
+      <div class="splash-planet"><svg class="planet-symbol bean-crease" viewBox="0 0 96 96" width="48" height="48" aria-hidden="true"><path d="M48 14 C36 30 60 42 48 48 C36 54 60 66 48 82" fill="none" stroke="rgba(74,36,16,.55)" stroke-width="5" stroke-linecap="round"/><path d="M33 24 C28.5 33 28.5 42 31.5 48" fill="none" stroke="rgba(255,245,176,.4)" stroke-width="3" stroke-linecap="round"/></svg></div>
     </div>
     <pre class="splash-ascii" aria-hidden="true">
   ✦  ·  *  ·  ✦  ·  *  ·  ✦
@@ -144,8 +144,9 @@
   ·                         ·
   ✦  ·  *  ·  ✦  ·  *  ·  ✦</pre>
     <div class="splash-brand">
-      <h1 class="splash-title">Venus Notebooks</h1>
-      <p class="splash-msg" id="splash-msg">Initializing…</p>
+      <h1 class="splash-title">Arima Notebooks</h1>
+      <p class="splash-tagline">Interactive notebooks, freshly brewed</p>
+      <p class="splash-msg" id="splash-msg">Warming up the Barista engine…</p>
     </div>
     <div class="splash-loader"><div class="splash-loader-bar"></div></div>
   </div>
@@ -169,16 +170,14 @@
           </radialGradient>
         </defs>
         <circle cx="16" cy="16" r="13" fill="rgba(245,166,35,0.18)"/>
-        <ellipse cx="16" cy="16" rx="15.5" ry="4.8" fill="none"
-                 stroke="rgba(245,166,35,0.6)" stroke-width="1"
-                 transform="rotate(-22,16,16)"/>
-        <circle cx="16" cy="16" r="11.5" fill="url(#bpg)"/>
-        <circle cx="16" cy="16" r="11.5" fill="url(#bsh)"/>
-        <circle cx="16" cy="12.5" r="4"  fill="none" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
-        <line x1="16" y1="16.5" x2="16" y2="21.5" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
-        <line x1="13" y1="19.5" x2="19" y2="19.5" stroke="rgba(255,255,255,0.52)" stroke-width="1.6" stroke-linecap="round"/>
+        <g transform="rotate(-18,16,16)">
+          <ellipse cx="16" cy="16" rx="10.5" ry="12" fill="url(#bpg)"/>
+          <ellipse cx="16" cy="16" rx="10.5" ry="12" fill="url(#bsh)"/>
+          <path d="M16 5 C12 10 20 14 16 16 C12 18 20 22 16 27" fill="none" stroke="rgba(74,36,16,0.55)" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <path d="M24 7 C26 5.4 22.6 4 24.4 2.2" fill="none" stroke="rgba(245,166,35,0.7)" stroke-width="1" stroke-linecap="round"/>
       </svg>
-      <span class="brand-name">Venus Notebooks</span>
+      <span class="brand-name">Arima Notebooks</span>
       <span class="brand-tag">v1.0</span>
     </div>
 
@@ -268,7 +267,7 @@
       </div>
     </div>
 
-    <button class="tb-btn tb-btn-danger" id="btn-shutdown" title="Shut down Venus Notebooks server">
+    <button class="tb-btn tb-btn-danger" id="btn-shutdown" title="Shut down Arima Notebooks server">
       <svg viewBox="0 0 16 16" fill="none">
         <path d="M8 2v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         <path d="M5.1 3.8A5 5 0 1 0 10.9 3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -382,7 +381,7 @@
           </div>
         </div>
         <div class="console-output" id="console-output">
-          <div class="console-info">Venus Console ready.  Select a runtime above and start typing.</div>
+          <div class="console-info">Arima Console ready.  Select a runtime above and start typing.</div>
         </div>
         <div class="console-input-row" style="position:relative">
           <span class="console-prompt">&gt;</span>
@@ -549,7 +548,7 @@
               <p><strong>C# and F# cells</strong> require the .NET SDK — no extra tools needed:</p>
               <pre style="background:var(--bg-3);padding:8px 12px;border-radius:6px;font-size:12px;overflow-x:auto">dotnet --version   # verify SDK is installed
 dotnet fsi --version  # verify F# Interactive</pre>
-              <p style="margin-top:10px">Install the .NET SDK from <strong>https://dot.net</strong> (free), then restart Venus.</p>
+              <p style="margin-top:10px">Install the .NET SDK from <strong>https://dot.net</strong> (free), then restart Arima.</p>
             </div>
           </div>
         </div><!-- /pkg-panel-nuget -->
@@ -611,13 +610,13 @@ dotnet fsi --version  # verify F# Interactive</pre>
           </div>
 
           <div class="card" style="margin-top:12px">
-            <div class="card-title">Venus Display Helpers</div>
+            <div class="card-title">Arima Display Helpers</div>
             <div class="card-body">
               <table class="status-table" style="font-size:12px">
-                <tr><td><code>venusHtml(string)</code></td><td>Renders HTML output inline in the cell</td></tr>
-                <tr><td><code>venusDisplay(value)</code></td><td>Prints any streamable value</td></tr>
-                <tr><td><code>venusTable(vector&lt;T&gt;)</code></td><td>Shows item count summary</td></tr>
-                <tr><td><code>venusTable(map&lt;K,V&gt;)</code></td><td>Renders a key/value ASCII table</td></tr>
+                <tr><td><code>baristaHtml(string)</code></td><td>Renders HTML output inline in the cell</td></tr>
+                <tr><td><code>baristaDisplay(value)</code></td><td>Prints any streamable value</td></tr>
+                <tr><td><code>baristaTable(vector&lt;T&gt;)</code></td><td>Shows item count summary</td></tr>
+                <tr><td><code>baristaTable(map&lt;K,V&gt;)</code></td><td>Renders a key/value ASCII table</td></tr>
               </table>
             </div>
           </div>
@@ -632,7 +631,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
 
 // Your cell code follows…</pre>
               <p style="margin-top:10px;color:var(--text-3);font-size:12px">
-                ⚠ Third-party headers (Boost, Eigen, nlohmann/json, etc.) require manual compiler setup — install the library system-wide so the compiler can find them. Venus does not manage C++ package installation.
+                ⚠ Third-party headers (Boost, Eigen, nlohmann/json, etc.) require manual compiler setup — install the library system-wide so the compiler can find them. Arima does not manage C++ package installation.
               </p>
             </div>
           </div>
@@ -922,7 +921,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
 
               <div class="auth-restart-notice hidden" id="auth-restart-notice">
                 <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 3v3l2 2" stroke="#f5a623" stroke-width="1.4" stroke-linecap="round"/></svg>
-                Restart Venus Notebooks to apply changes.
+                Restart Arima Notebooks to apply changes.
               </div>
 
               <div class="auth-actions">
@@ -948,9 +947,9 @@ dotnet fsi --version  # verify F# Interactive</pre>
               </button>
             </div>
             <p class="lifecycle-note">
-              <strong>Restart</strong> saves your notebooks then relaunches Venus automatically —
+              <strong>Restart</strong> saves your notebooks then relaunches Arima automatically —
               your cell outputs will still be visible when it comes back.<br>
-              Use <code>start.sh</code> / <code>start.bat</code> to launch Venus so the watchdog
+              Use <code>start.sh</code> / <code>start.bat</code> to launch Arima so the watchdog
               can handle restarts. Running via <code>mvn spring-boot:run</code> supports shutdown only.
             </p>
           </div>
@@ -1067,7 +1066,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
       <div class="ai-msg assistant" id="ai-intro-msg">
         <div class="ai-msg-avatar">AI</div>
         <div class="ai-msg-body" id="ai-intro-body">
-          <p>Hi! I'm your Venus AI assistant — I help you write, explain, fix, and generate code across <strong>Java, JavaScript, C++, C#, and F#</strong>.</p>
+          <p>Hi! I'm your Arima AI assistant — I help you write, explain, fix, and generate code across <strong>Java, JavaScript, C++, C#, and F#</strong>.</p>
           <p>I work through your local AI CLI — no separate API key needed. Switch providers anytime in <strong>Settings → AI Assistant</strong>.</p>
           <p id="ai-intro-provider-line">Try a quick action above or ask anything!</p>
         </div>
@@ -1215,15 +1214,16 @@ dotnet fsi --version  # verify F# Interactive</pre>
               <stop offset="68%" stop-color="#c87518"/><stop offset="100%" stop-color="#6e3000"/>
             </radialGradient>
           </defs>
-          <ellipse cx="32" cy="32" rx="30" ry="9" fill="none" stroke="rgba(245,166,35,.5)" stroke-width="1.6" transform="rotate(-22 32 32)"/>
-          <circle cx="32" cy="32" r="22" fill="url(#wpg)"/>
-          <circle cx="32" cy="26" r="7" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
-          <line x1="32" y1="33" x2="32" y2="44" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
-          <line x1="26" y1="38.5" x2="38" y2="38.5" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round"/>
+          <g transform="rotate(-18,32,32)">
+            <ellipse cx="32" cy="32" rx="21" ry="24" fill="url(#wpg)"/>
+            <path d="M32 9 C24 18 40 26 32 32 C24 38 40 46 32 55" fill="none" stroke="rgba(74,36,16,.55)" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M21 17 C17 25 17 33 19 39" fill="none" stroke="rgba(255,245,176,.4)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <path d="M48 11 C52 7 44 4 48 0.5" fill="none" stroke="rgba(245,166,35,.65)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
       <div class="welcome-hero-text">
-        <h1>Welcome to <span>Venus Notebooks</span> <em id="welcome-version-tag">v2.1.0</em></h1>
+        <h1>Welcome to <span>Arima Notebooks</span> <em id="welcome-version-tag">v2.1.0</em></h1>
         <p>A local, browser-based notebook for seven languages — with AI co-pilots and MCP. Pick a quick tour below; reopen anytime from <strong>Help</strong>.</p>
       </div>
     </div>
@@ -1243,7 +1243,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
       <div class="welcome-foot-actions">
         <button class="welcome-btn ghost" onclick="Welcome.openReleaseNotes()">What's New</button>
         <button class="welcome-btn ghost" onclick="if(window.showDocsPanel)showDocsPanel('usage');Welcome.close()">Open Docs</button>
-        <button class="welcome-btn primary" onclick="Welcome.close()">Start using Venus</button>
+        <button class="welcome-btn primary" onclick="Welcome.close()">Start using Arima</button>
       </div>
     </div>
   </div>
@@ -1259,7 +1259,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
           <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/>
           <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
-        <span>Venus Notebooks — Documentation</span>
+        <span>Arima Notebooks — Documentation</span>
       </div>
       <button class="docs-close-btn" id="btn-docs-close" title="Close (Esc)">
         <svg viewBox="0 0 16 16" width="16" height="16"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1327,7 +1327,7 @@ dotnet fsi --version  # verify F# Interactive</pre>
     <span class="sb-sep">|</span>
     <span id="sb-java">Java 25</span>
     <span class="sb-sep">|</span>
-    <span id="sb-version" title="Version — click for What's New" style="cursor:pointer" onclick="Welcome && Welcome.openReleaseNotes()">v3.0.0</span>
+    <span id="sb-version" title="Version — click for What's New" style="cursor:pointer" onclick="Welcome && Welcome.openReleaseNotes()">v3.1.0</span>
     <span id="sb-build-date" class="sb-build-date" title="Build timestamp"></span>
     <span class="sb-sep">|</span>
     <span id="sb-time"></span>
@@ -1359,13 +1359,15 @@ dotnet fsi --version  # verify F# Interactive</pre>
             <stop offset="100%" stop-color="#6e3000"/>
           </radialGradient>
         </defs>
-        <ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="3" transform="rotate(-22,32,32)"/>
-        <circle cx="32" cy="32" r="18" fill="url(#lp-grad)"/>
-        <circle cx="27" cy="27" r="9" fill="rgba(255,255,255,.08)"/>
-        <text x="32" y="38" text-anchor="middle" font-size="16" fill="rgba(255,255,255,.55)" font-family="serif">♀</text>
+        <g transform="rotate(-18,32,32)">
+          <ellipse cx="32" cy="32" rx="18" ry="21" fill="url(#lp-grad)"/>
+          <circle cx="27" cy="27" r="9" fill="rgba(255,255,255,.08)"/>
+          <path d="M32 13 C25 22 39 29 32 32 C25 35 39 42 32 51" fill="none" stroke="rgba(74,36,16,.55)" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <path d="M46 13 C50 10 43 7 47 4" fill="none" stroke="rgba(245,166,35,.6)" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
     </div>
-    <h2 class="login-title">Welcome to Venus Notebooks</h2>
+    <h2 class="login-title">Welcome to Arima Notebooks</h2>
     <p class="login-sub">Sign in to access your personal notebooks</p>
 
     <div class="login-providers" id="login-providers">
@@ -1440,7 +1442,7 @@ const PackageTabUI = {
     const el = document.getElementById('cpp-compiler-status-body');
     if (!el || el.dataset.loaded) return;
     try {
-      const s = await Venus.api('GET', '/settings/status');
+      const s = await Arima.api('GET', '/settings/status');
       const cppAvail  = s.cppAvailable;
       const cppDetail = s.cppCompilerDetail || s.cppStatus || '';
       el.innerHTML = cppAvail

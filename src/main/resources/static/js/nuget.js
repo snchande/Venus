@@ -1,5 +1,5 @@
 /**
- * NuGet package manager UI for Venus Notebooks.
+ * NuGet package manager UI for Arima Notebooks.
  * Manages NuGet packages for C# and F# cells.
  *
  * Talks to:
@@ -27,7 +27,7 @@ const NuGetUI = (() => {
             const dotnet = s.dotnetAvailable;
             if (!dotnet) {
                 box.style.display = '';
-                box.innerHTML = '<strong>⚠ .NET SDK not found.</strong> Install from <a href="https://dot.net" target="_blank">dot.net</a> and restart Venus to use C# and F# cells.';
+                box.innerHTML = '<strong>⚠ .NET SDK not found.</strong> Install from <a href="https://dot.net" target="_blank">dot.net</a> and restart Arima to use C# and F# cells.';
             } else {
                 box.style.display = 'none';
             }

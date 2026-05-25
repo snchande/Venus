@@ -1,7 +1,7 @@
 {
   "id": "fsharp-101",
   "name": "F# Introduction",
-  "description": "Introduction to F# in Venus Notebooks — functional programming, immutable data, pattern matching, and pipelines",
+  "description": "Introduction to F# in Arima Notebooks — functional programming, immutable data, pattern matching, and pipelines",
   "metadata": {
     "category": "tutorial",
     "language": "fsharp",
@@ -12,7 +12,7 @@
     {
       "id": "fs-intro-md-1",
       "type": "MARKDOWN",
-      "source": "# F# in Venus Notebooks\n\nVenus supports **F#** cells via `dotnet fsi` (F# Interactive) — built into the .NET SDK.\n\n## Setup (one-time)\n1. Install the [.NET SDK](https://dot.net) — dotnet fsi is included, no extra tools needed\n2. Restart Venus\n\n## Cell mode\nClick the mode button on any code cell to cycle: **JShell → Java → JS → C# → F#**\n\n## Built-in helpers\n```fsharp\nvenusHtml \"<b>bold</b>\"  // render HTML in output\nvenusDisplay myObject    // printfn \"%A\" shorthand\nvenusTable myList        // print list contents\n```\n\n## F# philosophy\nF# encourages **immutability**, **pure functions**, and **data pipelines** using the `|>` pipe operator.",
+      "source": "# F# in Arima Notebooks\n\nArima supports **F#** cells via `dotnet fsi` (F# Interactive) — built into the .NET SDK.\n\n## Setup (one-time)\n1. Install the [.NET SDK](https://dot.net) — dotnet fsi is included, no extra tools needed\n2. Restart Arima\n\n## Cell mode\nClick the mode button on any code cell to cycle: **JShell → Java → JS → C# → F#**\n\n## Built-in helpers\n```fsharp\nbaristaHtml \"<b>bold</b>\"  // render HTML in output\nbaristaDisplay myObject    // printfn \"%A\" shorthand\nbaristaTable myList        // print list contents\n```\n\n## F# philosophy\nF# encourages **immutability**, **pure functions**, and **data pipelines** using the `|>` pipe operator.",
       "output": "",
       "executed": false
     },
@@ -20,7 +20,7 @@
       "id": "fs-intro-1",
       "type": "CODE",
       "mode": "fsharp",
-      "source": "//@ anchor: hello-world-in-f\n//@ description: Hello World in F#\n// Hello World in F#\nprintfn \"Hello from Venus Notebooks!\"\nprintfn \".NET version: %A\" (System.Environment.Version)\nprintfn \"OS: %s\" (System.Environment.OSVersion.ToString())",
+      "source": "//@ anchor: hello-world-in-f\n//@ description: Hello World in F#\n// Hello World in F#\nprintfn \"Hello from Arima Notebooks!\"\nprintfn \".NET version: %A\" (System.Environment.Version)\nprintfn \"OS: %s\" (System.Environment.OSVersion.ToString())",
       "output": "",
       "executed": false,
       "anchor": "hello-world-in-f",
@@ -37,7 +37,7 @@
       "id": "fs-intro-2",
       "type": "CODE",
       "mode": "fsharp",
-      "source": "//@ anchor: values-are-immutable-by-default\n//@ description: Values are immutable by default\n// Values are immutable by default\nlet name    = \"Venus\"\nlet version = 1.0\nlet year    = System.DateTime.Now.Year\n\nprintfn \"Project: %s v%.1f\" name version\nprintfn \"Year: %d\" year\n\n// Functions — just another let binding\nlet square x = x * x\nlet add x y  = x + y\nlet greet person = sprintf \"Hello, %s!\" person\n\nprintfn \"5 squared = %d\" (square 5)\nprintfn \"3 + 7 = %d\" (add 3 7)\nprintfn \"%s\" (greet \"World\")",
+      "source": "//@ anchor: values-are-immutable-by-default\n//@ description: Values are immutable by default\n// Values are immutable by default\nlet name    = \"Arima\"\nlet version = 1.0\nlet year    = System.DateTime.Now.Year\n\nprintfn \"Project: %s v%.1f\" name version\nprintfn \"Year: %d\" year\n\n// Functions — just another let binding\nlet square x = x * x\nlet add x y  = x + y\nlet greet person = sprintf \"Hello, %s!\" person\n\nprintfn \"5 squared = %d\" (square 5)\nprintfn \"3 + 7 = %d\" (add 3 7)\nprintfn \"%s\" (greet \"World\")",
       "output": "",
       "executed": false,
       "anchor": "values-are-immutable-by-default",

@@ -1,12 +1,12 @@
 {
   "id": "cpp-intro",
   "name": "C++ Introduction",
-  "description": "Learn modern C++17 with Venus Notebooks — from Hello World to STL containers, classes, and algorithms.",
+  "description": "Learn modern C++17 with Arima Notebooks — from Hello World to STL containers, classes, and algorithms.",
   "cells": [
     {
       "id": "cpp-intro-md-1",
       "type": "MARKDOWN",
-      "source": "# C++ in Venus Notebooks\n\nVenus supports **C++17** via `g++` or `clang++`. Each cell compiles and runs instantly — no `main()` function needed.\n\n**Venus C++ helpers:**\n```cpp\nvenusHtml(\"<b>bold</b>\");   // render HTML in output\nvenusDisplay(value);          // cout << value\nvenusTable(myMap);            // formatted table\n```\n\n**Pipeline annotations (same as Java/C#):**\n```cpp\n//@ anchor: myName      // name this cell\n//@ depends: other      // inject other cell's code\n```",
+      "source": "# C++ in Arima Notebooks\n\nArima supports **C++17** via `g++` or `clang++`. Each cell compiles and runs instantly — no `main()` function needed.\n\n**Arima C++ helpers:**\n```cpp\nbaristaHtml(\"<b>bold</b>\");   // render HTML in output\nbaristaDisplay(value);          // cout << value\nbaristaTable(myMap);            // formatted table\n```\n\n**Pipeline annotations (same as Java/C#):**\n```cpp\n//@ anchor: myName      // name this cell\n//@ depends: other      // inject other cell's code\n```",
       "output": "",
       "executionCount": 0
     },
@@ -14,7 +14,7 @@
       "id": "cpp-intro-1",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: hello-world\n//@ description: Hello, World!\n// Hello, World!\ncout << \"Hello from C++ in Venus!\" << endl;\ncout << \"Compiled with C++17\" << endl;",
+      "source": "//@ anchor: hello-world\n//@ description: Hello, World!\n// Hello, World!\ncout << \"Hello from C++ in Arima!\" << endl;\ncout << \"Compiled with C++17\" << endl;",
       "output": "",
       "executionCount": 0,
       "anchor": "hello-world",
@@ -31,7 +31,7 @@
       "id": "cpp-intro-2",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: fundamental-types\n//@ description: Fundamental types\n// Fundamental types\nint    age    = 30;\ndouble pi     = 3.14159265358979;\nbool   active = true;\nstring name   = \"Venus\";\nauto   count  = 42LL;  // long long via auto\n\ncout << \"Name:   \" << name   << \"\\n\";\ncout << \"Age:    \" << age    << \"\\n\";\ncout << \"Pi:     \" << fixed << setprecision(6) << pi << \"\\n\";\ncout << \"Active: \" << boolalpha << active << \"\\n\";\ncout << \"Count:  \" << count  << \"\\n\";",
+      "source": "//@ anchor: fundamental-types\n//@ description: Fundamental types\n// Fundamental types\nint    age    = 30;\ndouble pi     = 3.14159265358979;\nbool   active = true;\nstring name   = \"Arima\";\nauto   count  = 42LL;  // long long via auto\n\ncout << \"Name:   \" << name   << \"\\n\";\ncout << \"Age:    \" << age    << \"\\n\";\ncout << \"Pi:     \" << fixed << setprecision(6) << pi << \"\\n\";\ncout << \"Active: \" << boolalpha << active << \"\\n\";\ncout << \"Count:  \" << count  << \"\\n\";",
       "output": "",
       "executionCount": 0,
       "anchor": "fundamental-types",
@@ -85,7 +85,7 @@
       "id": "cpp-intro-6",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: regular-function\n//@ description: Regular function\n// Regular function\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\n// Function overloading\ndouble square(double x) { return x * x; }\nint    square(int x)    { return x * x; }\n\n// Lambda function\nauto greet = [](const string& name) {\n    return \"Hello, \" + name + \"!\";\n};\n\ncout << \"5! = \" << factorial(5) << \"\\n\";\ncout << \"square(4)   = \" << square(4)   << \"\\n\";\ncout << \"square(3.5) = \" << square(3.5) << \"\\n\";\ncout << greet(\"Venus\") << \"\\n\";",
+      "source": "//@ anchor: regular-function\n//@ description: Regular function\n// Regular function\nint factorial(int n) {\n    if (n <= 1) return 1;\n    return n * factorial(n - 1);\n}\n\n// Function overloading\ndouble square(double x) { return x * x; }\nint    square(int x)    { return x * x; }\n\n// Lambda function\nauto greet = [](const string& name) {\n    return \"Hello, \" + name + \"!\";\n};\n\ncout << \"5! = \" << factorial(5) << \"\\n\";\ncout << \"square(4)   = \" << square(4)   << \"\\n\";\ncout << \"square(3.5) = \" << square(3.5) << \"\\n\";\ncout << greet(\"Arima\") << \"\\n\";",
       "output": "",
       "executionCount": 0,
       "anchor": "regular-function",
@@ -122,7 +122,7 @@
       "id": "cpp-intro-9",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: map-key-value-store-sorted-by-key\n//@ description: map — key/value store (sorted by key)\n// map — key/value store (sorted by key)\nmap<string, int> scores;\nscores[\"Alice\"]   = 95;\nscores[\"Bob\"]     = 87;\nscores[\"Charlie\"] = 92;\nscores[\"Diana\"]   = 98;\n\ncout << \"Scores:\\n\";\nfor (const auto& [name, score] : scores) {\n    cout << \"  \" << setw(10) << left << name << \" : \" << score << \"\\n\";\n}\n\n// Find and check\nif (auto it = scores.find(\"Bob\"); it != scores.end()) {\n    cout << \"Bob's score: \" << it->second << \"\\n\";\n}\n\nvenusTable(scores);",
+      "source": "//@ anchor: map-key-value-store-sorted-by-key\n//@ description: map — key/value store (sorted by key)\n// map — key/value store (sorted by key)\nmap<string, int> scores;\nscores[\"Alice\"]   = 95;\nscores[\"Bob\"]     = 87;\nscores[\"Charlie\"] = 92;\nscores[\"Diana\"]   = 98;\n\ncout << \"Scores:\\n\";\nfor (const auto& [name, score] : scores) {\n    cout << \"  \" << setw(10) << left << name << \" : \" << score << \"\\n\";\n}\n\n// Find and check\nif (auto it = scores.find(\"Bob\"); it != scores.end()) {\n    cout << \"Bob's score: \" << it->second << \"\\n\";\n}\n\nbaristaTable(scores);",
       "output": "",
       "executionCount": 0,
       "anchor": "map-key-value-store-sorted-by-key",
@@ -132,7 +132,7 @@
       "id": "cpp-intro-10",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: set-unique-sorted-elements\n//@ description: set — unique sorted elements\n// set — unique sorted elements\nset<string> tags = {\"c++\", \"programming\", \"c++\", \"venus\", \"programming\"};\ncout << \"Tags (unique): \";\nfor (const auto& t : tags) cout << t << \" \";\ncout << \"\\n\";\ncout << \"Count: \" << tags.size() << \"\\n\";\n\n// unordered_map — faster lookup, unordered\nunordered_map<string, int> freq;\nstring words[] = {\"the\", \"quick\", \"brown\", \"fox\", \"the\", \"quick\", \"the\"};\nfor (const auto& w : words) freq[w]++;\n\ncout << \"\\nWord frequencies:\\n\";\nfor (const auto& [word, count] : freq)\n    cout << \"  \" << word << \": \" << count << \"\\n\";",
+      "source": "//@ anchor: set-unique-sorted-elements\n//@ description: set — unique sorted elements\n// set — unique sorted elements\nset<string> tags = {\"c++\", \"programming\", \"c++\", \"barista\", \"programming\"};\ncout << \"Tags (unique): \";\nfor (const auto& t : tags) cout << t << \" \";\ncout << \"\\n\";\ncout << \"Count: \" << tags.size() << \"\\n\";\n\n// unordered_map — faster lookup, unordered\nunordered_map<string, int> freq;\nstring words[] = {\"the\", \"quick\", \"brown\", \"fox\", \"the\", \"quick\", \"the\"};\nfor (const auto& w : words) freq[w]++;\n\ncout << \"\\nWord frequencies:\\n\";\nfor (const auto& [word, count] : freq)\n    cout << \"  \" << word << \": \" << count << \"\\n\";",
       "output": "",
       "executionCount": 0,
       "anchor": "set-unique-sorted-elements",
@@ -236,7 +236,7 @@
     {
       "id": "cpp-intro-md-11",
       "type": "MARKDOWN",
-      "source": "## Venus HTML Output\n\nUse `venusHtml()` to render formatted HTML directly in the notebook output.",
+      "source": "## Arima HTML Output\n\nUse `baristaHtml()` to render formatted HTML directly in the notebook output.",
       "output": "",
       "executionCount": 0
     },
@@ -244,11 +244,11 @@
       "id": "cpp-intro-17",
       "type": "CODE",
       "mode": "cpp",
-      "source": "//@ anchor: venus-html-renders-formatted-output-in-t\n//@ description: venusHtml renders formatted output in the notebook\n// venusHtml renders formatted output in the notebook\nvenusHtml(\"<h3 style='color:#06b6d4'>C++ Stats</h3>\");\n\nvector<int> data = {23, 45, 12, 67, 34, 89, 56, 78, 90, 11};\nint n = data.size();\ndouble sum = accumulate(data.begin(), data.end(), 0.0);\ndouble mean = sum / n;\n\nauto [minIt, maxIt] = minmax_element(data.begin(), data.end());\n\nvenusHtml(\"<table style='border-collapse:collapse;font-family:monospace'>\"\n    \"<tr><th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Stat</th>\"\n        \"<th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Value</th></tr>\"\n    \"<tr><td style='padding:4px 12px'>Count</td><td style='padding:4px 12px'>\" + to_string(n) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Sum</td><td style='padding:4px 12px'>\" + to_string((int)sum) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Mean</td><td style='padding:4px 12px'>\" + to_string(mean) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Min</td><td style='padding:4px 12px'>\" + to_string(*minIt) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Max</td><td style='padding:4px 12px'>\" + to_string(*maxIt) + \"</td></tr>\"\n    \"</table>\");",
+      "source": "//@ anchor: barista-html-renders-formatted-output-in-t\n//@ description: baristaHtml renders formatted output in the notebook\n// baristaHtml renders formatted output in the notebook\nbaristaHtml(\"<h3 style='color:#06b6d4'>C++ Stats</h3>\");\n\nvector<int> data = {23, 45, 12, 67, 34, 89, 56, 78, 90, 11};\nint n = data.size();\ndouble sum = accumulate(data.begin(), data.end(), 0.0);\ndouble mean = sum / n;\n\nauto [minIt, maxIt] = minmax_element(data.begin(), data.end());\n\nbaristaHtml(\"<table style='border-collapse:collapse;font-family:monospace'>\"\n    \"<tr><th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Stat</th>\"\n        \"<th style='padding:4px 12px;background:#1e293b;color:#94a3b8'>Value</th></tr>\"\n    \"<tr><td style='padding:4px 12px'>Count</td><td style='padding:4px 12px'>\" + to_string(n) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Sum</td><td style='padding:4px 12px'>\" + to_string((int)sum) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Mean</td><td style='padding:4px 12px'>\" + to_string(mean) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Min</td><td style='padding:4px 12px'>\" + to_string(*minIt) + \"</td></tr>\"\n    \"<tr><td style='padding:4px 12px'>Max</td><td style='padding:4px 12px'>\" + to_string(*maxIt) + \"</td></tr>\"\n    \"</table>\");",
       "output": "",
       "executionCount": 0,
-      "anchor": "venus-html-renders-formatted-output-in-t",
-      "description": "venusHtml renders formatted output in the notebook"
+      "anchor": "barista-html-renders-formatted-output-in-t",
+      "description": "baristaHtml renders formatted output in the notebook"
     },
     {
       "id": "cpp-intro-md-end",

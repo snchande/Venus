@@ -1,6 +1,6 @@
-# Create a Venus Notebook from a Description
+# Create a Arima Notebook from a Description
 
-You are the Venus Notebooks CLI assistant. Venus Notebooks is a Java interactive notebook
+You are the Arima Notebooks CLI assistant. Arima Notebooks is a Java interactive notebook
 environment running at **http://localhost:8585**.
 
 The user wants to create a new notebook. Their description is:
@@ -8,8 +8,8 @@ The user wants to create a new notebook. Their description is:
 $ARGUMENTS
 
 ## Your task
-1. Call the Venus AI generation API to create a structured notebook from the description
-2. Save the notebook to Venus
+1. Call the Arima AI generation API to create a structured notebook from the description
+2. Save the notebook to Arima
 3. Report the notebook name and how to find it in the UI
 
 ## Steps to follow
@@ -45,10 +45,10 @@ Content-Type: application/json
 Tell the user:
 - The notebook name
 - The notebook ID
-- That they can open it in the Venus UI at http://localhost:8585 by clicking Browse → My Notebooks
+- That they can open it in the Arima UI at http://localhost:8585 by clicking Browse → My Notebooks
 
 ## Error handling
-- If Venus is not running (connection refused), tell the user to start it first with `/start`
+- If Arima is not running (connection refused), tell the user to start it first with `/start`
 - If AI generation fails, show the error and suggest a simpler description
 - If save fails, show the raw error from the API
 

@@ -37,20 +37,20 @@
   .tool-call .name { color: #67e8f9; font-weight: 600; }
   .tool-call .args { color: #94a3b8; margin-top: 4px; }
   .tool-call .ok { float: right; color: #86efac; font-size: 11px; }
-  /* Right — Venus window */
-  .venus-win { flex: 1; background: #0f172a; border-radius: 12px;
+  /* Right — Arima window */
+  .arima-win { flex: 1; background: #0f172a; border-radius: 12px;
     box-shadow: 0 25px 60px rgba(0,0,0,0.5);
     overflow: hidden; display: flex; flex-direction: column;
     border: 1px solid #334155; transform: rotate(0.4deg); }
-  .venus-bar { height: 38px; background: #020617; display: flex;
+  .arima-bar { height: 38px; background: #020617; display: flex;
     align-items: center; padding: 0 14px; gap: 10px;
     border-bottom: 1px solid #1e293b; }
-  .venus-bar .v-title { margin-left: 14px; font-size: 13px; color: #94a3b8;
+  .arima-bar .v-title { margin-left: 14px; font-size: 13px; color: #94a3b8;
     display: flex; align-items: center; gap: 8px; }
-  .venus-bar .v-title::before { content: ''; width: 18px; height: 18px;
+  .arima-bar .v-title::before { content: ''; width: 18px; height: 18px;
     background: radial-gradient(circle at 35% 30%, #fb923c, #c2410c);
     border-radius: 50%; display: inline-block; }
-  .venus-content { flex: 1; padding: 18px; overflow: hidden; }
+  .arima-content { flex: 1; padding: 18px; overflow: hidden; }
   .nb-title { font-size: 18px; color: #f1f5f9; font-weight: 700;
     margin-bottom: 6px; }
   .nb-meta { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
@@ -84,45 +84,45 @@
     </div>
     <div class="toolbar">
       <span>MCP Tools Active:</span>
-      <span class="tool-pill">venus.create_notebook</span>
-      <span class="tool-pill">venus.add_cell</span>
-      <span class="tool-pill">venus.execute_cell</span>
-      <span class="tool-pill">venus.install_package</span>
+      <span class="tool-pill">barista.create_notebook</span>
+      <span class="tool-pill">barista.add_cell</span>
+      <span class="tool-pill">barista.execute_cell</span>
+      <span class="tool-pill">barista.install_package</span>
     </div>
     <div class="conv">
       <div class="msg user-msg">
         <div class="author">You</div>
-        Create a Venus notebook that fits a polynomial to this sales data,
+        Create a Arima notebook that fits a polynomial to this sales data,
         with cells in TypeScript (data prep) and Java (regression). Run it.
       </div>
       <div class="msg ai-msg">
         <div class="author">◆ Claude</div>
         I'll create the notebook, add cells in both languages, and execute them in order.
         <div class="tool-call">
-          <span class="name">venus.create_notebook</span><span class="ok">✓ created</span>
+          <span class="name">barista.create_notebook</span><span class="ok">✓ created</span>
           <div class="args">name: "polynomial-fit", language: "mixed"</div>
         </div>
         <div class="tool-call">
-          <span class="name">venus.add_cell</span><span class="ok">✓ added</span>
+          <span class="name">barista.add_cell</span><span class="ok">✓ added</span>
           <div class="args">mode: "typescript", anchor: "load-data"</div>
         </div>
         <div class="tool-call">
-          <span class="name">venus.add_cell</span><span class="ok">✓ added</span>
+          <span class="name">barista.add_cell</span><span class="ok">✓ added</span>
           <div class="args">mode: "jshell", anchor: "regression", depends: ["load-data"]</div>
         </div>
         <div class="tool-call">
-          <span class="name">venus.execute_cell</span><span class="ok">✓ ran</span>
+          <span class="name">barista.execute_cell</span><span class="ok">✓ ran</span>
           <div class="args">cellId: "regression", pipeline: true</div>
         </div>
-        Notebook ready — open it in Venus to see the chart. R² = 0.94.
+        Notebook ready — open it in Arima to see the chart. R² = 0.94.
       </div>
     </div>
   </div>
-  <div class="venus-win">
-    <div class="venus-bar">
-      <div class="v-title">Venus Notebooks · polynomial-fit.vnb</div>
+  <div class="arima-win">
+    <div class="arima-bar">
+      <div class="v-title">Arima Notebooks · polynomial-fit.vnb</div>
     </div>
-    <div class="venus-content">
+    <div class="arima-content">
       <div class="nb-title">polynomial-fit</div>
       <div class="nb-meta">Created by agent · 4 cells · session nb-poly</div>
       <div class="cell ts">
@@ -133,7 +133,7 @@
         <div class="code">
 <span class="kw">const</span> raw = <span class="kw">await</span> fs.<span class="fn">readFile</span>(<span class="str">"sales.csv"</span>);<br>
 <span class="kw">const</span> points = <span class="fn">parse</span>(raw).map(r =&gt; ({x: +r.q, y: +r.sales}));<br>
-venus.<span class="fn">table</span>(points);
+barista.<span class="fn">table</span>(points);
         </div>
       </div>
       <div class="cell j">

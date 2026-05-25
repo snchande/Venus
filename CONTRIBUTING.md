@@ -1,20 +1,20 @@
-# Contributing to Venus Notebooks
+# Contributing to Arima Notebooks
 
-Thank you for your interest in contributing to Venus Notebooks. This document covers everything you need to know — from setting up your development environment to getting your pull request merged.
+Thank you for your interest in contributing to Arima Notebooks. This document covers everything you need to know — from setting up your development environment to getting your pull request merged.
 
 > **Working with AI coding agents?** Read [`AGENTS.md`](AGENTS.md) first. It is the single source of truth for the architecture rules every contributor — human or AI — must follow. Provider-specific files ([`CLAUDE.md`](CLAUDE.md), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), [`GEMINI.md`](GEMINI.md)) all point at it.
 >
 > **Before you push:** run `pwsh ./scripts/security-check.ps1` (or `./scripts/security-check.sh`). The same script runs in CI and gates whether your PR can leave draft state. See [`AGENTS.md` §2.3](AGENTS.md) for the rules it enforces.
 >
-> **Want the big picture?** See the [Product Brochure](docs/brochure/venus-brochure.pdf) — feature set, architecture diagrams, install, and contribution workflow on 12 pages.
+> **Want the big picture?** See the [Product Brochure](docs/brochure/arima-brochure.pdf) — feature set, architecture diagrams, install, and contribution workflow on 12 pages.
 >
-> **Claude Code users:** skills and subagents specific to Venus live under [`.claude/`](.claude/README.md) — `architecture-check`, `add-execution-language`, `add-tutorial`, and `add-rest-endpoint` skills, plus `venus-architect`, `venus-security`, and `venus-tutorial-writer` subagents.
+> **Claude Code users:** skills and subagents specific to Arima live under [`.claude/`](.claude/README.md) — `architecture-check`, `add-execution-language`, `add-tutorial`, and `add-rest-endpoint` skills, plus `arima-architect`, `arima-security`, and `arima-tutorial-writer` subagents.
 
 ---
 
 ## Why Contribute?
 
-Venus Notebooks fills a real gap: **Java, C#, and F# developers have never had a first-class notebook environment**. Jupyter supports Python natively; everything else is a workaround. Venus was built to give JVM and .NET developers the same interactive, exploratory workflow.
+Arima Notebooks fills a real gap: **Java, C#, and F# developers have never had a first-class notebook environment**. Jupyter supports Python natively; everything else is a workaround. Arima was built to give JVM and .NET developers the same interactive, exploratory workflow.
 
 By contributing, you help:
 
@@ -30,16 +30,16 @@ This is a young, growing project. Your contributions have outsized impact — th
 
 ## Contributing in an Agentic Cycle
 
-Venus is designed to be **reshaped by AI in your own loop, then contributed back through the same loop.** You do not need to spend a Saturday morning learning the codebase by hand. The recommended workflow is:
+Arima is designed to be **reshaped by AI in your own loop, then contributed back through the same loop.** You do not need to spend a Saturday morning learning the codebase by hand. The recommended workflow is:
 
-1. **Use Venus.** Notice something missing or wrong.
+1. **Use Arima.** Notice something missing or wrong.
 2. **Open your AI CLI inside the repo** — `claude code`, `copilot`, `gemini`, whichever you have authenticated.
 3. **Describe what you want** in plain English. The AI reads the architecture rules in [`AGENTS.md`](AGENTS.md), edits the right files, runs the build, iterates.
-4. **Try it locally.** Refresh Venus. Confirm it works for you.
+4. **Try it locally.** Refresh Arima. Confirm it works for you.
 5. **Ask the same AI to contribute it back:**
    > *"Run `pwsh ./scripts/security-check.ps1`, then package this as a PR back to upstream with a good description."*
 
-That is the contribution path. The same loop that customizes Venus for you produces the PR for everyone else — the bar to do both becomes the same bar.
+That is the contribution path. The same loop that customizes Arima for you produces the PR for everyone else — the bar to do both becomes the same bar.
 
 ### Examples of agentic prompts for contributions
 
@@ -48,7 +48,7 @@ That is the contribution path. The same loop that customizes Venus for you produ
 | Add a language | *"Add a Kotlin execution mode following the pattern of `CppExecutionService.java`. Wire it into `ShellController` and add the JS frontend mode."* |
 | Fix a bug | *"This stack trace shows a NullPointerException in `OrchestrationService.runPipeline`. Find the root cause and fix it. Add a test."* |
 | New tutorial | *"Create a `notebooks/tutorials/java-701.vnb` covering Java 21 virtual threads. Five cells, beginner-to-intermediate."* |
-| UI tweak | *"In the dark theme, the cell border for TypeScript cells is too saturated. Soften the blue and update `venus.css`."* |
+| UI tweak | *"In the dark theme, the cell border for TypeScript cells is too saturated. Soften the blue and update `arima.css`."* |
 | New API endpoint | *"Add a `GET /api/notebooks/{id}/stats` endpoint that returns cell count, total runs, and last-modified. Update `docs/API.md`."* |
 | Close the loop | *"Run security-check, push the branch, open a PR with title `feat(kotlin): add Kotlin execution mode` and a clear description."* |
 
@@ -89,7 +89,7 @@ If you have an idea that doesn't fit a category above — open a Discussion and 
 
 > **Use JDK 17 or 21** for development. JDK versions above 21 may compile fine but the project targets `--release 21` for compatibility with Spring Boot 3.2.x.
 
-> **For C# / F# work**: install the [.NET SDK](https://dotnet.microsoft.com/download) (6.0 or later). No additional tools are needed — Venus uses `dotnet run` for C# and `dotnet fsi` for F#, both included in the standard SDK.
+> **For C# / F# work**: install the [.NET SDK](https://dotnet.microsoft.com/download) (6.0 or later). No additional tools are needed — Arima uses `dotnet run` for C# and `dotnet fsi` for F#, both included in the standard SDK.
 
 ### Fork and Clone
 
@@ -97,8 +97,8 @@ If you have an idea that doesn't fit a category above — open a Discussion and 
 # 1. Fork the repo on GitHub (click Fork button)
 
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/Venus.git
-cd Venus
+git clone https://github.com/YOUR_USERNAME/Arima.git
+cd Arima
 
 # 3. Add the upstream remote so you can pull future changes
 git remote add upstream https://github.com/snchande/Venus.git
@@ -131,7 +131,7 @@ If any of these fail, check [docs/SETUP.md](docs/SETUP.md) for troubleshooting s
 ## Project Structure
 
 ```
-src/main/java/com/venus/
+src/main/java/com/barista/
 ├── controller/          # REST and WebSocket endpoints — add new endpoints here
 ├── service/             # Business logic — all execution engines and services
 │   ├── JShellManager.java          # Core JShell session management
@@ -148,7 +148,7 @@ src/main/java/com/venus/
 src/main/resources/
 ├── static/
 │   ├── index.html       # Entire frontend — single HTML file
-│   ├── css/venus.css    # All styles
+│   ├── css/arima.css    # All styles
 │   └── js/              # Frontend modules
 │       ├── app.js              # App initialization
 │       ├── notebook.js         # Notebook editor
@@ -188,7 +188,7 @@ notebooks/tutorials/     # Built-in tutorial .vnb files
 - No npm for frontend, no webpack, no TypeScript, no React — vanilla JS only
 - All frontend code lives in `src/main/resources/static/`
 - Follow the existing module pattern in the `.js` files
-- CSS lives in `venus.css` — follow the existing custom property naming pattern (`--venus-*`)
+- CSS lives in `arima.css` — follow the existing custom property naming pattern (`--arima-*`)
 
 ### Commit Messages
 
@@ -234,7 +234,7 @@ chore(deps): upgrade Spring Boot to 3.2.4
 
 Tutorials are `.vnb` JSON files stored in `notebooks/tutorials/`. The easiest way:
 
-1. Open Venus locally and create the tutorial notebook interactively
+1. Open Arima locally and create the tutorial notebook interactively
 2. Save it as a `.vnb` file
 3. Copy it to `notebooks/tutorials/`
 4. Add its metadata to the tutorial registry in `NotebookService.java`
@@ -248,7 +248,7 @@ Example notebooks (cross-notebook demos, showcases) go in `notebooks/examples/` 
 
 ## Who Reviews and Merges
 
-Venus Notebooks has a two-tier maintainer structure:
+Arima Notebooks has a two-tier maintainer structure:
 
 - **Founding Maintainer** — created the project and holds final authority over what gets merged into `main`, the roadmap, and releases. All significant PRs require their approval.
 - **Co-Maintainers** — trusted contributors invited by the Founding Maintainer to help with reviews, triage, and merging of non-controversial changes.
@@ -311,12 +311,12 @@ Steps you took to verify the change works.
 
 When filing a bug, include:
 
-- **Venus version** (shown in the Settings tab or `venus version`)
+- **Arima version** (shown in the Settings tab or `arima version`)
 - **OS and Java version** (`java -version`)
 - **Steps to reproduce** — be specific
 - **Expected behavior** vs **actual behavior**
 - **Browser console errors** if it's a frontend issue (F12 → Console)
-- **Server logs** if it's a backend issue (run `venus logs` or check terminal output)
+- **Server logs** if it's a backend issue (run `arima logs` or check terminal output)
 
 ---
 

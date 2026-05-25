@@ -12,7 +12,7 @@
     {
       "id": "cs201-md-1",
       "type": "MARKDOWN",
-      "source": "# C# Data Processing & Pipelines\n\nThis notebook covers:\n- LINQ grouping, aggregation, and joins\n- Working with `Dictionary<K,V>` and nested collections\n- **Pipeline orchestration** using `//@ anchor:` and `//@ depends:` annotations\n\n## How Pipelines Work\n\nAnnotate C# cells just like JShell cells:\n```csharp\n//@ anchor: myStep\n// This cell can be referenced by other cells\n```\n```csharp\n//@ depends: myStep\n// Venus runs myStep first, then this cell\n```\n\nClick **Run with deps** (→ button) or use a **Pipeline cell** to orchestrate multi-cell workflows.",
+      "source": "# C# Data Processing & Pipelines\n\nThis notebook covers:\n- LINQ grouping, aggregation, and joins\n- Working with `Dictionary<K,V>` and nested collections\n- **Pipeline orchestration** using `//@ anchor:` and `//@ depends:` annotations\n\n## How Pipelines Work\n\nAnnotate C# cells just like JShell cells:\n```csharp\n//@ anchor: myStep\n// This cell can be referenced by other cells\n```\n```csharp\n//@ depends: myStep\n// Arima runs myStep first, then this cell\n```\n\nClick **Run with deps** (→ button) or use a **Pipeline cell** to orchestrate multi-cell workflows.",
       "output": "",
       "executed": false
     },
@@ -21,7 +21,7 @@
       "type": "CODE",
       "mode": "csharp",
       "anchor": "cs_loadSalesData",
-      "source": "//@ anchor: cs_loadSalesData\n//@ description: Step 1: Define data model and load dataset\n// Step 1: Define data model and load dataset\nrecord Sale(string Region, string Product, int Quarter, decimal Amount, int Units);\n\nvar sales = new List<Sale> {\n    new(\"North\", \"Widget A\", 1, 12400m, 124),\n    new(\"North\", \"Widget B\", 1,  8900m,  89),\n    new(\"South\", \"Widget A\", 1, 11200m, 112),\n    new(\"South\", \"Widget B\", 1,  6300m,  63),\n    new(\"North\", \"Widget A\", 2, 15600m, 156),\n    new(\"North\", \"Widget B\", 2,  9800m,  98),\n    new(\"South\", \"Widget A\", 2, 14100m, 141),\n    new(\"South\", \"Widget B\", 2,  7900m,  79),\n    new(\"North\", \"Widget A\", 3, 13800m, 138),\n    new(\"East\",  \"Widget A\", 3, 10500m, 105),\n    new(\"East\",  \"Widget B\", 3,  5600m,  56),\n    new(\"West\",  \"Widget A\", 3,  9200m,  92),\n};\n\nConsole.WriteLine($\"Loaded {sales.Count} sales records\");\nVenusTable(sales);",
+      "source": "//@ anchor: cs_loadSalesData\n//@ description: Step 1: Define data model and load dataset\n// Step 1: Define data model and load dataset\nrecord Sale(string Region, string Product, int Quarter, decimal Amount, int Units);\n\nvar sales = new List<Sale> {\n    new(\"North\", \"Widget A\", 1, 12400m, 124),\n    new(\"North\", \"Widget B\", 1,  8900m,  89),\n    new(\"South\", \"Widget A\", 1, 11200m, 112),\n    new(\"South\", \"Widget B\", 1,  6300m,  63),\n    new(\"North\", \"Widget A\", 2, 15600m, 156),\n    new(\"North\", \"Widget B\", 2,  9800m,  98),\n    new(\"South\", \"Widget A\", 2, 14100m, 141),\n    new(\"South\", \"Widget B\", 2,  7900m,  79),\n    new(\"North\", \"Widget A\", 3, 13800m, 138),\n    new(\"East\",  \"Widget A\", 3, 10500m, 105),\n    new(\"East\",  \"Widget B\", 3,  5600m,  56),\n    new(\"West\",  \"Widget A\", 3,  9200m,  92),\n};\n\nConsole.WriteLine($\"Loaded {sales.Count} sales records\");\nBaristaTable(sales);",
       "output": "",
       "executed": false,
       "description": "Step 1: Define data model and load dataset"
@@ -58,7 +58,7 @@
       "type": "CODE",
       "mode": "csharp",
       "anchor": "cs_finalReport",
-      "source": "//@ anchor: cs_finalReport\n//@ depends: cs_salesByRegion, cs_salesByProduct\n//@ description: Step 4: Final summary\n// Step 4: Final summary\nvar totalRevenue = sales.Sum(s => s.Amount);\nvar totalUnits   = sales.Sum(s => s.Units);\nvar topRegion    = byRegion.First().Region;\nvar topProduct   = byProduct.First().Product;\n\nVenusHtml($\"<h3>Sales Summary</h3><ul><li>Total Revenue: <strong>${totalRevenue:N0}</strong></li><li>Total Units Sold: <strong>{totalUnits:N0}</strong></li><li>Top Region: <strong>{topRegion}</strong></li><li>Top Product: <strong>{topProduct}</strong></li></ul>\");",
+      "source": "//@ anchor: cs_finalReport\n//@ depends: cs_salesByRegion, cs_salesByProduct\n//@ description: Step 4: Final summary\n// Step 4: Final summary\nvar totalRevenue = sales.Sum(s => s.Amount);\nvar totalUnits   = sales.Sum(s => s.Units);\nvar topRegion    = byRegion.First().Region;\nvar topProduct   = byProduct.First().Product;\n\nBaristaHtml($\"<h3>Sales Summary</h3><ul><li>Total Revenue: <strong>${totalRevenue:N0}</strong></li><li>Total Units Sold: <strong>{totalUnits:N0}</strong></li><li>Top Region: <strong>{topRegion}</strong></li><li>Top Product: <strong>{topProduct}</strong></li></ul>\");",
       "output": "",
       "executed": false,
       "description": "Step 4: Final summary"
