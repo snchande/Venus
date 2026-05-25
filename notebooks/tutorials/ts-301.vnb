@@ -14,7 +14,7 @@
       "id": "ts-301-1",
       "type": "CODE",
       "mode": "typescript",
-      "source": "//@ anchor: conditional-types\n//@ description: T extends U ? X : Y\n\ntype IsString<T> = T extends string ? \"yes\" : \"no\";\n\ntype A = IsString<\"hello\">;  // \"yes\"\ntype B = IsString<42>;       // \"no\"\ntype C = IsString<boolean>;  // \"no\"\n\n// Distributive — applied to each union member\ntype OnlyStrings<T> = T extends string ? T : never;\ntype Filtered = OnlyStrings<string | number | boolean | \"hello\">; // \"hello\" | string\n\nconst exA: A = \"yes\";\nconst exB: B = \"no\";\nconst exC: C = \"no\";\nconst f:   Filtered = \"venus\";\n\nconsole.log({ exA, exB, exC, f });",
+      "source": "//@ anchor: conditional-types\n//@ description: T extends U ? X : Y\n\ntype IsString<T> = T extends string ? \"yes\" : \"no\";\n\ntype A = IsString<\"hello\">;  // \"yes\"\ntype B = IsString<42>;       // \"no\"\ntype C = IsString<boolean>;  // \"no\"\n\n// Distributive — applied to each union member\ntype OnlyStrings<T> = T extends string ? T : never;\ntype Filtered = OnlyStrings<string | number | boolean | \"hello\">; // \"hello\" | string\n\nconst exA: A = \"yes\";\nconst exB: B = \"no\";\nconst exC: C = \"no\";\nconst f:   Filtered = \"barista\";\n\nconsole.log({ exA, exB, exC, f });",
       "output": "",
       "executed": false,
       "anchor": "conditional-types",

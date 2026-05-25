@@ -21,9 +21,9 @@
       "Bash(chmod:*)",
       "Bash(./scripts/security-check.sh:*)",
       "Bash(pwsh ./scripts/security-check.ps1:*)",
-      "Bash(./venus.sh:*)",
-      "Bash(./venus.ps1:*)",
-      "Bash(venus:*)"
+      "Bash(./arima.sh:*)",
+      "Bash(./arima.ps1:*)",
+      "Bash(arima:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
@@ -33,8 +33,8 @@
     ]
   },
   "env": {
-    "VENUS_HOME": "${PWD}",
-    "VENUS_AGENTS_GUIDE": "AGENTS.md"
+    "BARISTA_HOME": "${PWD}",
+    "BARISTA_AGENTS_GUIDE": "AGENTS.md"
   },
   "skills": {
     "enabled": [
@@ -47,12 +47,12 @@
   },
   "agents": {
     "enabled": [
-      "venus",
-      "venus-architect",
-      "venus-security",
-      "venus-tutorial-writer"
+      "arima",
+      "barista-architect",
+      "barista-security",
+      "arima-tutorial-writer"
     ],
-    "primary": "venus",
+    "primary": "arima",
     "source": ".claude/agents"
   },
   "instructionFiles": [

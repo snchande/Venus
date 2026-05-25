@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — Interactive Console
+ * Arima Notebooks — Interactive Console
  *
  * Multi-runtime REPL: JShell, Java (compile), and JavaScript (Node.js).
  * Features: runtime selector buttons, ↑↓ history, Tab completion (JShell server-side,
@@ -75,7 +75,7 @@ const ConsoleTab = (() => {
             if (!confirm(`Restart ${label} session? All variables will be cleared.`)) return;
             try {
                 if (runtime === 'jshell') {
-                    await Venus.api('POST', `/shell/${sessionId}/restart`);
+                    await Arima.api('POST', `/shell/${sessionId}/restart`);
                 }
                 appendEntry('system', `--- ${label} session restarted — all variables cleared ---`);
             } catch (e) {
@@ -83,7 +83,7 @@ const ConsoleTab = (() => {
             }
         });
 
-        appendEntry('system', 'Venus Console ready.  Select a runtime above and start typing.');
+        appendEntry('system', 'Arima Console ready.  Select a runtime above and start typing.');
     }
 
     // ── Runtime selector ──────────────────────────────────────────
@@ -118,7 +118,7 @@ const ConsoleTab = (() => {
             // Server-side JShell completion via SourceCodeAnalysis
             if (completions.length === 0 || source !== lastCompSource) {
                 try {
-                    const res = await Venus.api('POST', '/shell/complete', { sessionId, source, cursor });
+                    const res = await Arima.api('POST', '/shell/complete', { sessionId, source, cursor });
                     completions = (res.completions || []).filter(c => c.trim().length > 0);
                     lastCompSource = source;
                     compIndex = -1;
@@ -221,7 +221,7 @@ const ConsoleTab = (() => {
         resetCompletions();
 
         try {
-            const result = await Venus.api('POST', '/shell/execute', {
+            const result = await Arima.api('POST', '/shell/execute', {
                 sessionId,
                 code,
                 cellId: null,
@@ -248,12 +248,12 @@ const ConsoleTab = (() => {
         const entry  = document.createElement('div');
         entry.className = 'console-entry';
 
-        // Support VENUS_HTML: inline charts from JavaScript cells
-        if (type === 'output' && text.includes('VENUS_HTML:')) {
+        // Support BARISTA_HTML: inline charts from JavaScript cells
+        if (type === 'output' && text.includes('BARISTA_HTML:')) {
             const lines = text.split('\n');
             const textLines = [];
             lines.forEach(line => {
-                if (line.startsWith('VENUS_HTML:')) {
+                if (line.startsWith('BARISTA_HTML:')) {
                     if (textLines.length) {
                         const pre = document.createElement('pre');
                         pre.className = cssMap.output;
@@ -262,7 +262,7 @@ const ConsoleTab = (() => {
                         textLines.length = 0;
                     }
                     const wrap = document.createElement('div');
-                    wrap.className = 'venus-html-output';
+                    wrap.className = 'barista-html-output';
                     wrap.innerHTML = line.slice(11);
                     entry.appendChild(wrap);
                 } else {

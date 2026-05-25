@@ -4,9 +4,9 @@
 >
 > **Companion files:** [`CLAUDE.md`](CLAUDE.md) (Claude-specific), [`.github/copilot-instructions.md`](.github/copilot-instructions.md) (Copilot), [`GEMINI.md`](GEMINI.md) (Gemini). All three load this file by reference — change one, change the others.
 
-Venus Notebooks is meant to be **personalized and extended by its users with AI assistance**. That is the workflow the product is built around — the *use → customize → contribute* loop. The expectation:
+Arima Notebooks is meant to be **personalized and extended by its users with AI assistance**. That is the workflow the product is built around — the *use → customize → contribute* loop. The expectation:
 
-- A user installs Venus, finds something missing.
+- A user installs Arima, finds something missing.
 - They open *you* — their AI CLI — inside the cloned repo.
 - They describe the change in plain English.
 - You read this file, edit the right places, run the build, iterate until it works.
@@ -22,7 +22,7 @@ When the user asks you to "package this as a PR," run `pwsh ./scripts/security-c
 
 ## 1. The mental model
 
-Venus is **one Spring Boot 3.2 application on Java 21**, serving a static HTML/CSS/JS UI directly from the JAR. There is **no frontend build step**. The backend is layered:
+Arima is **one Spring Boot 3.2 application on Java 21**, serving a static HTML/CSS/JS UI directly from the JAR. There is **no frontend build step**. The backend is layered:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -94,8 +94,8 @@ When the user asks you to add a capability, follow this loop:
 4. **Write** the change. Smallest possible diff. No drive-by refactors.
 5. **Verify** locally:
    ```bash
-   venus rebuild
-   venus start
+   arima rebuild
+   arima start
    mvn test
    pwsh ./scripts/security-check.ps1   # or .sh on Linux/macOS
    ```
@@ -111,7 +111,7 @@ If the security check, `mvn test`, or `architecture-lint` fails in CI, **fix the
 - Add a new tutorial under `notebooks/` (especially `notebooks/tutorials/`).
 - Add a new execution helper inside an existing execution service.
 - Add a new REST endpoint, as long as it stays inside the controller→service pattern.
-- Add a new field to `VenusSettings`, with a sensible default.
+- Add a new field to `BaristaSettings`, with a sensible default.
 - Improve docs, fix typos, clarify error messages.
 - Add new unit or integration tests.
 - Refactor inside a single file when the user asks.
@@ -133,7 +133,7 @@ If the security check, `mvn test`, or `architecture-lint` fails in CI, **fix the
 
 ## 6. When the user says "make it personal"
 
-Venus is designed to be **shaped by the people who use it**. If the user is only personalizing their local copy:
+Arima is designed to be **shaped by the people who use it**. If the user is only personalizing their local copy:
 
 - It is fine to keep the change in a fork.
 - It is fine to commit experimental code to a feature branch and never PR it.

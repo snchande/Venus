@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — Server Lifecycle
+ * Arima Notebooks — Server Lifecycle
  *
  * Shutdown, restart, and automatic reconnect with notebook restore.
  *
@@ -43,7 +43,7 @@ const ServerLifecycle = (() => {
         _disconnectTimer = setTimeout(() => {
             if (_mode !== 'idle') return;
             _mode = 'restarting';              // unknown disconnect → treat as restart
-            _showOverlay('Server disconnected', 'Venus lost connection — checking if it will come back…', true);
+            _showOverlay('Server disconnected', 'Arima lost connection — checking if it will come back…', true);
             _startHealthPolling();
         }, WS_THRESHOLD_MS);
     }
@@ -57,9 +57,9 @@ const ServerLifecycle = (() => {
 
     async function restart() {
         if (!confirm(
-            'Restart Venus Notebooks?\n\n' +
-            'Your notebook is saved first. The page reloads automatically when Venus is back.\n\n' +
-            'Tip: run Venus via start.sh / start.bat for automatic server restart.\n' +
+            'Restart Arima Notebooks?\n\n' +
+            'Your notebook is saved first. The page reloads automatically when Arima is back.\n\n' +
+            'Tip: run Arima via start.sh / start.bat for automatic server restart.\n' +
             'With "mvn spring-boot:run" you will need to restart the server manually.'
         )) return;
 
@@ -67,7 +67,7 @@ const ServerLifecycle = (() => {
         clearTimeout(_disconnectTimer);
 
         await _saveCurrentNotebook();
-        _showOverlay('Restarting Venus…', 'Notebook saved. Waiting for the server to come back…', true);
+        _showOverlay('Restarting Arima…', 'Notebook saved. Waiting for the server to come back…', true);
 
         try { await fetch(RESTART_URL, { method: 'POST' }); } catch (_) {}
 
@@ -76,8 +76,8 @@ const ServerLifecycle = (() => {
 
     async function shutdown() {
         if (!confirm(
-            'Shut down Venus Notebooks?\n\n' +
-            'Your notebook is saved first. Run start.sh / start.bat to start Venus again.'
+            'Shut down Arima Notebooks?\n\n' +
+            'Your notebook is saved first. Run start.sh / start.bat to start Arima again.'
         )) return;
 
         _mode = 'shutting_down';
@@ -85,7 +85,7 @@ const ServerLifecycle = (() => {
 
         await _saveCurrentNotebook();
         _showOverlay(
-            'Venus is shutting down…',
+            'Arima is shutting down…',
             'The server is stopping. Run start.sh / start.bat to start it again.',
             false
         );
@@ -142,8 +142,8 @@ const ServerLifecycle = (() => {
         _updateSub('Server is back — reloading your notebook…');
 
         // Store notebook ID so init() can re-open it after the page reloads
-        const nbId = Venus?.state?.currentNotebook?.id;
-        if (nbId) sessionStorage.setItem('venus-restart-restore', nbId);
+        const nbId = Arima?.state?.currentNotebook?.id;
+        if (nbId) sessionStorage.setItem('barista-restart-restore', nbId);
 
         await _sleep(700);
         _mode = 'idle';
@@ -160,7 +160,7 @@ const ServerLifecycle = (() => {
 
         _updateTitle('Server stopped');
         _updateSub(
-            'Venus is not responding.\n' +
+            'Arima is not responding.\n' +
             'If you used start.sh / start.bat, the server may restart automatically.\n' +
             'Otherwise restart it in your terminal, then click Refresh Page.'
         );
@@ -247,16 +247,16 @@ const ServerLifecycle = (() => {
 
         // After a page reload that followed a restart, re-open the notebook
         // that was open before — so the user sees exactly what they had.
-        const restoreId = sessionStorage.getItem('venus-restart-restore');
+        const restoreId = sessionStorage.getItem('barista-restart-restore');
         if (restoreId) {
-            sessionStorage.removeItem('venus-restart-restore');
+            sessionStorage.removeItem('barista-restart-restore');
             // Delay slightly so NotebookEditor.init() finishes first
             setTimeout(async () => {
                 try {
-                    const nb = await Venus.api('GET', `/notebooks/${restoreId}`);
+                    const nb = await Arima.api('GET', `/notebooks/${restoreId}`);
                     if (nb && typeof NotebookEditor !== 'undefined') {
                         NotebookEditor.loadNotebook(nb);
-                        Venus.setStatus('Notebook restored after restart');
+                        Arima.setStatus('Notebook restored after restart');
                     }
                 } catch (e) {
                     console.warn('[ServerLifecycle] Notebook restore failed:', e);

@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks - npm Package Manager
+ * Arima Notebooks - npm Package Manager
  * Install and manage npm packages for JavaScript cells.
  */
 
@@ -30,7 +30,7 @@ const NpmPackageManager = (() => {
         const countBadge = document.getElementById('npm-pkg-count');
         if (!container) return;
         try {
-            const packages = await Venus.api('GET', '/npm/packages');
+            const packages = await Arima.api('GET', '/npm/packages');
             if (countBadge) countBadge.textContent = packages.length;
             renderPackageList(packages);
         } catch (e) {
@@ -113,26 +113,26 @@ const NpmPackageManager = (() => {
         }
 
         setInstallStatus(`Installing ${name}@${version}… (this may take a moment)`, 'loading');
-        Venus.setStatus('Installing npm: ' + name);
+        Arima.setStatus('Installing npm: ' + name);
 
         try {
-            const pkg = await Venus.api('POST', '/npm/packages/install', { name, version });
+            const pkg = await Arima.api('POST', '/npm/packages/install', { name, version });
             setInstallStatus(`Installed: ${pkg.name} ${pkg.version}`, 'success');
             if (input) input.value = '';
             await loadInstalledPackages();
-            Venus.setStatus('npm installed: ' + pkg.name);
+            Arima.setStatus('npm installed: ' + pkg.name);
         } catch (e) {
             setInstallStatus('Install failed: ' + e.message, 'error');
-            Venus.setStatus('npm install failed');
+            Arima.setStatus('npm install failed');
         }
     }
 
     async function removePackage(name) {
         if (!confirm(`Remove npm package "${name}"?\n\n⚠ Warning: any JavaScript cell that calls require('${name}') will fail until the package is re-installed.`)) return;
         try {
-            await Venus.api('DELETE', `/npm/packages/${encodeURIComponent(name)}`);
+            await Arima.api('DELETE', `/npm/packages/${encodeURIComponent(name)}`);
             await loadInstalledPackages();
-            Venus.setStatus('npm removed: ' + name);
+            Arima.setStatus('npm removed: ' + name);
         } catch (e) {
             alert('Failed to remove: ' + e.message);
         }
@@ -149,7 +149,7 @@ const NpmPackageManager = (() => {
         resultsEl.classList.remove('hidden');
 
         try {
-            const results = await Venus.api('GET', `/npm/packages/search?q=${encodeURIComponent(query)}`);
+            const results = await Arima.api('GET', `/npm/packages/search?q=${encodeURIComponent(query)}`);
             if (!results || results.length === 0) {
                 resultsEl.innerHTML = '<div class="muted">No results found.</div>';
                 return;

@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks - Package Manager
+ * Arima Notebooks - Package Manager
  * Install and manage Maven packages from Maven Central.
  */
 
@@ -15,7 +15,7 @@ const PackageManager = (() => {
         if (!container) return;
 
         try {
-            const packages = await Venus.api('GET', '/packages');
+            const packages = await Arima.api('GET', '/packages');
             if (countBadge) countBadge.textContent = packages.length;
             renderPackageList(packages);
         } catch (e) {
@@ -91,17 +91,17 @@ const PackageManager = (() => {
         }
 
         setInstallStatus('Installing ' + coordinate + '…', 'loading');
-        Venus.setStatus('Installing: ' + coordinate);
+        Arima.setStatus('Installing: ' + coordinate);
 
         try {
-            const pkg = await Venus.api('POST', '/packages/install', { coordinate });
+            const pkg = await Arima.api('POST', '/packages/install', { coordinate });
             setInstallStatus(`Installed: ${pkg.artifactId} ${pkg.version}`, 'success');
             if (input) input.value = '';
             await loadInstalledPackages();
-            Venus.setStatus('Package installed: ' + coordinate);
+            Arima.setStatus('Package installed: ' + coordinate);
         } catch (e) {
             setInstallStatus('Install failed: ' + e.message, 'error');
-            Venus.setStatus('Install failed');
+            Arima.setStatus('Install failed');
         }
     }
 
@@ -109,9 +109,9 @@ const PackageManager = (() => {
         if (!confirm(`Remove ${artifactId} ${version}?\n\n⚠ Warning: any notebook or cell that uses this package will fail to execute until it is re-installed.\n\nRestart JShell sessions after removal to fully unload it.`)) return;
 
         try {
-            await Venus.api('DELETE', `/packages/${groupId}/${artifactId}/${version}`);
+            await Arima.api('DELETE', `/packages/${groupId}/${artifactId}/${version}`);
             await loadInstalledPackages();
-            Venus.setStatus('Package removed: ' + artifactId);
+            Arima.setStatus('Package removed: ' + artifactId);
         } catch (e) {
             alert('Failed to remove: ' + e.message);
         }

@@ -1,6 +1,6 @@
-# .claude/ — Venus Notebooks Claude Code Configuration
+# .claude/ — Arima Notebooks Claude Code Configuration
 
-This directory is the **central registration** for Venus's Claude Code integration: slash commands, skills, subagents, and project settings. Files here are checked into the repo so every contributor gets the same set automatically when they open Venus in Claude Code.
+This directory is the **central registration** for Arima's Claude Code integration: slash commands, skills, subagents, and project settings. Files here are checked into the repo so every contributor gets the same set automatically when they open Arima in Claude Code.
 
 ## Layout
 
@@ -11,7 +11,7 @@ This directory is the **central registration** for Venus's Claude Code integrati
 ├── settings.local.json                # per-developer overrides (gitignored)
 │
 ├── commands/                          # slash commands
-│   ├── start.md                       # /start — start the venus server
+│   ├── start.md                       # /start — start the arima server
 │   ├── build.md                       # /build — build the JAR
 │   └── create-notebook.md             # /create-notebook — scaffold a .vnb
 │
@@ -22,29 +22,29 @@ This directory is the **central registration** for Venus's Claude Code integrati
 │   └── add-rest-endpoint/SKILL.md     # add a REST endpoint
 │
 └── agents/                            # subagents
-    ├── venus.md                       # PRIMARY front-door agent — welcome + full functionality
-    ├── venus-architect.md             # architecture reviewer (read-only)
-    ├── venus-security.md              # triages security-check findings
-    └── venus-tutorial-writer.md       # writes tutorial notebooks
+    ├── barista.md                       # PRIMARY front-door agent — welcome + full functionality
+    ├── barista-architect.md             # architecture reviewer (read-only)
+    ├── barista-security.md              # triages security-check findings
+    └── arima-tutorial-writer.md       # writes tutorial notebooks
 ```
 
-## The `venus` agent (start here)
+## The `arima` agent (start here)
 
-`venus` is the **primary, full-functionality** agent — the single front door for using, operating,
-documenting, and extending Venus. It delivers the common welcome (open the UI · drive Venus over MCP ·
+`arima` is the **primary, full-functionality** agent — the single front door for using, operating,
+documenting, and extending Arima. It delivers the common welcome (open the UI · drive Arima over MCP ·
 personalize & extend), opens the right docs, and — because it can write code — guides feature changes
 while obeying [`../AGENTS.md`](../AGENTS.md). It delegates focused work to the three specialists
-(`venus-architect`, `venus-security`, `venus-tutorial-writer`).
+(`barista-architect`, `barista-security`, `arima-tutorial-writer`).
 
 The same agent persona is described for **all three agentic CLIs** so the experience is consistent:
 [`../CLAUDE.md`](../CLAUDE.md), [`../.github/copilot-instructions.md`](../.github/copilot-instructions.md),
-and [`../GEMINI.md`](../GEMINI.md). The terminal equivalent is the `venus welcome` command; the canonical
+and [`../GEMINI.md`](../GEMINI.md). The terminal equivalent is the `arima welcome` command; the canonical
 content lives in [`../docs/WELCOME.md`](../docs/WELCOME.md).
 
 ## Skills vs. agents — when each fires
 
 - **Skills** are triggered automatically by Claude when a request matches the skill's description. You don't need to name them. They run *in* the main conversation.
-- **Agents** are spawned explicitly. Use them when you want a focused, scoped review (e.g. *"hand this proposal to `venus-architect` for review"*). They run in their own context and return a summary.
+- **Agents** are spawned explicitly. Use them when you want a focused, scoped review (e.g. *"hand this proposal to `barista-architect` for review"*). They run in their own context and return a summary.
 
 ## Adding a skill
 

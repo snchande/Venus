@@ -1,12 +1,12 @@
 # Our Developer Tools Were Built for a Pre-AI World. It's Time to Rethink Them.
 
-### Why I built Venus Notebooks — an MCP-native, CLI-AI-integrated, multi-language notebook designed to be reshaped by you and your AI in under an hour.
+### Why I built Arima Notebooks — an MCP-native, CLI-AI-integrated, multi-language notebook designed to be reshaped by you and your AI in under an hour.
 
 *By Suresh Chande · ~5 min read*
 
 ---
 
-![Venus Notebooks — Developer Tools Built for an AI-Native World](../docs/screenshots/00-banner-linkedin.png)
+![Arima Notebooks — Developer Tools Built for an AI-Native World](../docs/screenshots/00-banner-linkedin.png)
 
 ---
 
@@ -40,9 +40,9 @@ The agentic era demands tools where both of those are different.
 
 ---
 
-## What Venus Notebooks Is
+## What Arima Notebooks Is
 
-**Venus** is a locally-hosted, browser-based, multi-language notebook environment — MIT-licensed and on GitHub. It runs seven languages side-by-side in the same notebook:
+**Arima** is a locally-hosted, browser-based, multi-language notebook environment — MIT-licensed and on GitHub. It runs seven languages side-by-side in the same notebook:
 
 | Language | Runtime |
 |---|---|
@@ -60,34 +60,34 @@ The interesting part isn't the language list. It's three design decisions that c
 
 ---
 
-![Venus Notebooks UI](../docs/screenshots/01-hero-welcome.png)
+![Arima Notebooks UI](../docs/screenshots/01-hero-welcome.png)
 
-*The Venus UI: notebook cells with pipeline anchors, live status bar, tabs for Console, Packages, Settings, and Docs. Dark theme by default.*
+*The Arima UI: notebook cells with pipeline anchors, live status bar, tabs for Console, Packages, Settings, and Docs. Dark theme by default.*
 
 ---
 
 ## Decision 1 — AI in the Loop, Through Your Own CLI
 
-Venus runs AI as a local subprocess via whatever CLI you have authenticated:
+Arima runs AI as a local subprocess via whatever CLI you have authenticated:
 
 - Claude Code CLI
 - GitHub Copilot CLI
 - Gemini CLI
 
-No second API key. No second vendor relationship. No new exfiltration path. If your security team has already cleared one of these CLIs for your developers, Venus inherits that posture exactly.
+No second API key. No second vendor relationship. No new exfiltration path. If your security team has already cleared one of these CLIs for your developers, Arima inherits that posture exactly.
 
-The practical effect: **the AI inside Venus has the same powers as the AI in your terminal** — and we lean into that.
+The practical effect: **the AI inside Arima has the same powers as the AI in your terminal** — and we lean into that.
 
 ---
 
 ## Decision 2 — The Entire System is an MCP Server
 
-[Model Context Protocol](https://modelcontextprotocol.io) is the standard that lets AI agents drive tools in a structured way. Venus doesn't just consume it — **it publishes itself as one.**
+[Model Context Protocol](https://modelcontextprotocol.io) is the standard that lets AI agents drive tools in a structured way. Arima doesn't just consume it — **it publishes itself as one.**
 
 Every notebook, cell, execution, package install, and pipeline is exposed as an MCP tool. So you can:
 
-- Work in the Venus browser UI directly, **or**
-- Drive Venus from Claude Code / Claude Desktop / any MCP-aware agent, **or**
+- Work in the Arima browser UI directly, **or**
+- Drive Arima from Claude Code / Claude Desktop / any MCP-aware agent, **or**
 - Both, on the same notebook, simultaneously
 
 ```mermaid
@@ -97,7 +97,7 @@ flowchart LR
         AI["AI Agent<br/>(Claude Code,<br/>Claude Desktop,<br/>custom agent)"]
     end
 
-    subgraph Venus["Venus Notebooks (Local)"]
+    subgraph Arima["Arima Notebooks (Local)"]
         UI["Browser UI"]
         MCP["MCP Server"]
         ENG["7 Execution Engines<br/>Java · JS · TS · C# · F# · C++"]
@@ -109,12 +109,12 @@ flowchart LR
     MCP --> ENG
 
     style You fill:#0f172a,stroke:#3b82f6,color:#fff
-    style Venus fill:#1e293b,stroke:#06b6d4,color:#fff
+    style Arima fill:#1e293b,stroke:#06b6d4,color:#fff
 ```
 
-The unlock: **an agent can prepare a notebook for you overnight.** Tell Claude Code "build an exploration notebook for our new pricing API — load sample requests, validate the schema, chart latency distributions" — and the notebook is waiting when you open Venus in the morning.
+The unlock: **an agent can prepare a notebook for you overnight.** Tell Claude Code "build an exploration notebook for our new pricing API — load sample requests, validate the schema, chart latency distributions" — and the notebook is waiting when you open Arima in the morning.
 
-Conversely, from inside the Venus UI, you can attach a cell to the AI panel and ask "why is this latency spike here?" — same provider, same auth, same context.
+Conversely, from inside the Arima UI, you can attach a cell to the AI panel and ask "why is this latency spike here?" — same provider, same auth, same context.
 
 The notebook is the shared artifact. Both of you are first-class users of it.
 
@@ -126,7 +126,7 @@ This is the philosophical core, and the one I think matters most for the next de
 
 Most products say: *here's what we built; submit a feature request and we'll consider it.*
 
-Venus says: *here's what we built; if you need something else, ask your AI to add it, and it should take less than an hour.*
+Arima says: *here's what we built; if you need something else, ask your AI to add it, and it should take less than an hour.*
 
 That's possible because of deliberate constraints:
 
@@ -137,7 +137,7 @@ That's possible because of deliberate constraints:
 
 The loop becomes:
 
-1. You want a feature → open your AI CLI in the venus repo
+1. You want a feature → open your AI CLI in the arima repo
 2. Describe what you want → AI edits the code, runs it locally
 3. Works? Use it.
 4. Would others benefit? *"Package this as a PR back to the upstream repo."*
@@ -150,9 +150,9 @@ The same CLI that built your local change can prepare the contribution. **The ba
 
 ## Freedom > Lock-In
 
-A modern developer tool shouldn't trap your work inside itself. There's no good reason a notebook authored in Venus shouldn't open in Jupyter, or vice versa. The artifact is JSON. The cells are code. The execution model differs — but the *content* should be portable.
+A modern developer tool shouldn't trap your work inside itself. There's no good reason a notebook authored in Arima shouldn't open in Jupyter, or vice versa. The artifact is JSON. The cells are code. The execution model differs — but the *content* should be portable.
 
-**To be transparent: this isn't shipped yet.** Venus today reads and writes its own `.vnb` format; `.ipynb` round-tripping is planned for the next update — and it's a great first contribution for anyone who wants to try the loop described above. The principle stands: developers should be free to pick whichever tool fits the moment and move work between them without friction.
+**To be transparent: this isn't shipped yet.** Arima today reads and writes its own `.vnb` format; `.ipynb` round-tripping is planned for the next update — and it's a great first contribution for anyone who wants to try the loop described above. The principle stands: developers should be free to pick whichever tool fits the moment and move work between them without friction.
 
 Same goes for AI providers. Same for languages. Same for package ecosystems. **The era of "pick a tool and live inside it forever" is closing.** The era of "compose what you need, swap when convenient, shape what doesn't fit" is here.
 
@@ -168,7 +168,7 @@ If you lead, hire, or work on a team where any of these are true:
 - **DevRel / developer education** that needs executable, shareable content
 - **AI-forward teams** wanting tools their agents can drive, not just observe
 
-…Venus is worth ten minutes of your time. And if it doesn't do what you need, *the whole pitch* is that it should take you under an hour with an AI CLI to add what's missing.
+…Arima is worth ten minutes of your time. And if it doesn't do what you need, *the whole pitch* is that it should take you under an hour with an AI CLI to add what's missing.
 
 ---
 
@@ -176,23 +176,23 @@ If you lead, hire, or work on a team where any of these are true:
 
 ```bash
 git clone https://github.com/snchande/Venus.git
-cd Venus
-./venus       # Windows CMD — also venus.ps1 (PowerShell), venus.sh (mac/Linux)
+cd Arima
+./arima       # Windows CMD — also arima.ps1 (PowerShell), arima.sh (mac/Linux)
 ```
 
 Builds the JAR, starts the server, opens your browser. About 30 seconds.
 
-To drive it from an MCP-aware agent (Claude Code, Claude Desktop, custom agents): add the Venus MCP server config — see `docs/MCP.md` in the repo.
+To drive it from an MCP-aware agent (Claude Code, Claude Desktop, custom agents): add the Arima MCP server config — see `docs/MCP.md` in the repo.
 
-![MCP-driven workflow — Claude Desktop and Venus on the same artifact](../docs/screenshots/08-mcp-claude.png)
+![MCP-driven workflow — Claude Desktop and Arima on the same artifact](../docs/screenshots/08-mcp-claude.png)
 
-*Two surfaces, one artifact: Claude Desktop driving Venus via MCP tools (`venus.create_notebook`, `venus.add_cell`, `venus.execute_cell`) while the resulting notebook stays live and inspectable in the Venus UI.*
+*Two surfaces, one artifact: Claude Desktop driving Arima via MCP tools (`barista.create_notebook`, `barista.add_cell`, `barista.execute_cell`) while the resulting notebook stays live and inspectable in the Arima UI.*
 
 ---
 
 ## What I'd Love To Hear
 
-I built Venus because I wanted a notebook that fit the way I — and my AI partner — actually work together now. I open-sourced it because the most valuable outcome isn't Venus staying the way I built it. It's other people forking it, asking their AI to add what they need, and (sometimes) contributing those changes back.
+I built Arima because I wanted a notebook that fit the way I — and my AI partner — actually work together now. I open-sourced it because the most valuable outcome isn't Arima staying the way I built it. It's other people forking it, asking their AI to add what they need, and (sometimes) contributing those changes back.
 
 That loop — **use, reshape, contribute, repeat** — is what I believe open source should feel like in 2026. Tools that bend toward their users, not the other way around.
 

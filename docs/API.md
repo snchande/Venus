@@ -1,4 +1,4 @@
-# Venus Notebooks - REST API Reference
+# Arima Notebooks - REST API Reference
 
 Base URL: `http://localhost:8585/api`
 
@@ -19,7 +19,7 @@ Returns metadata for all notebooks (not full cell content).
 [
   {
     "id": "welcome",
-    "name": "Welcome to Venus Notebooks",
+    "name": "Welcome to Arima Notebooks",
     "description": "...",
     "created": "2025-01-01T00:00:00",
     "modified": "2025-01-01T00:00:00",
@@ -229,12 +229,12 @@ Cells can declare dependencies on cells in other notebooks using the annotation 
 //@ depends: notebook:csharp-shared-utils/cs_statistics, cs_loadData
 ```
 
-**How Venus resolves cross-notebook refs at execution time:**
+**How Arima resolves cross-notebook refs at execution time:**
 
 | Language | Resolution |
 |----------|-----------|
 | JShell / Java | The foreign cell's source is executed in the current JShell session |
-| C# / F# | Venus builds an **expanded source** (full transitive dep chain, annotation-stripped) and injects it with output suppressed before the current cell's code |
+| C# / F# | Arima builds an **expanded source** (full transitive dep chain, annotation-stripped) and injects it with output suppressed before the current cell's code |
 
 Cross-notebook execution is triggered automatically by `execute-with-deps` and `execute-pipeline` when they encounter `notebook:*` references. It can also be triggered manually by `POST /api/shell/execute` when the cell has `//@ depends:` annotations and a session anchor cache is already populated.
 
@@ -439,7 +439,7 @@ Example: `DELETE /api/nuget/Newtonsoft.Json`
 
 ## AI Assistant
 
-Venus supports three AI providers: **Claude CLI**, **Copilot CLI**, and **Gemini CLI**. All `/api/llm/*` endpoints route to the currently active provider — no change to request format needed when switching.
+Arima supports three AI providers: **Claude CLI**, **Copilot CLI**, and **Gemini CLI**. All `/api/llm/*` endpoints route to the currently active provider — no change to request format needed when switching.
 
 ### Get Active Provider
 ```
@@ -642,7 +642,7 @@ Result is broadcast to all subscribers of `/topic/shell/{sessionId}`.
 
 ## MCP Server (Model Context Protocol)
 
-Venus implements MCP over HTTP+SSE transport (JSON-RPC 2.0). This lets any MCP-compatible AI client (Claude Desktop, Claude Code CLI, custom agents) use Venus as a tool server — executing Java code, reading notebooks, running pipelines, and more.
+Arima implements MCP over HTTP+SSE transport (JSON-RPC 2.0). This lets any MCP-compatible AI client (Claude Desktop, Claude Code CLI, custom agents) use Arima as a tool server — executing Java code, reading notebooks, running pipelines, and more.
 
 ### Connecting MCP Clients
 
@@ -653,21 +653,21 @@ Add to `claude_desktop_config.json` (see [SETUP.md — MCP section](SETUP.md#mcp
 ```json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "url": "http://localhost:8585/api/mcp/sse"
     }
   }
 }
 ```
 
-After saving, restart Claude Desktop. Venus tools appear automatically in every conversation.
+After saving, restart Claude Desktop. Arima tools appear automatically in every conversation.
 
 #### Claude Code CLI
 
 Add to your MCP config (run `claude mcp add --help` for current syntax):
 
 ```bash
-claude mcp add venus-notebooks --transport sse --url http://localhost:8585/api/mcp/sse
+claude mcp add arima-notebooks --transport sse --url http://localhost:8585/api/mcp/sse
 ```
 
 Or add manually to `~/.claude/settings.json` (macOS/Linux) or `%APPDATA%\claude\settings.json` (Windows):
@@ -675,7 +675,7 @@ Or add manually to `~/.claude/settings.json` (macOS/Linux) or `%APPDATA%\claude\
 ```json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "transport": "sse",
       "url": "http://localhost:8585/api/mcp/sse"
     }
@@ -695,7 +695,7 @@ Any client that supports MCP HTTP+SSE transport can connect directly:
 
 1. **Open SSE stream**: `GET http://localhost:8585/api/mcp/sse` — the server sends an `endpoint` event with the POST URL
 2. **Handshake**: send `initialize` then listen for `notifications/initialized`
-3. **List tools**: send `tools/list` to discover all Venus tools
+3. **List tools**: send `tools/list` to discover all Arima tools
 4. **Call tools**: send `tools/call` with `name` and `arguments`
 
 Example using `curl`:
@@ -707,7 +707,7 @@ curl -s -X POST http://localhost:8585/api/mcp/messages \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-Venus must be running (`venus start` or `mvn spring-boot:run`) before connecting.
+Arima must be running (`arima start` or `mvn spring-boot:run`) before connecting.
 
 ---
 
@@ -745,14 +745,14 @@ Handles JSON-RPC 2.0 messages.
 
 | Tool | Required Params | Description |
 |---|---|---|
-| `venus_execute_code` | `code` | Execute Java in a JShell session |
-| `venus_list_notebooks` | *(none)* | List all notebooks |
-| `venus_read_notebook` | `notebookId` | Read all cells from a notebook |
-| `venus_run_pipeline` | `notebookId`, `cellId` | Run a pipeline cell |
-| `venus_search_cells` | `query` | Search cells by content or anchor |
-| `venus_load_module` | `notebookRef` | Load `notebookId/anchor` into session |
-| `venus_create_notebook` | `name` | Create new notebook with optional cells |
-| `venus_append_cell` | `notebookId`, `source` | Append a cell, optionally execute |
+| `barista_execute_code` | `code` | Execute Java in a JShell session |
+| `barista_list_notebooks` | *(none)* | List all notebooks |
+| `barista_read_notebook` | `notebookId` | Read all cells from a notebook |
+| `barista_run_pipeline` | `notebookId`, `cellId` | Run a pipeline cell |
+| `barista_search_cells` | `query` | Search cells by content or anchor |
+| `barista_load_module` | `notebookRef` | Load `notebookId/anchor` into session |
+| `barista_create_notebook` | `name` | Create new notebook with optional cells |
+| `barista_append_cell` | `notebookId`, `source` | Append a cell, optionally execute |
 
 ---
 
@@ -761,7 +761,7 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "url": "http://localhost:8585/api/mcp/sse"
     }
   }
@@ -778,7 +778,7 @@ curl -X POST http://localhost:8585/api/mcp/messages \
     "jsonrpc": "2.0", "id": 1,
     "method": "tools/call",
     "params": {
-      "name": "venus_create_notebook",
+      "name": "barista_create_notebook",
       "arguments": {
         "name": "My Agent Notebook",
         "description": "Created by an AI agent",
@@ -801,7 +801,7 @@ curl -X POST http://localhost:8585/api/mcp/messages \
     "jsonrpc": "2.0", "id": 2,
     "method": "tools/call",
     "params": {
-      "name": "venus_append_cell",
+      "name": "barista_append_cell",
       "arguments": {
         "notebookId": "your-notebook-id",
         "source": "var result = 42 * 2; System.out.println(result);",

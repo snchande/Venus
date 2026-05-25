@@ -1,4 +1,4 @@
-# Venus Notebooks - Setup Guide
+# Arima Notebooks - Setup Guide
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@
 > npm install -g typescript
 > tsc --version   # verify
 > ```
-> Without `tsc`, TS cells still run — Node strips the type annotations and trusts the code. With `tsc` on the PATH, Venus also runs `tsc --noEmit` before each cell and folds the diagnostics into the cell's error stream.
+> Without `tsc`, TS cells still run — Node strips the type annotations and trusts the code. With `tsc` on the PATH, Arima also runs `tsc --noEmit` before each cell and folds the diagnostics into the cell's error stream.
 
 > **.NET SDK**: Install from [dot.net](https://dot.net) to use C# **and** F# cells. The SDK is free for all platforms.
 > Both C# and F# cells require only the standard .NET SDK — no extra tools like `dotnet-script` are needed.
@@ -42,7 +42,7 @@
 
 ## Recommended: an AI CLI
 
-Venus is designed to be **used, customized, and contributed back to entirely through agentic prompts** — see the [README's "Built for the Agentic Era"](../README.md#built-for-the-agentic-era) section. To get the full workflow, install at least one of:
+Arima is designed to be **used, customized, and contributed back to entirely through agentic prompts** — see the [README's "Built for the Agentic Era"](../README.md#built-for-the-agentic-era) section. To get the full workflow, install at least one of:
 
 | CLI | Install | Auth |
 |-----|---------|------|
@@ -50,19 +50,19 @@ Venus is designed to be **used, customized, and contributed back to entirely thr
 | **GitHub Copilot CLI** | `npm install -g @githubnext/github-copilot-cli` | `github-copilot-cli auth` |
 | **Gemini CLI** | `npm install -g @google/gemini-cli` | `gemini auth` |
 
-Once installed, Venus uses the CLI as a **local subprocess** — no API key for Venus to manage, no second vendor relationship. The same CLI lets you:
+Once installed, Arima uses the CLI as a **local subprocess** — no API key for Arima to manage, no second vendor relationship. The same CLI lets you:
 
-- Drive Venus from the in-app AI panel (generate cells, explain output, convert languages)
-- Open the same CLI inside the cloned repo to **reshape Venus itself** (add a feature, fix a bug, write a tutorial)
+- Drive Arima from the in-app AI panel (generate cells, explain output, convert languages)
+- Open the same CLI inside the cloned repo to **reshape Arima itself** (add a feature, fix a bug, write a tutorial)
 - Ask the same CLI to **package your change as a PR back upstream** — closing the contribute loop
 
-If you also want to drive Venus from outside the UI, the Venus MCP server lets any MCP-aware agent (Claude Code, Claude Desktop, custom agents) create notebooks, add cells, and run pipelines programmatically. See [`docs/USAGE.md` → Agentic Workflows](USAGE.md#agentic-workflows--use-customize-contribute).
+If you also want to drive Arima from outside the UI, the Arima MCP server lets any MCP-aware agent (Claude Code, Claude Desktop, custom agents) create notebooks, add cells, and run pipelines programmatically. See [`docs/USAGE.md` → Agentic Workflows](USAGE.md#agentic-workflows--use-customize-contribute).
 
 ---
 
 ## Language Support
 
-Venus supports multiple cell execution modes. Each language is **optional** — install only what you need.
+Arima supports multiple cell execution modes. Each language is **optional** — install only what you need.
 
 | Language | Mode | Requirement | Install |
 |----------|------|-------------|---------|
@@ -76,12 +76,12 @@ Venus supports multiple cell execution modes. Each language is **optional** — 
 
 ### Setting up C++ support
 
-C++ cells require a C++17-compatible compiler. Venus auto-detects compilers in this order:
+C++ cells require a C++17-compatible compiler. Arima auto-detects compilers in this order:
 1. `g++` on PATH
 2. `clang++` on PATH
 3. Visual Studio / Build Tools (MSVC) — Windows only, searched automatically in standard install locations
 
-If no compiler is found, Venus displays step-by-step installation instructions when you run a C++ cell.
+If no compiler is found, Arima displays step-by-step installation instructions when you run a C++ cell.
 
 > **Quick check**: Run `cout << "hello" << endl;` in a C++ cell. If it works, you're all set.
 > If you see "C++ compiler not found", follow one of the install options below for your platform.
@@ -131,19 +131,19 @@ g++-13 --version   # Homebrew installs as g++-<version>
 
 #### Windows — Option A: Visual Studio / Build Tools (Auto-detected, No PATH setup needed)
 
-If you already have **Visual Studio 2017, 2019, or 2022** (any edition) or the standalone **Build Tools**, Venus finds the compiler automatically — no PATH changes required.
+If you already have **Visual Studio 2017, 2019, or 2022** (any edition) or the standalone **Build Tools**, Arima finds the compiler automatically — no PATH changes required.
 
 1. Open **Visual Studio Installer** (search "Visual Studio Installer" in Start)
 2. Click **Modify** on your installation
 3. Under *Workloads*, check **"Desktop development with C++"**
 4. Click **Modify** to install
-5. Restart Venus — C++ cells will work immediately
+5. Restart Arima — C++ cells will work immediately
 
 If you don't have Visual Studio yet, download the free **Build Tools** (no IDE required):
 - Go to [visualstudio.microsoft.com/downloads/](https://visualstudio.microsoft.com/downloads/)
 - Scroll to "Tools for Visual Studio" → download **"Build Tools for Visual Studio 2022"**
 - During install, select **"Desktop development with C++"**
-- Restart Venus after installation
+- Restart Arima after installation
 
 > **Verify**: Run `cout << __cplusplus << endl;` in a C++ cell. You should see `201703`.
 
@@ -160,7 +160,7 @@ MSYS2 provides a native Windows GCC toolchain with `g++` accessible from any ter
    - Open **Start → Edit the system environment variables → Environment Variables**
    - Under *System variables*, select **Path → Edit → New**
    - Add: `C:\msys64\ucrt64\bin`
-   - Click OK, then **restart Venus and any open terminals**
+   - Click OK, then **restart Arima and any open terminals**
 4. Verify (in a new Command Prompt or PowerShell):
    ```cmd
    g++ --version
@@ -188,11 +188,11 @@ g++ --version
 
 #### Windows — Option E: WSL (Windows Subsystem for Linux)
 
-If you use WSL, install `build-essential` inside WSL, but note that Venus runs as a Windows process and needs a Windows-native `g++.exe` on the Windows PATH. The WSL `g++` is not directly usable from Venus.
+If you use WSL, install `build-essential` inside WSL, but note that Arima runs as a Windows process and needs a Windows-native `g++.exe` on the Windows PATH. The WSL `g++` is not directly usable from Arima.
 
-#### Verify C++ is ready in Venus
+#### Verify C++ is ready in Arima
 
-After installing, restart Venus and run this cell:
+After installing, restart Arima and run this cell:
 
 ```cpp
 cout << "C++ " << __cplusplus << " works!" << endl;
@@ -221,12 +221,12 @@ dotnet fsi --version
 C# cells compile and run via `dotnet run` inside a generated temp project.
 F# cells run via `dotnet fsi --exec` (F# Interactive, bundled with the SDK).
 
-> **No dotnet-script needed**: Venus uses `dotnet run` directly for C# cells.
-> If you previously installed `dotnet-script`, you can keep it — Venus will not use it.
+> **No dotnet-script needed**: Arima uses `dotnet run` directly for C# cells.
+> If you previously installed `dotnet-script`, you can keep it — Arima will not use it.
 
 ### NuGet packages (C# and F#)
 
-Install NuGet packages via the **Packages → NuGet** tab in Venus. Installed packages are automatically injected as `#r "nuget: PackageId, Version"` directives in every C# and F# cell.
+Install NuGet packages via the **Packages → NuGet** tab in Arima. Installed packages are automatically injected as `#r "nuget: PackageId, Version"` directives in every C# and F# cell.
 
 ---
 
@@ -237,7 +237,7 @@ Install NuGet packages via the **Packages → NuGet** tab in Venus. Installed pa
 ```bash
 # Clone from GitHub (once published)
 git clone https://github.com/snchande/Venus.git
-cd Venus
+cd Arima
 
 # OR download the zip and extract
 ```
@@ -271,15 +271,15 @@ export PATH=$JAVA_HOME/bin:$PATH
 mvn clean package -DskipTests
 ```
 
-This creates `target/venus-notebooks-1.0.0-SNAPSHOT.jar`.
+This creates `target/arima-notebooks-1.0.0-SNAPSHOT.jar`.
 
 ### Step 4: Run
 
-**Option A: Venus CLI — Windows (recommended)**
+**Option A: Arima CLI — Windows (recommended)**
 ```cmd
-venus
+arima
 ```
-`venus.cmd` in the project root auto-builds if the JAR is missing, starts the server, and opens your browser. See the [Venus CLI reference](#venus-cli-windows) below for all commands.
+`arima.cmd` in the project root auto-builds if the JAR is missing, starts the server, and opens your browser. See the [Arima CLI reference](#arima-cli-windows) below for all commands.
 
 **Option B: Startup scripts**
 ```bash
@@ -301,13 +301,13 @@ java \
   --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \
   --add-opens=java.base/java.lang=ALL-UNNAMED \
   --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \
-  -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+  -jar target/arima-notebooks-1.0.0-SNAPSHOT.jar
 ```
 
 ### Step 5: Open Browser
 
 Navigate to: **http://localhost:8585**
-(The `venus` CLI opens this automatically.)
+(The `arima` CLI opens this automatically.)
 
 ---
 
@@ -324,31 +324,31 @@ server.port=9000
 
 **Option B: Command line**
 ```bash
-java -jar venus-notebooks.jar --server.port=9000
+java -jar arima-notebooks.jar --server.port=9000
 ```
 
 **Option C: Environment variable**
 ```bash
-SERVER_PORT=9000 java -jar venus-notebooks.jar
+SERVER_PORT=9000 java -jar arima-notebooks.jar
 ```
 
 ---
 
 ## AI Assistant Setup
 
-Venus supports three AI providers. Install any one (or all) and select the active provider from the **AI sidebar** switcher or **Settings → AI Provider**.
+Arima supports three AI providers. Install any one (or all) and select the active provider from the **AI sidebar** switcher or **Settings → AI Provider**.
 
 ### Claude CLI (default)
 
-No Anthropic API key or account credits required — Venus calls the local Claude CLI.
+No Anthropic API key or account credits required — Arima calls the local Claude CLI.
 
 1. Install Claude Code from [claude.ai/code](https://claude.ai/code)
 2. Authenticate: run `claude auth` in a terminal
-3. Start Venus — the AI Assistant is ready
+3. Start Arima — the AI Assistant is ready
 
 The Settings tab → Server Status shows **Claude CLI: ✓ Found** when detected.
 
-**Claude CLI on PATH (Windows)** — if Venus shows "CLI not found" after authentication:
+**Claude CLI on PATH (Windows)** — if Arima shows "CLI not found" after authentication:
 
 ```cmd
 where claude
@@ -363,12 +363,12 @@ Common install locations checked automatically:
 
 ### Copilot CLI
 
-Venus calls the `copilot` binary directly as a subprocess.
+Arima calls the `copilot` binary directly as a subprocess.
 
 1. Install Copilot CLI — check [GitHub Copilot CLI docs](https://docs.github.com/en/copilot/github-copilot-in-the-cli) for the latest install instructions
 2. Authenticate as required by Copilot CLI
 3. Verify: `copilot --version` prints a version number
-4. In Venus, open **Settings → AI Provider** and select **Copilot CLI**, or use the toggle in the AI sidebar
+4. In Arima, open **Settings → AI Provider** and select **Copilot CLI**, or use the toggle in the AI sidebar
 
 The Settings tab → Server Status shows **GitHub Copilot: ✓ Found** when the `copilot` binary is detected.
 
@@ -376,7 +376,7 @@ The Settings tab → Server Status shows **GitHub Copilot: ✓ Found** when the 
 
 ### Gemini CLI
 
-Venus calls the `gemini` binary via `gemini -p "prompt"`.
+Arima calls the `gemini` binary via `gemini -p "prompt"`.
 
 1. Install Gemini CLI:
    ```bash
@@ -387,7 +387,7 @@ Venus calls the `gemini` binary via `gemini -p "prompt"`.
    gemini auth
    ```
 3. Verify: `gemini --version` prints a version number
-4. In Venus, open **Settings → AI Provider** and select **Gemini CLI**, or use the toggle in the AI sidebar
+4. In Arima, open **Settings → AI Provider** and select **Gemini CLI**, or use the toggle in the AI sidebar
 
 The Settings tab → Server Status shows **Gemini CLI: ✓ Found** when detected.
 
@@ -407,7 +407,7 @@ The active provider is shown in the sidebar header and in the status bar badge.
 ## Directory Structure After First Run
 
 ```
-venus/
+arima/
 ├── data/
 │   ├── settings.json          # Created automatically
 │   ├── packages.json          # Created automatically (initially empty)
@@ -415,83 +415,83 @@ venus/
 ├── notebooks/
 │   └── welcome.vnb            # Pre-existing welcome notebook
 └── target/
-    └── venus-notebooks-1.0.0-SNAPSHOT.jar
+    └── arima-notebooks-1.0.0-SNAPSHOT.jar
 ```
 
 ---
 
-## Venus CLI (Windows)
+## Arima CLI (Windows)
 
-`venus.cmd` is a full-featured command-line launcher located in the project root.
+`arima.cmd` is a full-featured command-line launcher located in the project root.
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
-| `venus` | Start server (auto-build if needed), open browser |
-| `venus start` | Same as above |
-| `venus start --bg` | Start in background; logs go to `venus.log` |
-| `venus stop` | Kill the running server (finds PID via netstat) |
-| `venus status` | Running state, PID, JAR exists, Java version |
-| `venus build` | `mvn clean package -DskipTests` (skips if JAR exists) |
-| `venus rebuild` | Force clean build |
-| `venus open` | Open browser (server must already be running) |
-| `venus logs` | Tail `venus.log` (background mode only) |
-| `venus version` | Java + Maven version info |
-| `venus help` | Illustrated help with ASCII banner |
+| `arima` | Start server (auto-build if needed), open browser |
+| `arima start` | Same as above |
+| `arima start --bg` | Start in background; logs go to `arima.log` |
+| `arima stop` | Kill the running server (finds PID via netstat) |
+| `arima status` | Running state, PID, JAR exists, Java version |
+| `arima build` | `mvn clean package -DskipTests` (skips if JAR exists) |
+| `arima rebuild` | Force clean build |
+| `arima open` | Open browser (server must already be running) |
+| `arima logs` | Tail `arima.log` (background mode only) |
+| `arima version` | Java + Maven version info |
+| `arima help` | Illustrated help with ASCII banner |
 
 ### Background mode
 
 Run the server detached so the terminal is free:
 
 ```cmd
-venus start --bg
+arima start --bg
 ```
 
-Logs are written to `venus.log` in the project root. Stream them with:
+Logs are written to `arima.log` in the project root. Stream them with:
 
 ```cmd
-venus logs
+arima logs
 ```
 
 Stop the background server at any time with:
 
 ```cmd
-venus stop
+arima stop
 ```
 
 ### Claude AI with the CLI
 
-Ensure `claude auth` has been run once in any terminal before starting Venus.
+Ensure `claude auth` has been run once in any terminal before starting Arima.
 The `claude` executable is automatically detected from your PATH and common install locations.
 
 ---
 
 ## MCP Server Setup
 
-Venus runs a built-in MCP (Model Context Protocol) server at `http://localhost:8585/api/mcp/sse`. Any MCP-compatible AI client can connect to it while Venus is running.
+Arima runs a built-in MCP (Model Context Protocol) server at `http://localhost:8585/api/mcp/sse`. Any MCP-compatible AI client can connect to it while Arima is running.
 
 ### Claude Desktop
 
 1. Open (or create) `claude_desktop_config.json`:
    - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-2. Add the Venus server entry:
+2. Add the Arima server entry:
    ```json
    {
      "mcpServers": {
-       "venus-notebooks": {
+       "arima-notebooks": {
          "url": "http://localhost:8585/api/mcp/sse"
        }
      }
    }
    ```
-3. Restart Claude Desktop. Venus tools appear automatically.
+3. Restart Claude Desktop. Arima tools appear automatically.
 
 ### Claude Code CLI
 
 ```bash
-claude mcp add venus-notebooks --transport sse --url http://localhost:8585/api/mcp/sse
+claude mcp add arima-notebooks --transport sse --url http://localhost:8585/api/mcp/sse
 ```
 
 Or add manually to `~/.claude/settings.json`:
@@ -499,7 +499,7 @@ Or add manually to `~/.claude/settings.json`:
 ```json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "transport": "sse",
       "url": "http://localhost:8585/api/mcp/sse"
     }
@@ -507,7 +507,7 @@ Or add manually to `~/.claude/settings.json`:
 }
 ```
 
-Verify: `claude mcp list` — `venus-notebooks` should appear.
+Verify: `claude mcp list` — `arima-notebooks` should appear.
 
 ### Available MCP Tools
 
@@ -515,14 +515,14 @@ Once connected, the AI client can:
 
 | Tool | What it does |
 |------|-------------|
-| `venus_execute_code` | Run Java code in a JShell session |
-| `venus_list_notebooks` | List all notebooks |
-| `venus_read_notebook` | Read all cells from a notebook |
-| `venus_run_pipeline` | Execute a pipeline cell |
-| `venus_search_cells` | Search cells by content or anchor |
-| `venus_load_module` | Load a notebook module into a session |
-| `venus_create_notebook` | Create a notebook with cells |
-| `venus_append_cell` | Append and optionally execute a cell |
+| `barista_execute_code` | Run Java code in a JShell session |
+| `barista_list_notebooks` | List all notebooks |
+| `barista_read_notebook` | Read all cells from a notebook |
+| `barista_run_pipeline` | Execute a pipeline cell |
+| `barista_search_cells` | Search cells by content or anchor |
+| `barista_load_module` | Load a notebook module into a session |
+| `barista_create_notebook` | Create a notebook with cells |
+| `barista_append_cell` | Append and optionally execute a cell |
 
 See [docs/API.md — MCP Server section](API.md#mcp-server-model-context-protocol) for full JSON-RPC details.
 
@@ -532,7 +532,7 @@ See [docs/API.md — MCP Server section](API.md#mcp-server-model-context-protoco
 
 ### IntelliJ IDEA
 
-1. Open the project: **File → Open** → select the `venus` directory
+1. Open the project: **File → Open** → select the `arima` directory
 2. IntelliJ will detect the `pom.xml` and configure Maven automatically
 3. To run from IDE: Edit the run configuration and add JVM args:
    ```
@@ -544,15 +544,15 @@ See [docs/API.md — MCP Server section](API.md#mcp-server-model-context-protoco
 ### VS Code
 
 1. Install the **Extension Pack for Java** extension
-2. Open the `venus` folder
+2. Open the `arima` folder
 3. Add JVM args to `.vscode/launch.json`:
 ```json
 {
   "configurations": [{
     "type": "java",
-    "name": "Venus Notebooks",
+    "name": "Arima Notebooks",
     "request": "launch",
-    "mainClass": "com.venus.VenusApplication",
+    "mainClass": "com.barista.BaristaApplication",
     "vmArgs": "--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED"
   }]
 }
@@ -575,16 +575,16 @@ See [docs/API.md — MCP Server section](API.md#mcp-server-model-context-protoco
    --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED
    ```
 
-### `venus` command not recognized
+### `arima` command not recognized
 
 **Cause**: The project root is not in your PATH.
 
-**Fix**: Run `venus.cmd` from the project root directory, or add the project root to your PATH:
+**Fix**: Run `arima.cmd` from the project root directory, or add the project root to your PATH:
 ```cmd
-set PATH=%PATH%;C:\path\to\venus
+set PATH=%PATH%;C:\path\to\arima
 ```
 
-### `venus stop` says "not running" but port 8585 is busy
+### `arima stop` says "not running" but port 8585 is busy
 
 **Fix**: The process may not be on the expected port. Find and kill manually:
 ```cmd
@@ -596,7 +596,7 @@ taskkill /PID <pid> /F
 
 **Fix**: Change the port in `application.properties` or via command line:
 ```bash
-java ... -jar venus-notebooks.jar --server.port=8586
+java ... -jar arima-notebooks.jar --server.port=8586
 ```
 
 ### WebSocket connection failed
@@ -646,11 +646,11 @@ First, check which provider is active in the AI sidebar or Settings → AI Provi
 
 **Fix**:
 1. Install a compiler — see the **Setting up C++ support** section above
-2. Restart Venus (PATH is read at server startup)
-3. Verify in Venus: run `cout << __cplusplus << endl;` in a C++ cell — should print `201703`
+2. Restart Arima (PATH is read at server startup)
+3. Verify in Arima: run `cout << __cplusplus << endl;` in a C++ cell — should print `201703`
 
 **On Windows — compiler detection order:**
-Venus checks for compilers in this order:
+Arima checks for compilers in this order:
 1. `g++` on PATH (MinGW-w64 / MSYS2 / WinLibs)
 2. `clang++` on PATH (LLVM)
 3. Visual Studio / Build Tools MSVC (searched automatically, no PATH needed)
@@ -660,7 +660,7 @@ Venus checks for compilers in this order:
 where g++           # should print a path; if missing, PATH is not set
 g++ --version       # should print version info
 ```
-Re-add `C:\msys64\ucrt64\bin` (or your MinGW bin path) to the system PATH and restart Venus.
+Re-add `C:\msys64\ucrt64\bin` (or your MinGW bin path) to the system PATH and restart Arima.
 
 **If Visual Studio is installed but not detected**: Ensure the "Desktop development with C++" workload is installed (open Visual Studio Installer → Modify → check the workload).
 
@@ -682,7 +682,7 @@ Re-add `C:\msys64\ucrt64\bin` (or your MinGW bin path) to the system PATH and re
 
 ### C++ compile error line numbers seem off
 
-**Cause**: Venus adjusts line numbers to hide the injected preamble (25 header lines). In rare cases, the offset may differ.
+**Cause**: Arima adjusts line numbers to hide the injected preamble (25 header lines). In rare cases, the offset may differ.
 
 **Fix**: The error shows `main.cpp:<line>` — the actual error is at that line in your cell code. Temporarily add `#line 1` at the top of the cell to force line 1 as the reference.
 
@@ -690,17 +690,17 @@ Re-add `C:\msys64\ucrt64\bin` (or your MinGW bin path) to the system PATH and re
 
 **Fix**:
 1. Install the .NET SDK from [dot.net](https://dot.net)
-2. Restart Venus
+2. Restart Arima
 3. Verify: `dotnet --version`
 4. Check Settings → Server Status → **.NET** shows ✓ Found
 
-> Venus uses `dotnet run` directly — no `dotnet-script` tool is needed.
+> Arima uses `dotnet run` directly — no `dotnet-script` tool is needed.
 
 ### F# cells fail with ".NET SDK not found"
 
 **Fix**:
 1. Install the .NET SDK from [dot.net](https://dot.net)
-2. Restart Venus
+2. Restart Arima
 3. Verify: `dotnet fsi --version`
 4. Check Settings → Server Status → **dotnet** shows ✓ Found
 

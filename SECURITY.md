@@ -10,10 +10,10 @@
 
 **Please do NOT open a public GitHub issue for security vulnerabilities.**
 
-If you discover a security vulnerability in Venus Notebooks, please report it privately:
+If you discover a security vulnerability in Arima Notebooks, please report it privately:
 
 1. **Email**: [suresh.chande@gmail.com](mailto:suresh.chande@gmail.com)  
-   Use the subject line: `[Venus Security] <brief description>`
+   Use the subject line: `[Arima Security] <brief description>`
 
 2. **GitHub Private Advisory** (preferred for confirmed vulnerabilities):  
    Go to **Security → Advisories → New draft security advisory** in this repository.
@@ -44,12 +44,12 @@ We follow [coordinated vulnerability disclosure](https://en.wikipedia.org/wiki/C
 
 - The **Anthropic API key** and **GitHub Token** you configure are stored in `data/settings.json` on your local machine.
 - This file is listed in `.gitignore` and should **never be committed** to version control.
-- Venus serves on `localhost` only by default. Do not expose port 8585 to the public internet without adding authentication.
+- Arima serves on `localhost` only by default. Do not expose port 8585 to the public internet without adding authentication.
 
 ### Local-only by default
 
-Venus Notebooks is designed to run **locally** on your development machine. It is not intended as a multi-user server without additional hardening. If you need shared/cloud deployment, enable OAuth authentication via Settings and ensure the server is behind a reverse proxy with TLS.
+Arima Notebooks is designed to run **locally** on your development machine. It is not intended as a multi-user server without additional hardening. If you need shared/cloud deployment, enable OAuth authentication via Settings and ensure the server is behind a reverse proxy with TLS.
 
 ### Dependency vulnerabilities
 
-Run `mvn dependency-check:check` to scan for known CVEs in Venus's Java dependencies. Report any high-severity findings via the process above.
+Run `mvn dependency-check:check` to scan for known CVEs in Arima's Java dependencies. Report any high-severity findings via the process above.

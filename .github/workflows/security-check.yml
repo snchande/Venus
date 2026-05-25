@@ -1,6 +1,6 @@
 name: security-check
 
-# Venus Notebooks — PR Security & Architecture Gate
+# Arima Notebooks — PR Security & Architecture Gate
 #
 # Every PR runs scripts/security-check (the same script you run locally).
 # A blocking finding fails this job, which in turn keeps the PR in DRAFT
@@ -97,17 +97,17 @@ jobs:
             const top = r.findings.slice(0, 30).map(f =>
               `- **${f.level.toUpperCase()}** \`${f.rule}\` — \`${f.path}${f.line ? ':' + f.line : ''}\` — ${f.detail}`
             ).join('\n');
-            const body = `### Venus security check — ${status}\n\n` +
+            const body = `### Arima security check — ${status}\n\n` +
                          `**Summary:** ${sum.blocks} block · ${sum.warns} warn · ${sum.infos} info\n\n` +
                          (r.findings.length > 0 ? `**Top findings:**\n${top}\n` : '_No findings._\n') +
                          (sum.blocks > 0 ? `\n> This PR cannot be marked **ready for review** until all blocking findings are resolved.` : '') +
                          `\n\n<sub>Run locally before pushing:&nbsp;\`pwsh ./scripts/security-check.ps1\` or \`./scripts/security-check.sh\`</sub>` +
-                         `\n<!-- venus-security-check -->`;
+                         `\n<!-- arima-security-check -->`;
 
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
             const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
-            const prior = comments.find(c => c.body && c.body.includes('<!-- venus-security-check -->'));
+            const prior = comments.find(c => c.body && c.body.includes('<!-- arima-security-check -->'));
             if (prior) {
               await github.rest.issues.updateComment({ owner, repo, comment_id: prior.id, body });
             } else {
@@ -133,5 +133,5 @@ jobs:
       - name: Fail job on BLOCK
         if: steps.scan.outputs.exit_code != '0'
         run: |
-          echo "::error::Venus security check found blocking issues. See PR comment for details."
+          echo "::error::Arima security check found blocking issues. See PR comment for details."
           exit 1

@@ -1,12 +1,12 @@
-# Venus Notebooks — Maintainer Guide
+# Arima Notebooks — Maintainer Guide
 
-This document is for current and prospective maintainers of Venus Notebooks. It covers the maintainer hierarchy, responsibilities, day-to-day operations, how to review and merge contributions, how to manage the community, and how new partners can join as co-maintainers.
+This document is for current and prospective maintainers of Arima Notebooks. It covers the maintainer hierarchy, responsibilities, day-to-day operations, how to review and merge contributions, how to manage the community, and how new partners can join as co-maintainers.
 
 ---
 
 ## Maintainer Hierarchy
 
-Venus Notebooks has a two-tier maintainer structure:
+Arima Notebooks has a two-tier maintainer structure:
 
 ### Founding Maintainer
 
@@ -142,7 +142,7 @@ A GitHub Action can automate this, but the manual rule is:
 
 ## Release Process
 
-Venus Notebooks uses [Semantic Versioning](https://semver.org/):
+Arima Notebooks uses [Semantic Versioning](https://semver.org/):
 
 - **PATCH** (1.2.x) — bug fixes only, no new features, no API changes
 - **MINOR** (1.x.0) — new features, new endpoints, new cell types, backwards-compatible

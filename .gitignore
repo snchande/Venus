@@ -54,7 +54,7 @@ bin/
 ehthumbs.db
 Thumbs.db
 
-# Venus Notebooks - Runtime Data
+# Arima Notebooks - Runtime Data
 # DO NOT commit user data, API keys, or installed package lists
 data/settings.json
 data/packages.json

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea or improvement for Venus Notebooks
+about: Suggest an idea or improvement for Arima Notebooks
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''

@@ -1,5 +1,5 @@
 @echo off
-REM Venus Notebooks — Windows startup script
+REM Arima Notebooks — Windows startup script
 REM Exit code 42 from the JVM means "restart requested"; this script loops automatically.
 
 setlocal enabledelayedexpansion
@@ -7,7 +7,7 @@ setlocal enabledelayedexpansion
 cd /d "%~dp0\.."
 
 echo =======================================
-echo   Venus Notebooks v1.0
+echo   Arima Notebooks v1.0
 echo   Java ^| JavaScript ^| C# ^| F# ^| JShell
 echo =======================================
 echo.
@@ -40,28 +40,28 @@ if %ERRORLEVEL% == 0 (
 echo.
 
 REM ── AI co-pilot context ─────────────────────────────────────────────────────
-REM Export guardrail + skill + agent paths so the Venus JVM (and any CLI it
+REM Export guardrail + skill + agent paths so the Arima JVM (and any CLI it
 REM spawns for the in-UI AI panel) resolves them regardless of launch dir.
-set "VENUS_HOME=%CD%"
-if exist "%CD%\AGENTS.md"       set "VENUS_AGENTS_GUIDE=%CD%\AGENTS.md"
-if exist "%CD%\.claude\skills"  set "VENUS_SKILLS_DIR=%CD%\.claude\skills"
-if exist "%CD%\.claude\agents"  set "VENUS_AGENTS_DIR=%CD%\.claude\agents"
+set "BARISTA_HOME=%CD%"
+if exist "%CD%\AGENTS.md"       set "BARISTA_AGENTS_GUIDE=%CD%\AGENTS.md"
+if exist "%CD%\.claude\skills"  set "BARISTA_SKILLS_DIR=%CD%\.claude\skills"
+if exist "%CD%\.claude\agents"  set "BARISTA_AGENTS_DIR=%CD%\.claude\agents"
 set "AI_FOUND="
 where claude  >nul 2>&1 && set "AI_FOUND=!AI_FOUND! claude"
 where copilot >nul 2>&1 && set "AI_FOUND=!AI_FOUND! copilot"
 where gemini  >nul 2>&1 && set "AI_FOUND=!AI_FOUND! gemini"
 if defined AI_FOUND (
-    echo AI:     !AI_FOUND!  -- co-pilot ready, AGENTS.md + .claude loaded; run venus agents
+    echo AI:     !AI_FOUND!  -- co-pilot ready, AGENTS.md + .claude loaded; run arima agents
 ) else (
     echo AI:     no CLI found -- install Claude / Copilot / Gemini for AI features
 )
 echo.
 
 REM ── Build if JAR missing ───────────────────────────────────────────────────
-set JAR=target\venus-notebooks-1.0.0-SNAPSHOT.jar
+set JAR=target\arima-notebooks-1.0.0-SNAPSHOT.jar
 
 if not exist "%JAR%" (
-    echo Building Venus Notebooks...
+    echo Building Arima Notebooks...
     mvn clean package -DskipTests -q
     if !ERRORLEVEL! neq 0 (
         echo ERROR: Build failed. Make sure Maven is installed.
@@ -70,7 +70,7 @@ if not exist "%JAR%" (
     )
 )
 
-echo Starting Venus Notebooks...
+echo Starting Arima Notebooks...
 echo Open http://localhost:8585 in your browser
 echo.
 echo Press Ctrl+C to stop   ^|   Use Restart in the UI to apply code changes
@@ -90,10 +90,10 @@ set EXIT_CODE=!ERRORLEVEL!
 if !EXIT_CODE! == 42 (
     echo.
     echo ---------------------------------------
-    echo   Restarting Venus Notebooks...
+    echo   Restarting Arima Notebooks...
     echo ---------------------------------------
     timeout /t 1 /nobreak >nul
-    if "%VENUS_AUTO_BUILD%"=="1" (
+    if "%BARISTA_AUTO_BUILD%"=="1" (
         echo   Auto-building before restart...
         mvn package -DskipTests -q
     )
@@ -102,7 +102,7 @@ if !EXIT_CODE! == 42 (
 
 if !EXIT_CODE! neq 0 (
     echo.
-    echo Venus Notebooks exited with code !EXIT_CODE!.
+    echo Arima Notebooks exited with code !EXIT_CODE!.
     pause
 )
 

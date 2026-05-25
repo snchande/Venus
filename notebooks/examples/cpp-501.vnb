@@ -6,7 +6,7 @@
     {
       "id": "cpp501-md-1",
       "type": "MARKDOWN",
-      "source": "# Advanced C++ in Venus\n\nThis notebook covers modern C++ features at an intermediate-to-advanced level.\n\n**Prerequisites:** Familiarity with C++ basics (see [C++ Introduction](cpp-intro)).\n\n**Topics:**\n- Move semantics and perfect forwarding\n- CRTP (Curiously Recurring Template Pattern)\n- Variadic templates and fold expressions\n- `std::ranges` (C++20)\n- Compile-time programming (`constexpr`)\n- Pipeline anchors — sharing code between cells",
+      "source": "# Advanced C++ in Arima\n\nThis notebook covers modern C++ features at an intermediate-to-advanced level.\n\n**Prerequisites:** Familiarity with C++ basics (see [C++ Introduction](cpp-intro)).\n\n**Topics:**\n- Move semantics and perfect forwarding\n- CRTP (Curiously Recurring Template Pattern)\n- Variadic templates and fold expressions\n- `std::ranges` (C++20)\n- Compile-time programming (`constexpr`)\n- Pipeline anchors — sharing code between cells",
       "output": "",
       "executionCount": 0
     },
@@ -186,7 +186,7 @@
     {
       "id": "cpp501-md-end",
       "type": "MARKDOWN",
-      "source": "## Summary\n\n| Feature | C++ Version | Benefit |\n|---------|-------------|----------|\n| Move semantics | C++11 | Zero-cost ownership transfer |\n| Perfect forwarding | C++11 | Preserve value category |\n| `constexpr` | C++11/14/17 | Compile-time computation |\n| Fold expressions | C++17 | Concise variadic templates |\n| Structured bindings | C++17 | Clean tuple unpacking |\n| `if constexpr` | C++17 | Compile-time branches |\n| `std::ranges` | C++20 | Composable lazy sequences |\n| `std::atomic` | C++11 | Lock-free threading |\n| `std::async` | C++11 | Simple async tasks |\n\n> **Venus C++ Note:** All cells compile with `-std=c++17` by default. C++20 features like `std::ranges` work on GCC 10+/Clang 10+.",
+      "source": "## Summary\n\n| Feature | C++ Version | Benefit |\n|---------|-------------|----------|\n| Move semantics | C++11 | Zero-cost ownership transfer |\n| Perfect forwarding | C++11 | Preserve value category |\n| `constexpr` | C++11/14/17 | Compile-time computation |\n| Fold expressions | C++17 | Concise variadic templates |\n| Structured bindings | C++17 | Clean tuple unpacking |\n| `if constexpr` | C++17 | Compile-time branches |\n| `std::ranges` | C++20 | Composable lazy sequences |\n| `std::atomic` | C++11 | Lock-free threading |\n| `std::async` | C++11 | Simple async tasks |\n\n> **Arima C++ Note:** All cells compile with `-std=c++17` by default. C++20 features like `std::ranges` work on GCC 10+/Clang 10+.",
       "output": "",
       "executionCount": 0
     }

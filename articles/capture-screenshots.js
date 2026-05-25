@@ -1,5 +1,5 @@
-// Drive the running Venus instance via Chrome to capture real product screenshots.
-// Requires Venus running at http://localhost:8585 and Chrome installed on Windows.
+// Drive the running Arima instance via Chrome to capture real product screenshots.
+// Requires Arima running at http://localhost:8585 and Chrome installed on Windows.
 //
 // Usage:  node capture-screenshots.js
 
@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const VENUS  = 'http://localhost:8585/';
+const ARIMA  = 'http://localhost:8585/';
 const OUT    = path.resolve(__dirname, '..', 'docs', 'screenshots');
 
 const VIEWPORT = { width: 1600, height: 1000, deviceScaleFactor: 2 };
@@ -30,7 +30,7 @@ async function withPage(fn) {
 }
 
 async function waitForAppReady(page) {
-  await page.goto(VENUS, { waitUntil: 'networkidle2', timeout: 30000 });
+  await page.goto(ARIMA, { waitUntil: 'networkidle2', timeout: 30000 });
   // Wait for the notebook UI to be present
   await page.waitForSelector('#notebook-selector', { timeout: 15000 });
   // Give the app a moment to initialize internal state

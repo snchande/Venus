@@ -1,4 +1,4 @@
-# Venus Notebooks — PR Security & Architecture Check (PowerShell)
+# Arima Notebooks — PR Security & Architecture Check (PowerShell)
 #
 # Runs locally (pre-push) and in CI. Same script, same rules.
 # Exit code:
@@ -58,7 +58,7 @@ if (-not $files -or $files.Count -eq 0) {
 
 if (-not $Json) {
   Write-Host ""
-  Write-Host "Venus security check — scanning $($files.Count) file(s)" -ForegroundColor Cyan
+  Write-Host "Arima security check — scanning $($files.Count) file(s)" -ForegroundColor Cyan
   Write-Host "───────────────────────────────────────────────────────"
 }
 
@@ -90,7 +90,7 @@ $rules = @(
 
   # Frontend rules — BLOCK
   @{ name='ui/forbidden-framework';  pattern='^\s*(import\s.+\s+from\s+["''](react|vue|svelte|@angular)[/"'']|const\s+\w+\s*=\s*require\(["''](jquery|lodash|axios)["'']\))'; level='block';
-     msg='Forbidden browser framework/library — Venus frontend is vanilla JS' },
+     msg='Forbidden browser framework/library — Arima frontend is vanilla JS' },
   @{ name='ui/lombok';               pattern='import\s+lombok\.|@Data\b|@Getter\b|@Setter\b|@Builder\b|@AllArgsConstructor\b|@NoArgsConstructor\b'; level='block';
      msg='Lombok is forbidden (removed for JDK 25 compatibility) — use plain getters/setters + manual Builder' },
 
@@ -161,7 +161,11 @@ foreach ($file in $files) {
   for ($i=0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
     foreach ($rule in $rules) {
-      if ($isDocFile -and $rule.level -ne 'block') { continue }
+      # Exempt (doc/meta) files skip advisory rules AND the code-style block rules
+      # (lombok / forbidden-framework) — instruction docs and this scanner itself
+      # legitimately quote those patterns. Secret/exec/arch rules still scan everywhere.
+      $codeStyleRule = @('ui/lombok','ui/forbidden-framework') -contains $rule.name
+      if ($isDocFile -and ($rule.level -ne 'block' -or $codeStyleRule)) { continue }
       if ($line -match $rule.pattern) {
         # net/outbound-url allow-list — extract every host on the line, all must be allowed
         if ($rule.name -eq 'net/outbound-url') {
@@ -185,11 +189,11 @@ foreach ($file in $files) {
 # ─────────────────────────────────────────────────────────────
 # Architecture-lint: controller-to-controller calls
 # ─────────────────────────────────────────────────────────────
-$controllerFiles = $files | Where-Object { $_ -match 'src/main/java/com/venus/controller/.*Controller\.java$' }
+$controllerFiles = $files | Where-Object { $_ -match 'src/main/java/com/barista/controller/.*Controller\.java$' }
 foreach ($file in $controllerFiles) {
   $content = Get-Content -LiteralPath $file -Raw -ErrorAction SilentlyContinue
   if ($null -eq $content) { continue }
-  if ($content -match 'import\s+com\.venus\.controller\.\w+Controller\s*;') {
+  if ($content -match 'import\s+com.barista\.controller\.\w+Controller\s*;') {
     Add-Finding -Level 'block' -Rule 'arch/controller-cycle' -Path $file -Line 0 `
       -Detail 'Controller imports another controller — must call through a service instead'
   }
@@ -206,7 +210,7 @@ $jsFiles = $files | Where-Object { $_ -match 'src/main/resources/static/.*\.js$'
 foreach ($file in $jsFiles) {
   $content = Get-Content -LiteralPath $file -Raw -ErrorAction SilentlyContinue
   if ($null -eq $content) { continue }
-  if ($content -match 'jdbc:|java\.sql\.|Connection\.|com\.venus\.shell\.') {
+  if ($content -match 'jdbc:|java\.sql\.|Connection\.|com.barista\.shell\.') {
     Add-Finding -Level 'block' -Rule 'arch/frontend-backend-leak' -Path $file -Line 0 `
       -Detail 'Frontend references backend internals — must use REST/STOMP only'
   }

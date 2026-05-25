@@ -1,7 +1,7 @@
 {
   "id": "csharp-101",
   "name": "C# Introduction",
-  "description": "Introduction to C# in Venus Notebooks — basics, collections, LINQ, and Venus helpers",
+  "description": "Introduction to C# in Arima Notebooks — basics, collections, LINQ, and Arima helpers",
   "metadata": {
     "category": "tutorial",
     "language": "csharp",
@@ -12,7 +12,7 @@
     {
       "id": "cs-intro-md-1",
       "type": "MARKDOWN",
-      "source": "# C# in Venus Notebooks\n\nVenus supports **C#** cells via `dotnet-script` — the .NET scripting tool.\n\n## Setup (one-time)\n1. Install the [.NET SDK](https://dot.net) (free, Windows / macOS / Linux)\n2. Install dotnet-script: `dotnet tool install -g dotnet-script`\n3. Restart Venus\n\n## Cell mode\nClick the mode button on any code cell to cycle through: **JShell → Java → JS → C# → F#**\n\n## Built-in helpers\n```csharp\nVenusHtml(\"<b>bold</b>\");   // render HTML in output\nVenusDisplay(myObject);      // Console.WriteLine shorthand\nVenusTable(myList);          // ASCII table for any IEnumerable\n```\n\n> Install NuGet packages in the **Packages → NuGet** tab — they are auto-injected into every C# cell.",
+      "source": "# C# in Arima Notebooks\n\nArima supports **C#** cells via `dotnet-script` — the .NET scripting tool.\n\n## Setup (one-time)\n1. Install the [.NET SDK](https://dot.net) (free, Windows / macOS / Linux)\n2. Install dotnet-script: `dotnet tool install -g dotnet-script`\n3. Restart Arima\n\n## Cell mode\nClick the mode button on any code cell to cycle through: **JShell → Java → JS → C# → F#**\n\n## Built-in helpers\n```csharp\nBaristaHtml(\"<b>bold</b>\");   // render HTML in output\nBaristaDisplay(myObject);      // Console.WriteLine shorthand\nBaristaTable(myList);          // ASCII table for any IEnumerable\n```\n\n> Install NuGet packages in the **Packages → NuGet** tab — they are auto-injected into every C# cell.",
       "output": "",
       "executed": false
     },
@@ -20,7 +20,7 @@
       "id": "cs-intro-1",
       "type": "CODE",
       "mode": "csharp",
-      "source": "//@ anchor: hello-world-in-c\n//@ description: Hello World in C#\n// Hello World in C#\nConsole.WriteLine(\"Hello from Venus Notebooks!\");\nConsole.WriteLine($\".NET version: {Environment.Version}\");\nConsole.WriteLine($\"OS: {Environment.OSVersion}\");",
+      "source": "//@ anchor: hello-world-in-c\n//@ description: Hello World in C#\n// Hello World in C#\nConsole.WriteLine(\"Hello from Arima Notebooks!\");\nConsole.WriteLine($\".NET version: {Environment.Version}\");\nConsole.WriteLine($\"OS: {Environment.OSVersion}\");",
       "output": "",
       "executed": false,
       "anchor": "hello-world-in-c",
@@ -37,7 +37,7 @@
       "id": "cs-intro-2",
       "type": "CODE",
       "mode": "csharp",
-      "source": "//@ anchor: value-types-strings-and-interpolation\n//@ description: Value types, strings, and interpolation\n// Value types, strings, and interpolation\nvar name    = \"Venus\";\nvar version = 1.0;\nint year    = DateTime.Now.Year;\nbool isAwesome = true;\n\nConsole.WriteLine($\"Project: {name} v{version}\");\nConsole.WriteLine($\"Year: {year}, Awesome: {isAwesome}\");\n\n// String methods\nstring sentence = \"  Hello, World!  \";\nConsole.WriteLine(sentence.Trim().ToUpper());\nConsole.WriteLine($\"Length: {sentence.Trim().Length}\");",
+      "source": "//@ anchor: value-types-strings-and-interpolation\n//@ description: Value types, strings, and interpolation\n// Value types, strings, and interpolation\nvar name    = \"Arima\";\nvar version = 1.0;\nint year    = DateTime.Now.Year;\nbool isAwesome = true;\n\nConsole.WriteLine($\"Project: {name} v{version}\");\nConsole.WriteLine($\"Year: {year}, Awesome: {isAwesome}\");\n\n// String methods\nstring sentence = \"  Hello, World!  \";\nConsole.WriteLine(sentence.Trim().ToUpper());\nConsole.WriteLine($\"Length: {sentence.Trim().Length}\");",
       "output": "",
       "executed": false,
       "anchor": "value-types-strings-and-interpolation",
@@ -80,7 +80,7 @@
     {
       "id": "cs-intro-md-5",
       "type": "MARKDOWN",
-      "source": "## VenusTable Helper\n\nUse `VenusTable()` to render any `IEnumerable` as an ASCII table.",
+      "source": "## BaristaTable Helper\n\nUse `BaristaTable()` to render any `IEnumerable` as an ASCII table.",
       "output": "",
       "executed": false
     },
@@ -88,7 +88,7 @@
       "id": "cs-intro-5",
       "type": "CODE",
       "mode": "csharp",
-      "source": "//@ anchor: employee\n//@ description: Defines Employee type\nrecord Employee(string Name, string Dept, int YearsExp, decimal Salary);\n\nvar team = new List<Employee> {\n    new(\"Alice\",  \"Engineering\", 5, 95000m),\n    new(\"Bob\",    \"Design\",      3, 72000m),\n    new(\"Carol\",  \"Engineering\", 8, 120000m),\n    new(\"Dave\",   \"Marketing\",   2, 65000m),\n    new(\"Eve\",    \"Engineering\", 4, 88000m),\n};\n\nVenusTable(team);\n\nvar avgByDept = team\n    .GroupBy(e => e.Dept)\n    .Select(g => new { Dept = g.Key, Count = g.Count(), AvgSalary = g.Average(e => e.Salary) })\n    .OrderBy(x => x.Dept);\n\nConsole.WriteLine(\"\\nAverage salary by department:\");\nforeach (var row in avgByDept)\n    Console.WriteLine($\"  {row.Dept,-15} {row.Count} engineers  avg: ${row.AvgSalary:N0}\");",
+      "source": "//@ anchor: employee\n//@ description: Defines Employee type\nrecord Employee(string Name, string Dept, int YearsExp, decimal Salary);\n\nvar team = new List<Employee> {\n    new(\"Alice\",  \"Engineering\", 5, 95000m),\n    new(\"Bob\",    \"Design\",      3, 72000m),\n    new(\"Carol\",  \"Engineering\", 8, 120000m),\n    new(\"Dave\",   \"Marketing\",   2, 65000m),\n    new(\"Eve\",    \"Engineering\", 4, 88000m),\n};\n\nBaristaTable(team);\n\nvar avgByDept = team\n    .GroupBy(e => e.Dept)\n    .Select(g => new { Dept = g.Key, Count = g.Count(), AvgSalary = g.Average(e => e.Salary) })\n    .OrderBy(x => x.Dept);\n\nConsole.WriteLine(\"\\nAverage salary by department:\");\nforeach (var row in avgByDept)\n    Console.WriteLine($\"  {row.Dept,-15} {row.Count} engineers  avg: ${row.AvgSalary:N0}\");",
       "output": "",
       "executed": false,
       "anchor": "employee",

@@ -1,5 +1,5 @@
 /**
- * Venus Notebooks — In-App Documentation
+ * Arima Notebooks — In-App Documentation
  * Usage Guide · Setup & Install · Tutorials · Pipelines/Workflows · MCP & Agents
  * API Reference · Architecture · Developer Guide
  */
@@ -11,9 +11,9 @@ const DocsPanel = (() => {
 // USER MANUAL
 // ═══════════════════════════════════════════════════════
 usage: `
-# Venus Notebooks — User Guide
+# Arima Notebooks — User Guide
 
-Venus is a multi-language interactive notebook environment. Write and run code across **seven languages** — JShell, Java, JavaScript, **TypeScript**, C#, F#, and C++ — in cells that live alongside Markdown documentation. Organise work with named Workflows, get AI assistance from Claude, GitHub Copilot, or Gemini, and expose everything as an API.
+Arima is a multi-language interactive notebook environment. Write and run code across **seven languages** — JShell, Java, JavaScript, **TypeScript**, C#, F#, and C++ — in cells that live alongside Markdown documentation. Organise work with named Workflows, get AI assistance from Claude, GitHub Copilot, or Gemini, and expose everything as an API.
 
 ---
 
@@ -52,7 +52,7 @@ All cells in a notebook share **one JShell session**. Variables, methods, and im
 
 \`\`\`java
 // Cell 1 — declare variables
-var name = "Venus";
+var name = "Arima";
 var version = 2;
 
 // Cell 2 — use what Cell 1 declared
@@ -88,15 +88,15 @@ Bare statements are auto-wrapped — no class boilerplate required.
 
 ### 2.3 JavaScript Mode — Node.js
 
-Each cell runs as a Node.js script. A built-in \`venus\` object provides output helpers.
+Each cell runs as a Node.js script. A built-in \`barista\` object provides output helpers.
 
 \`\`\`javascript
 const data = [10, 25, 37, 42, 18];
 const mean = data.reduce((a, b) => a + b, 0) / data.length;
-venus.table([{ metric: "Mean", value: mean.toFixed(2) }]);
+barista.table([{ metric: "Mean", value: mean.toFixed(2) }]);
 \`\`\`
 
-**Built-in helpers:** \`venus.table(rows)\`, \`venus.display(value)\`, \`venus.html(html)\`, \`venus.stats(arr)\`
+**Built-in helpers:** \`barista.table(rows)\`, \`barista.display(value)\`, \`barista.html(html)\`, \`barista.stats(arr)\`
 
 Install npm packages via the **Packages → npm** tab. Modules are available via \`require()\`.
 
@@ -104,7 +104,7 @@ Install npm packages via the **Packages → npm** tab. Modules are available via
 
 ### 2.4 TypeScript Mode — Node.js with type-stripping
 
-TypeScript cells run as **TypeScript 5+** via Node.js 22.6's built-in type-stripping runtime — no separate compile step, no project setup. If \`tsc\` is on your PATH, Venus also runs a quick \`tsc --noEmit\` pass before execution so you see type errors with proper line numbers.
+TypeScript cells run as **TypeScript 5+** via Node.js 22.6's built-in type-stripping runtime — no separate compile step, no project setup. If \`tsc\` is on your PATH, Arima also runs a quick \`tsc --noEmit\` pass before execution so you see type errors with proper line numbers.
 
 \`\`\`typescript
 type Sale = { region: string; amount: number };
@@ -116,11 +116,11 @@ const data: Sale[] = [
 ];
 
 const total: number = data.reduce((sum, r) => sum + r.amount, 0);
-venus.table([{ metric: "Total",   value: total },
+barista.table([{ metric: "Total",   value: total },
              { metric: "Avg/row", value: (total / data.length).toFixed(2) }]);
 \`\`\`
 
-**Built-in helpers (typed):** \`venus.table(rows: Record<string, unknown>[])\`, \`venus.display(value: unknown)\`, \`venus.html(content: string)\`, \`venus.stats(arr: number[])\`
+**Built-in helpers (typed):** \`barista.table(rows: Record<string, unknown>[])\`, \`barista.display(value: unknown)\`, \`barista.html(content: string)\`, \`barista.stats(arr: number[])\`
 
 **npm packages** installed via the **Packages → npm** tab work in TS cells too — the same \`data/npm-modules/\` directory is shared:
 
@@ -140,7 +140,7 @@ console.log("stddev:", ss.standardDeviation(samples).toFixed(3));
 
 ### 2.5 C# Mode — dotnet run
 
-Each C# cell runs as a **C# 9+ top-level program** compiled and executed via \`dotnet run\`. No project file setup required — Venus generates everything automatically.
+Each C# cell runs as a **C# 9+ top-level program** compiled and executed via \`dotnet run\`. No project file setup required — Arima generates everything automatically.
 
 \`\`\`csharp
 //@ anchor: loadData
@@ -154,10 +154,10 @@ var transactions = new List<(string Category, decimal Amount)>
 };
 
 Console.WriteLine($"Loaded {transactions.Count} records");
-VenusTable(transactions);
+ArimaTable(transactions);
 \`\`\`
 
-**Built-in helpers:** \`VenusHtml(html)\`, \`VenusDisplay(obj)\`, \`VenusTable<T>(list)\`
+**Built-in helpers:** \`ArimaHtml(html)\`, \`ArimaDisplay(obj)\`, \`ArimaTable<T>(list)\`
 
 **Auto-usings:** \`System\`, \`System.Linq\`, \`System.Collections.Generic\`, \`System.Text\`, \`System.IO\`
 
@@ -180,11 +180,11 @@ let median = sorted.[sorted.Length / 2]
 
 printfn "Mean:   %.2f" mean
 printfn "Median: %.2f" median
-venusTable [| {| Metric = "Mean"; Value = mean |}
+baristaTable [| {| Metric = "Mean"; Value = mean |}
               {| Metric = "Median"; Value = median |} |]
 \`\`\`
 
-**Built-in helpers:** \`venusHtml\`, \`venusDisplay\`, \`venusTable\`
+**Built-in helpers:** \`baristaHtml\`, \`baristaDisplay\`, \`baristaTable\`
 
 **Auto-opens:** \`System\`, \`System.Linq\`, \`System.Collections.Generic\`
 
@@ -194,7 +194,7 @@ Inline \`#r "nuget: PackageId, Version"\` directives are supported and automatic
 
 ### 2.7 C++ Mode — Native Compilation
 
-Each C++ cell is compiled and run as a standalone program using the best available compiler: **MSVC** on Windows (Visual Studio Build Tools), **GCC** or **Clang** on macOS/Linux. No project setup required — Venus generates a temp source file, compiles it, and runs it.
+Each C++ cell is compiled and run as a standalone program using the best available compiler: **MSVC** on Windows (Visual Studio Build Tools), **GCC** or **Clang** on macOS/Linux. No project setup required — Arima generates a temp source file, compiles it, and runs it.
 
 \`\`\`cpp
 //@ anchor: hello-cpp
@@ -227,8 +227,8 @@ See **Packages → C++ (Built-in)** for the full header reference grouped by cat
 |---|---|
 | \`System.out.println\` / \`Console.WriteLine\` / \`console.log\` (JS/TS) / \`printfn\` / \`std::cout\` | Plain text below the cell |
 | Return value expression (JShell) | Green ⟹ value display |
-| \`VenusHtml()\` / \`venus.html()\` / \`venusHtml\` | Rendered inline HTML block |
-| \`VenusDisplay(chart)\` (XChart) | Inline PNG chart image |
+| \`ArimaHtml()\` / \`barista.html()\` / \`baristaHtml\` | Rendered inline HTML block |
+| \`ArimaDisplay(chart)\` (XChart) | Inline PNG chart image |
 | Compile error | Red ✖ with line numbers |
 | Runtime exception | Red ✖ with stack trace excerpt |
 
@@ -285,9 +285,9 @@ Go to **Packages → NuGet** to install NuGet packages.
 
 Go to **Packages → C++ (Built-in)** to see the reference panel.
 
-C++ does **not** use installable packages — instead, Venus pre-includes 26 standard C++ headers covering all major categories: I/O, containers, algorithms, threading, filesystem, and more. The panel shows these grouped by category with usage examples.
+C++ does **not** use installable packages — instead, Arima pre-includes 26 standard C++ headers covering all major categories: I/O, containers, algorithms, threading, filesystem, and more. The panel shows these grouped by category with usage examples.
 
-For third-party libraries (Boost, Eigen, nlohmann/json, etc.) install them system-wide using your OS package manager so the compiler can find them — Venus does not manage C++ package installation.
+For third-party libraries (Boost, Eigen, nlohmann/json, etc.) install them system-wide using your OS package manager so the compiler can find them — Arima does not manage C++ package installation.
 
 > **Removing a package:** The Maven, npm, and NuGet tabs each have a **Remove** button next to installed packages. You'll be warned that any notebook cells using that package will fail until it is re-installed.
 
@@ -295,7 +295,7 @@ For third-party libraries (Boost, Eigen, nlohmann/json, etc.) install them syste
 
 ## 6. Cell Workflows (Pipelines)
 
-Venus includes a named-cell dependency system that works across all seven languages. See the **Pipelines** tab for the full reference.
+Arima includes a named-cell dependency system that works across all seven languages. See the **Pipelines** tab for the full reference.
 
 **Quick start:**
 1. Click the **+ anchor** badge in a cell header to name a cell (e.g. \`loadData\`)
@@ -361,7 +361,7 @@ The **Server Status** panel shows which runtimes are detected: Java, Node.js (JS
 setup: `
 # Setup & Install
 
-Venus runs on any platform — Windows, macOS, and Linux. Install only the runtimes you plan to use.
+Arima runs on any platform — Windows, macOS, and Linux. Install only the runtimes you plan to use.
 
 ---
 
@@ -403,14 +403,14 @@ Without Node.js, JavaScript and TypeScript cells will fail. All other languages 
 
 ### Optional: TypeScript compiler (\`tsc\`) for type-checking
 
-TypeScript **runtime** does not require any install beyond Node 22.6+ — Venus uses Node's built-in type-stripping. But to get full **type-check** diagnostics (e.g. *"Type 'string' is not assignable to type 'number'"*) install the official compiler globally:
+TypeScript **runtime** does not require any install beyond Node 22.6+ — Arima uses Node's built-in type-stripping. But to get full **type-check** diagnostics (e.g. *"Type 'string' is not assignable to type 'number'"*) install the official compiler globally:
 
 \`\`\`bash
 npm install -g typescript
 tsc --version   # verify
 \`\`\`
 
-When \`tsc\` is on the PATH, Venus automatically runs \`tsc --noEmit\` before each TS cell and folds any diagnostics into the cell's error stream. Without \`tsc\`, TS cells still run — you just lose the pre-execution type-check pass.
+When \`tsc\` is on the PATH, Arima automatically runs \`tsc --noEmit\` before each TS cell and folds any diagnostics into the cell's error stream. Without \`tsc\`, TS cells still run — you just lose the pre-execution type-check pass.
 
 ---
 
@@ -422,7 +422,7 @@ When \`tsc\` is on the PATH, Venus automatically runs \`tsc --noEmit\` before ea
 
 Download from [dot.net](https://dot.net). The SDK is free and runs on Windows, Mac, and Linux.
 
-**No extra tools needed** — Venus uses \`dotnet run\` for C# and \`dotnet fsi\` for F#, both bundled in the SDK.
+**No extra tools needed** — Arima uses \`dotnet run\` for C# and \`dotnet fsi\` for F#, both bundled in the SDK.
 
 Verify after install:
 \`\`\`bash
@@ -434,7 +434,7 @@ Without .NET SDK, C# and F# cells will show a ".NET SDK not found" error. JShell
 
 ### NuGet packages
 
-C# and F# packages are installed via the **Packages → NuGet** tab. Venus uses the .NET SDK's built-in NuGet restore — no extra NuGet CLI installation needed.
+C# and F# packages are installed via the **Packages → NuGet** tab. Arima uses the .NET SDK's built-in NuGet restore — no extra NuGet CLI installation needed.
 
 NuGet package cache location:
 - **Windows:** \`%USERPROFILE%\\.nuget\\packages\`
@@ -444,7 +444,7 @@ NuGet package cache location:
 
 ## Optional: C++ (C++ cells)
 
-Venus detects whichever C++ compiler is available on your system. No extra install needed if you already have one.
+Arima detects whichever C++ compiler is available on your system. No extra install needed if you already have one.
 
 | Platform | Compiler | Install |
 |---|---|---|
@@ -460,13 +460,13 @@ Without a C++ compiler, C++ cells will show a "No C++ compiler found" error. All
 
 ## Optional: AI Assistant
 
-Venus supports three AI providers — all run as **local CLI subprocesses**, no API key required.
+Arima supports three AI providers — all run as **local CLI subprocesses**, no API key required.
 
 ### Claude CLI (default)
 
 1. Install Claude Code from [claude.ai/code](https://claude.ai/code)
 2. Run \`claude auth\` in a terminal to sign in
-3. Start Venus — Claude is detected automatically
+3. Start Arima — Claude is detected automatically
 
 Verify: \`claude --version\`
 
@@ -474,7 +474,7 @@ Verify: \`claude --version\`
 
 1. Install: \`npm install -g @githubnext/github-copilot-cli\`
 2. Authenticate: \`github-copilot-cli auth\`
-3. Select **GitHub Copilot** in Venus Settings → AI Provider
+3. Select **GitHub Copilot** in Arima Settings → AI Provider
 
 Verify: \`copilot --version\`
 
@@ -482,7 +482,7 @@ Verify: \`copilot --version\`
 
 1. Install: \`npm install -g @google/gemini-cli\`
 2. Authenticate: \`gemini auth\`
-3. Select **Gemini** in Venus Settings → AI Provider
+3. Select **Gemini** in Arima Settings → AI Provider
 
 Verify: \`gemini --version\`
 
@@ -490,13 +490,13 @@ The Settings tab → Server Status shows which AI providers are detected.
 
 ---
 
-## Building and Running Venus
+## Building and Running Arima
 
 ### Step 1 — Get the code
 
 \`\`\`bash
 git clone https://github.com/snchande/Venus.git
-cd Venus
+cd Arima
 \`\`\`
 
 ### Step 2 — Build
@@ -505,13 +505,13 @@ cd Venus
 mvn clean package -DskipTests
 \`\`\`
 
-Creates \`target/venus-notebooks-1.0.0-SNAPSHOT.jar\`.
+Creates \`target/arima-notebooks-1.0.0-SNAPSHOT.jar\`.
 
-### Step 3 — Start Venus
+### Step 3 — Start Arima
 
 **Option A — Windows launcher (recommended)**
 \`\`\`cmd
-venus
+barista
 \`\`\`
 Auto-builds if needed, starts the server, and opens your browser.
 
@@ -532,7 +532,7 @@ java \\
   --add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED \\
   --add-opens=java.base/java.lang=ALL-UNNAMED \\
   --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED \\
-  -jar target/venus-notebooks-1.0.0-SNAPSHOT.jar
+  -jar target/arima-notebooks-1.0.0-SNAPSHOT.jar
 \`\`\`
 
 ### Step 4 — Open Browser
@@ -558,7 +558,7 @@ Navigate to: **http://localhost:8585**
 | Copilot CLI | \`copilot --version\` | any version |
 | Gemini CLI | \`gemini --version\` | any version |
 
-The **Settings → Server Status** panel shows which runtimes Venus detected on startup.
+The **Settings → Server Status** panel shows which runtimes Arima detected on startup.
 
 ---
 
@@ -573,23 +573,23 @@ server.port=9000
 
 Or at startup:
 \`\`\`bash
-java ... -jar venus-notebooks.jar --server.port=9000
+java ... -jar arima-notebooks.jar --server.port=9000
 \`\`\`
 
 ---
 
-## Venus CLI (Windows)
+## Arima CLI (Windows)
 
-\`venus.cmd\` is in the project root:
+\`barista.cmd\` is in the project root:
 
 | Command | Description |
 |---|---|
-| \`venus\` | Start server, open browser |
-| \`venus start --bg\` | Start in background (logs → \`venus.log\`) |
-| \`venus stop\` | Stop the running server |
-| \`venus status\` | Running state, PID, Java version |
-| \`venus rebuild\` | Force clean build |
-| \`venus logs\` | Tail \`venus.log\` |
+| \`barista\` | Start server, open browser |
+| \`barista start --bg\` | Start in background (logs → \`arima.log\`) |
+| \`barista stop\` | Stop the running server |
+| \`barista status\` | Running state, PID, Java version |
+| \`barista rebuild\` | Force clean build |
+| \`barista logs\` | Tail \`arima.log\` |
 
 ---
 
@@ -611,9 +611,9 @@ In \`.vscode/launch.json\`:
 {
   "configurations": [{
     "type": "java",
-    "name": "Venus Notebooks",
+    "name": "Arima Notebooks",
     "request": "launch",
-    "mainClass": "com.venus.VenusApplication",
+    "mainClass": "com.barista.ArimaApplication",
     "vmArgs": "--add-opens=jdk.jshell/jdk.jshell=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-exports=jdk.jshell/jdk.jshell=ALL-UNNAMED"
   }]
 }
@@ -630,10 +630,10 @@ Missing JVM flags or JRE instead of JDK. Ensure you use all three \`--add-opens\
 Your Node version is below 22.6. Upgrade to Node 22.6+ (recommended: 24 LTS) from [nodejs.org](https://nodejs.org). Verify with \`node --version\`. JavaScript cells continue to work on older Node versions.
 
 ### TypeScript type errors are not reported (only runtime errors)
-\`tsc\` is not on your PATH. Install with \`npm install -g typescript\`, then restart Venus. The **Settings → Server Status** panel should show *"+ tsc"*.
+\`tsc\` is not on your PATH. Install with \`npm install -g typescript\`, then restart Arima. The **Settings → Server Status** panel should show *"+ tsc"*.
 
 ### C# cells fail — ".NET SDK not found"
-Install the .NET SDK from [dot.net](https://dot.net). Verify: \`dotnet --version\`. Restart Venus.
+Install the .NET SDK from [dot.net](https://dot.net). Verify: \`dotnet --version\`. Restart Arima.
 
 ### F# cells fail — ".NET SDK not found"
 Same fix — F# Interactive (\`dotnet fsi\`) is bundled with the .NET SDK.
@@ -642,12 +642,12 @@ Same fix — F# Interactive (\`dotnet fsi\`) is bundled with the .NET SDK.
 Check **Packages → NuGet** tab that the package is listed. Ensure internet access for first-time package download. The .NET runtime caches packages in \`~/.nuget/packages\` after first use.
 
 ### C++ cells fail — "No C++ compiler found"
-- **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) with the "Desktop development with C++" workload. Restart Venus.
+- **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) with the "Desktop development with C++" workload. Restart Arima.
 - **macOS:** Run \`xcode-select --install\`. Verify: \`clang++ --version\`.
 - **Linux:** Run \`sudo apt install g++\` (Debian/Ubuntu) or \`sudo dnf install gcc-c++\` (Fedora).
 
 ### AI not responding
-- **Claude:** Run \`claude auth\` in a terminal, then restart Venus. Check Settings → Server Status: **Claude CLI** must show ✓ Found.
+- **Claude:** Run \`claude auth\` in a terminal, then restart Arima. Check Settings → Server Status: **Claude CLI** must show ✓ Found.
 - **Copilot CLI:** Run \`github-copilot-cli auth\`. Verify: \`copilot --version\`.
 - **Gemini CLI:** Run \`gemini auth\`. Verify: \`gemini --version\`.
 - Switch providers in Settings → AI Provider if one CLI is not available.
@@ -668,7 +668,7 @@ Verify internet access to \`repo1.maven.org\`. Check the coordinate format: \`gr
 tutorials: `
 # Tutorial Notebooks
 
-Venus ships with **built-in tutorial notebooks** covering all seven languages, from beginner to expert. Open them from the **Browse** button in the toolbar.
+Arima ships with **built-in tutorial notebooks** covering all seven languages, from beginner to expert. Open them from the **Browse** button in the toolbar.
 
 ---
 
@@ -725,7 +725,7 @@ Venus ships with **built-in tutorial notebooks** covering all seven languages, f
 
 | Notebook | Level | Topics |
 |---|---|---|
-| **C# 101** | Beginner | Types, records, LINQ, collections, VenusTable |
+| **C# 101** | Beginner | Types, records, LINQ, collections, ArimaTable |
 | **C# 201** | Intermediate | Pipeline dependencies, session anchors, shared data |
 
 ---
@@ -784,7 +784,7 @@ Venus ships with **built-in tutorial notebooks** covering all seven languages, f
 pipeline: `
 # Cell Workflows & Orchestration
 
-Venus introduces **named cell orchestration** — a system for naming cells, declaring dependencies between them, and building deterministic, reusable execution workflows.
+Arima introduces **named cell orchestration** — a system for naming cells, declaring dependencies between them, and building deterministic, reusable execution workflows.
 
 Workflows work the same way in **all seven execution modes**: JShell, Java, JavaScript, TypeScript, C#, F#, and C++. They also extend **across notebooks**, enabling modular code libraries shared across your entire workspace.
 
@@ -794,9 +794,9 @@ Workflows work the same way in **all seven execution modes**: JShell, Java, Java
 
 Traditional notebooks number cells by execution order (\`[3]\`). This creates hidden, fragile coupling: cell 5 silently depends on cell 2 having run, but nothing enforces or communicates this. When you share a notebook, re-order cells, or restart a session, things break in unpredictable ways.
 
-**Venus solves this with explicit, named dependencies:**
+**Arima solves this with explicit, named dependencies:**
 
-| Feature | Traditional notebooks | Venus |
+| Feature | Traditional notebooks | Arima |
 |---|---|---|
 | Cell identity | Execution number (\`[3]\`) | Semantic name (\`loadData\`) |
 | Dependencies | Implicit (position-based) | Explicit (\`//@ depends:\`) |
@@ -836,7 +836,7 @@ Add \`//@ depends:\` at the top of a cell to declare what must run before it:
 //@ description: Aggregate by category
 \`\`\`
 
-Click **▶▶** (run-with-deps) and Venus:
+Click **▶▶** (run-with-deps) and Arima:
 1. Finds all declared dependencies (and their dependencies recursively)
 2. Runs a cycle check — reports an error with the full cycle path if one exists
 3. Topologically sorts the execution order
@@ -869,7 +869,7 @@ A **PIPELINE cell** defines a named, self-contained workflow that can be run wit
 | \`//@ description: text\` | No | Human-readable label in the cell header |
 | \`//@ on-error: stop\|continue\` | No | Stop on first failure (default: stop) |
 
-When you click **Run Pipeline**, Venus resolves the full dependency graph for all steps — even if a step itself has \`//@ depends:\` — and runs everything in the correct order.
+When you click **Run Pipeline**, Arima resolves the full dependency graph for all steps — even if a step itself has \`//@ depends:\` — and runs everything in the correct order.
 
 ---
 
@@ -894,7 +894,7 @@ var summary = data.GroupBy(r => r.Category)
                   .Select(g => new { Category = g.Key, Total = g.Sum(r => r.Amount) })
                   .OrderByDescending(x => x.Total)
                   .ToList();
-VenusTable(summary);
+ArimaTable(summary);
 \`\`\`
 
 \`\`\`
@@ -930,12 +930,12 @@ Console.WriteLine($"Mean: {Stats.Mean(amounts):F2}");
 | Language | Cross-notebook mechanism |
 |---|---|
 | JShell / Java | Foreign cell's source is executed in the current shared session |
-| C# / F# | Venus builds the full transitive dependency chain of the foreign cell (annotation-stripped, in topological order), injects it with output suppressed, then runs the current cell |
+| C# / F# | Arima builds the full transitive dependency chain of the foreign cell (annotation-stripped, in topological order), injects it with output suppressed, then runs the current cell |
 | C++ | Foreign cell's source is prepended to the current cell before compilation (per-cell isolation; no shared state) |
 
 This means C# and F# cells can share types, records, and classes across notebooks — the injected source is compiled together with the dependent cell.
 
-**Cross-notebook output suppression:** When injecting foreign cell code, Venus wraps it with console output suppression so only the current cell's output is visible. Earlier cells in the dependency chain are re-executed silently to recreate their state.
+**Cross-notebook output suppression:** When injecting foreign cell code, Arima wraps it with console output suppression so only the current cell's output is visible. Earlier cells in the dependency chain are re-executed silently to recreate their state.
 
 ---
 
@@ -957,7 +957,7 @@ Each CODE cell has three run actions:
 
 1. **Transitive resolution:** If A depends on B, and B depends on C, running A also runs C then B first
 2. **Topological order:** Dependencies always run before the cells that need them (Kahn's algorithm)
-3. **No skip:** Venus always re-runs the full dependency closure — state is always fresh, never stale
+3. **No skip:** Arima always re-runs the full dependency closure — state is always fresh, never stale
 4. **Cycle detection:** DFS back-edge detection before any execution. Clear error: *"Cycle detected: A → B → A"*
 5. **Unknown anchors:** Clear error if a \`//@ depends:\` names an anchor that doesn't exist in the notebook or the referenced cross-notebook
 
@@ -989,11 +989,11 @@ mcp: `
 
 The **Model Context Protocol (MCP)** is an open standard that allows AI systems — Claude Desktop, Claude Code, GitHub Copilot, and custom agents — to discover and invoke tools provided by external servers. Think of it as a universal plugin system for AI: instead of an AI hallucinating code, it can actually execute it.
 
-## Why Venus + MCP is Unique
+## Why Arima + MCP is Unique
 
-Most MCP servers provide read-only data sources: search results, database queries, file contents. **Venus is fundamentally different** — it provides a live **multi-language computational environment**.
+Most MCP servers provide read-only data sources: search results, database queries, file contents. **Arima is fundamentally different** — it provides a live **multi-language computational environment**.
 
-When an AI agent connects to Venus, it gains the ability to:
+When an AI agent connects to Arima, it gains the ability to:
 
 - **Write and execute code** across seven languages (JShell, Java, JavaScript, TypeScript, C#, F#, C++) and see real output
 - **Create, read, and organise notebooks** — persistent, structured documents with cells, anchors, and dependencies
@@ -1012,7 +1012,7 @@ GET  http://localhost:8585/api/mcp/sse       — SSE stream (MCP transport)
 POST http://localhost:8585/api/mcp/messages  — JSON-RPC 2.0 messages
 \`\`\`
 
-Venus implements **JSON-RPC 2.0 over HTTP+SSE** (MCP spec 2024-11-05).
+Arima implements **JSON-RPC 2.0 over HTTP+SSE** (MCP spec 2024-11-05).
 
 ---
 
@@ -1020,14 +1020,14 @@ Venus implements **JSON-RPC 2.0 over HTTP+SSE** (MCP spec 2024-11-05).
 
 | Tool | Required Params | What it does |
 |---|---|---|
-| \`venus_execute_code\` | \`code\` | Execute code in a live session (any language via \`mode\`) |
-| \`venus_list_notebooks\` | *(none)* | List all notebooks with metadata |
-| \`venus_read_notebook\` | \`notebookId\` | Read all cells (source, anchors, output) |
-| \`venus_run_pipeline\` | \`notebookId\`, \`cellId\` | Execute a full workflow with dependency resolution |
-| \`venus_search_cells\` | \`query\` | Find cells by anchor name or source content |
-| \`venus_load_module\` | \`notebookRef\` | Load \`notebookId/anchor\` into a session |
-| \`venus_create_notebook\` | \`name\` | Create a notebook (optionally with cells pre-populated) |
-| \`venus_append_cell\` | \`notebookId\`, \`source\` | Append a cell and optionally execute it immediately |
+| \`barista_execute_code\` | \`code\` | Execute code in a live session (any language via \`mode\`) |
+| \`barista_list_notebooks\` | *(none)* | List all notebooks with metadata |
+| \`barista_read_notebook\` | \`notebookId\` | Read all cells (source, anchors, output) |
+| \`barista_run_pipeline\` | \`notebookId\`, \`cellId\` | Execute a full workflow with dependency resolution |
+| \`barista_search_cells\` | \`query\` | Find cells by anchor name or source content |
+| \`barista_load_module\` | \`notebookRef\` | Load \`notebookId/anchor\` into a session |
+| \`barista_create_notebook\` | \`name\` | Create a notebook (optionally with cells pre-populated) |
+| \`barista_append_cell\` | \`notebookId\`, \`source\` | Append a cell and optionally execute it immediately |
 
 ---
 
@@ -1040,7 +1040,7 @@ Edit your Claude Desktop config:
 \`\`\`json
 {
   "mcpServers": {
-    "venus-notebooks": {
+    "arima-notebooks": {
       "url": "http://localhost:8585/api/mcp/sse"
     }
   }
@@ -1048,7 +1048,7 @@ Edit your Claude Desktop config:
 \`\`\`
 
 Restart Claude Desktop. You can now say:
-> *"Create a Venus notebook called 'Sales Analysis' and compute the monthly totals for this CSV data…"*
+> *"Create a Arima notebook called 'Sales Analysis' and compute the monthly totals for this CSV data…"*
 > *"Run the ETL pipeline in my data-processing notebook and show the results"*
 > *"Search my notebooks for cells that compute fibonacci"*
 
@@ -1061,7 +1061,7 @@ Add to \`.claude/settings.json\` (project) or \`~/.claude/settings.json\` (globa
 \`\`\`json
 {
   "mcpServers": {
-    "venus": {
+    "barista": {
       "url": "http://localhost:8585/api/mcp/sse"
     }
   }
@@ -1070,7 +1070,7 @@ Add to \`.claude/settings.json\` (project) or \`~/.claude/settings.json\` (globa
 
 Then in a Claude Code session:
 \`\`\`bash
-claude "List all Venus notebooks and tell me which have pipeline cells"
+claude "List all Arima notebooks and tell me which have pipeline cells"
 claude "Create a C# notebook that computes descriptive statistics for this data and runs it"
 claude "Load the math-helpers module from my utilities notebook and use it to compute the moving average"
 \`\`\`
@@ -1083,10 +1083,10 @@ claude "Load the math-helpers module from my utilities notebook and use it to co
 An agent reads a dataset, writes JShell or C# code to analyse it, executes the code, reads the output, refines the approach, and produces a summary — all without human intervention.
 
 ### Code Generation + Verification
-An agent generates a solution, creates it as a Venus cell, executes it, inspects the output, and confirms correctness before reporting success.
+An agent generates a solution, creates it as a Arima cell, executes it, inspects the output, and confirms correctness before reporting success.
 
 ### Notebook-as-Module Library
-Build reusable analytical modules in notebooks with named anchors. An agent can discover these via \`venus_search_cells\` and load them via \`venus_load_module\` — composing complex analyses from pre-verified building blocks.
+Build reusable analytical modules in notebooks with named anchors. An agent can discover these via \`barista_search_cells\` and load them via \`barista_load_module\` — composing complex analyses from pre-verified building blocks.
 
 ### CI/CD Integration
 A CI agent can execute a pipeline notebook after each deployment to verify system behaviour, comparing current output against expected results.
@@ -1104,7 +1104,7 @@ curl -X POST http://localhost:8585/api/mcp/messages \\
   -d '{
     "jsonrpc": "2.0", "id": 1, "method": "tools/call",
     "params": {
-      "name": "venus_execute_code",
+      "name": "barista_execute_code",
       "arguments": {
         "code": "var x = List.of(1,2,3,4,5); x.stream().mapToInt(i->i).sum()",
         "session": "agent-session",
@@ -1124,7 +1124,7 @@ curl -X POST http://localhost:8585/api/mcp/messages \\
   -d '{
     "jsonrpc": "2.0", "id": 2, "method": "tools/call",
     "params": {
-      "name": "venus_create_notebook",
+      "name": "barista_create_notebook",
       "arguments": {
         "name": "Agent Analysis",
         "description": "Generated by Claude",
@@ -1152,17 +1152,17 @@ int fib(int n) { return n <= 1 ? n : fib(n-1) + fib(n-2); }
 
 2. **Agent searches for it:**
 \`\`\`json
-{"method": "tools/call", "params": {"name": "venus_search_cells", "arguments": {"query": "fibonacci"}}}
+{"method": "tools/call", "params": {"name": "barista_search_cells", "arguments": {"query": "fibonacci"}}}
 \`\`\`
 
 3. **Agent loads it into its session:**
 \`\`\`json
-{"method": "tools/call", "params": {"name": "venus_load_module", "arguments": {"notebookRef": "my-notebook/fibonacci", "session": "agent-1"}}}
+{"method": "tools/call", "params": {"name": "barista_load_module", "arguments": {"notebookRef": "my-notebook/fibonacci", "session": "agent-1"}}}
 \`\`\`
 
 4. **Agent uses it:**
 \`\`\`json
-{"method": "tools/call", "params": {"name": "venus_execute_code", "arguments": {"code": "System.out.println(fib(10));", "session": "agent-1"}}}
+{"method": "tools/call", "params": {"name": "barista_execute_code", "arguments": {"code": "System.out.println(fib(10));", "session": "agent-1"}}}
 \`\`\`
 
 ---
@@ -1184,11 +1184,11 @@ curl -s -X POST http://localhost:8585/api/mcp/messages \\
 api: `
 # REST API Reference
 
-## Why Venus Has an API
+## Why Arima Has an API
 
-Venus was designed **API-first** from the beginning. The notebook UI is a client of the API — every action the browser performs is an HTTP call that any other system can make too.
+Arima was designed **API-first** from the beginning. The notebook UI is a client of the API — every action the browser performs is an HTTP call that any other system can make too.
 
-This means Venus is not just a notebook tool for humans. It is a **programmable computational environment** that can be:
+This means Arima is not just a notebook tool for humans. It is a **programmable computational environment** that can be:
 
 - **Embedded** in CI/CD pipelines — execute a data verification notebook after every deployment
 - **Driven by AI agents** — generate, run, and inspect notebook cells without the browser
@@ -1323,7 +1323,7 @@ Coordinate format: \`groupId:artifactId:version\` — e.g. \`com.google.code.gso
 
 ## AI Assistant
 
-Venus routes all AI calls through the active provider (Claude, Copilot, or Gemini) configured in Settings.
+Arima routes all AI calls through the active provider (Claude, Copilot, or Gemini) configured in Settings.
 
 | Method | Path | Description |
 |---|---|---|
@@ -1368,7 +1368,7 @@ The WebSocket path is used by the browser to stream cell output in real time. Ex
 
 ## Cross-Notebook Reference in API
 
-When calling \`execute-with-deps\` or \`execute-pipeline\` on a cell that has \`//@ depends: notebook:{id}/{anchor}\`, Venus automatically:
+When calling \`execute-with-deps\` or \`execute-pipeline\` on a cell that has \`//@ depends: notebook:{id}/{anchor}\`, Arima automatically:
 
 1. Loads the referenced notebook from disk
 2. Resolves the anchor's full dependency chain
@@ -1384,7 +1384,7 @@ No special API parameter is needed — the cross-notebook resolution is automati
 arch: `
 # Architecture
 
-Venus is a **single-server application** — one Spring Boot process serves the static frontend and provides all APIs. There is no separate frontend build, no microservices, no message queue. Everything communicates over HTTP REST and STOMP WebSocket. Seven execution engines (JShell, Java, JavaScript, TypeScript, C#, F#, C++) plug into a single \`ShellController\` route, all reporting back through one unified \`ExecutionResult\`.
+Arima is a **single-server application** — one Spring Boot process serves the static frontend and provides all APIs. There is no separate frontend build, no microservices, no message queue. Everything communicates over HTTP REST and STOMP WebSocket. Seven execution engines (JShell, Java, JavaScript, TypeScript, C#, F#, C++) plug into a single \`ShellController\` route, all reporting back through one unified \`ExecutionResult\`.
 
 ---
 
@@ -1396,7 +1396,7 @@ graph LR
         UI[HTML/CSS/JS]
     end
 
-    subgraph Server["Venus Server — Spring Boot 3.2 / Java 21"]
+    subgraph Server["Arima Server — Spring Boot 3.2 / Java 21"]
         Controllers["REST Controllers\n+ WebSocket"]
         Services["Execution Services"]
         Storage["File Storage (.vnb)"]
@@ -1584,7 +1584,7 @@ erDiagram
 
 \`\`\`mermaid
 graph TD
-    HTML["index.html\nSingle-page app shell"] --> AppJS["app.js\nVenus global module\nREST helpers · STOMP client\nTab navigation · Status bar"]
+    HTML["index.html\nSingle-page app shell"] --> AppJS["app.js\nArima global module\nREST helpers · STOMP client\nTab navigation · Status bar"]
 
     AppJS --> NB["notebook.js\nNotebook editor · Cell rendering\nExecution · Cross-notebook picker\nLanguage conversion banner"]
     AppJS --> Console["console-tab.js\nInteractive REPL\nJShell · Java · JS modes\nTab completion · History"]
@@ -1647,7 +1647,7 @@ graph LR
 ## Storage Layout
 
 \`\`\`
-venus/
+barista/
 ├── notebooks/
 │   ├── tutorials/          Built-in tutorials (read-only, checked in)
 │   ├── examples/           Example notebooks (read-only, checked in)
@@ -1669,7 +1669,7 @@ venus/
 
 - **Local only:** Binds to \`127.0.0.1\`. No authentication — do not expose to a network.
 - **No API keys in transit:** Claude calls go through the local \`claude\` CLI subprocess.
-- **Code execution:** All runtimes run with the same OS-user permissions as the Venus server process.
+- **Code execution:** All runtimes run with the same OS-user permissions as the Arima server process.
 - **CORS:** Configured for localhost only.
 `,
 
@@ -1679,7 +1679,7 @@ venus/
 dev: `
 # Developer Guide
 
-Venus is an open-source project. This guide covers the architecture for developers who want to extend it, contribute to it, or build on top of it.
+Arima is an open-source project. This guide covers the architecture for developers who want to extend it, contribute to it, or build on top of it.
 
 ---
 
@@ -1732,7 +1732,7 @@ The frontend has no build step — change a JS/CSS file and refresh the browser.
 
 ## 3. Adding a New REST Endpoint
 
-1. **Choose the right controller** in \`src/main/java/com/venus/controller/\`
+1. **Choose the right controller** in \`src/main/java/com/barista/controller/\`
 2. **Add the method:**
 \`\`\`java
 @GetMapping("/notebooks/{id}/stats")
@@ -1769,7 +1769,7 @@ const MODE_CYCLE = ['jshell','java','nodejs','typescript','csharp','fsharp','cpp
 const MODE_LABELS = { ..., ruby: 'Ruby' };
 \`\`\`
 
-5. **Add CSS badge colour in \`venus.css\`:**
+5. **Add CSS badge colour in \`arima.css\`:**
 \`\`\`css
 .mode-badge.ruby { background: rgba(204,52,45,.15); color: #cc342d; }
 \`\`\`
@@ -1790,7 +1790,7 @@ public enum CellType { CODE, MARKDOWN, PIPELINE, YOUR_TYPE }
 if (cell.type === 'YOUR_TYPE') buildYourCell(cell, div, bodyWrap);
 \`\`\`
 
-4. **Add CSS in \`venus.css\`:**
+4. **Add CSS in \`arima.css\`:**
 \`\`\`css
 .cell.type-yourtype::before { background: var(--purple); }
 \`\`\`
@@ -1864,7 +1864,7 @@ const MyModule = (() => {
 \`\`\`
 
 **Global modules:**
-- \`Venus\` — root module; \`Venus.api(method, path, body)\`, \`Venus.state\`, \`Venus.setStatus()\`
+- \`Arima\` — root module; \`Arima.api(method, path, body)\`, \`Arima.state\`, \`Arima.setStatus()\`
 - \`NotebookEditor\` — called from HTML onclick attributes
 - \`AIAssistant\` — context injection from notebook.js
 - \`Orchestration\` — dep graph operations called from notebook.js
@@ -1891,9 +1891,9 @@ ShellSession.execute(code, cellId):
 
 ---
 
-## 10. Contributing to Venus
+## 10. Contributing to Arima
 
-Venus is open source. To contribute:
+Arima is open source. To contribute:
 
 1. **Read \`CONTRIBUTING.md\`** — coding standards, commit format, PR process
 2. **Read \`MAINTAINER.md\`** — governance model (Founding Maintainer + Co-Maintainers)
@@ -1902,7 +1902,7 @@ Venus is open source. To contribute:
    - No Lombok (build compatibility)
    - No frontend build step (no webpack, no TypeScript, no npm for frontend)
    - Controllers are thin; business logic is in services
-   - CSS uses \`var(--venus-*)\` custom properties — no hard-coded colours
+   - CSS uses \`var(--barista-*)\` custom properties — no hard-coded colours
 
 **Contribution checklist before submitting a PR:**
 - [ ] Java: no Lombok; explicit getters/setters; Builder inner class
@@ -1920,7 +1920,7 @@ Venus is open source. To contribute:
 
 | File | Purpose |
 |---|---|
-| \`VenusApplication.java\` | Spring Boot entry point |
+| \`ArimaApplication.java\` | Spring Boot entry point |
 | \`shell/ShellSession.java\` | JShell wrapper, output capture |
 | \`shell/JShellManager.java\` | Session map, WebSocket broadcast |
 | \`service/JavaCompilerService.java\` | Full Java compile + run |
@@ -1939,7 +1939,7 @@ Venus is open source. To contribute:
 | \`static/js/orchestration.js\` | Client-side dep graph + badges |
 | \`static/js/notebook.js\` | Main notebook editor |
 | \`static/js/docs.js\` | This in-app documentation |
-| \`static/css/venus.css\` | All styles (dark/light themes, custom properties) |
+| \`static/css/arima.css\` | All styles (dark/light themes, custom properties) |
 | \`application.properties\` | Server config (port 8585, notebook/data directories) |
 `
     };  // end DOCS
