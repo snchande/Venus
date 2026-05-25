@@ -17,7 +17,7 @@
     <packaging>jar</packaging>
     <name>Arima Notebooks</name>
     <description>Arima Notebooks — interactive multi-language notebooks (Java/JShell, JavaScript, TypeScript, C#, F#, C++), brewed by the Barista engine</description>
-    <url>https://github.com/snchande/Venus</url>
+    <url>https://github.com/snchande/arima-notebooks</url>
     <inceptionYear>2026</inceptionYear>
 
     <licenses>
@@ -29,15 +29,15 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/snchande/Venus.git</connection>
-        <developerConnection>scm:git:git@github.com:snchande/Venus.git</developerConnection>
-        <url>https://github.com/snchande/Venus</url>
+        <connection>scm:git:https://github.com/snchande/arima-notebooks.git</connection>
+        <developerConnection>scm:git:git@github.com:snchande/arima-notebooks.git</developerConnection>
+        <url>https://github.com/snchande/arima-notebooks</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/snchande/Venus/issues</url>
+        <url>https://github.com/snchande/arima-notebooks/issues</url>
     </issueManagement>
 
     <properties>

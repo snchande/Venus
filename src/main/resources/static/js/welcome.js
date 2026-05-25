@@ -16,7 +16,7 @@
 
   // Link to the full changelog (release-by-release history lives in-app below,
   // and in this file for those who want the raw detail).
-  const CHANGELOG_URL = 'https://github.com/snchande/Venus/blob/master/CHANGELOG.md';
+  const CHANGELOG_URL = 'https://github.com/snchande/arima-notebooks/blob/master/CHANGELOG.md';
 
   const LS_SEEN    = 'barista.guide.seen';      // "1" once the user has seen the welcome
   const LS_VERSION = 'barista.guide.version';   // last version the user acknowledged

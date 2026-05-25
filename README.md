@@ -124,8 +124,8 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 ```
 
 ### Step 2 — Start Arima
