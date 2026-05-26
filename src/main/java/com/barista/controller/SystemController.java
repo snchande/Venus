@@ -157,7 +157,9 @@ public class SystemController {
     private void launchScript(boolean isWindows, Path script) throws IOException {
         ProcessBuilder pb;
         if (isWindows) {
-            pb = new ProcessBuilder("cmd", "/c", "start", "/b", script.toString());
+            // Empty "" title arg so `start` treats the next token as the command,
+            // not as a window title — survives temp paths that contain spaces.
+            pb = new ProcessBuilder("cmd", "/c", "start", "\"\"", "/b", script.toString());
         } else {
             pb = new ProcessBuilder("/bin/bash", script.toString());
         }
