@@ -236,8 +236,8 @@ Install NuGet packages via the **Packages → NuGet** tab in Arima. Installed pa
 
 ```bash
 # Clone from GitHub (once published)
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 
 # OR download the zip and extract
 ```

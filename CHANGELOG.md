@@ -5,6 +5,16 @@ Dates are in `YYYY-MM-DD` format.
 
 ---
 
+## [3.1.1] — 2026-05-25
+
+### Repository move
+- The GitHub repository was renamed **`snchande/Venus` → `snchande/arima-notebooks`** (GitHub redirects the old URLs; history, PRs, and branch protection are preserved).
+- Updated every repository reference — clone/upstream URLs, `pom.xml` SCM + issue-tracker URLs, the in-app changelog link, the brochure, the articles, and the docs viewer — to `github.com/snchande/arima-notebooks`, and the post-clone directory to `arima-notebooks`.
+
+> **Naming note:** this product/repo is **Arima Notebooks** (`arima-notebooks`), a notebooks subsystem. "Arima" on its own is a broader concept and is intentionally left undefined here.
+
+---
+
 ## [3.1.0] — 2026-05-25
 
 **Rebrand — Venus is now Arima Notebooks, brewed by the Barista engine.** The product
@@ -25,7 +35,7 @@ bean; tagline *"Interactive notebooks, freshly brewed"*).
 - MCP tool names `venus_*` → **`barista_*`**; build artifact `venus-notebooks` → `arima-notebooks`
 - `.claude` agents renamed: primary `venus` → `arima`; `venus-architect`/`venus-security` → `barista-architect`/`barista-security`; `venus-tutorial-writer` → `arima-tutorial-writer`
 
-> The GitHub repository remains `snchande/Venus` for now; a repo move is planned as a follow-up.
+> The GitHub repository was `snchande/Venus` at the time of this release; it was renamed to `snchande/arima-notebooks` in [3.1.1].
 
 ---
 

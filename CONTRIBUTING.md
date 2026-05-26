@@ -98,10 +98,10 @@ If you have an idea that doesn't fit a category above — open a Discussion and 
 
 # 2. Clone your fork
 git clone https://github.com/YOUR_USERNAME/Arima.git
-cd Arima
+cd arima-notebooks
 
 # 3. Add the upstream remote so you can pull future changes
-git remote add upstream https://github.com/snchande/Venus.git
+git remote add upstream https://github.com/snchande/arima-notebooks.git
 ```
 
 ### Build and Run

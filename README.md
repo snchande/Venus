@@ -124,8 +124,8 @@ The bar to **customize for yourself** and the bar to **contribute back** become 
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 ```
 
 ### Step 2 — Start Arima
@@ -340,10 +340,10 @@ Tutorials open in **read-only mode** — your personal notebooks are separate.
 Three launchers sit in the project root — pick whichever matches your shell. They all expose the same subcommands and share the same banner:
 
 ```
-        .           V E N U S   N O T E B O O K S
+        .           A R I M A   N O T E B O O K S
        /|\          ─────────────────────────────
       ( @ )         Java | JS | TS | C# | F# | C++
-     /|\_/|\        Powered by JShell + Spring Boot
+     /|\_/|\        Brewed by Barista · JShell + Spring Boot
     / |   | \       Port: 8585
 ```
 

@@ -175,8 +175,8 @@ If you lead, hire, or work on a team where any of these are true:
 ## Try It
 
 ```bash
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 ./arima       # Windows CMD — also arima.ps1 (PowerShell), arima.sh (mac/Linux)
 ```
 
@@ -198,7 +198,7 @@ That loop — **use, reshape, contribute, repeat** — is what I believe open so
 
 If this resonates with how you think about your team's tooling, I'd love to hear what you'd build first.
 
-**Repo:** [github.com/snchande/Venus](https://github.com/snchande/Venus)
+**Repo:** [github.com/snchande/arima-notebooks](https://github.com/snchande/arima-notebooks)
 **License:** MIT
 **Docs, MCP setup, tutorials:** all in the repo
 

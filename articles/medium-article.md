@@ -193,8 +193,8 @@ That's what I think a modern developer tool should feel like.
 ## Try It
 
 ```bash
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 ./arima       # Windows CMD
 ./arima.ps1   # PowerShell
 ./arima.sh    # macOS / Linux
@@ -224,7 +224,7 @@ Jupyter taught us to think in cells. Arima is one attempt to extend that thinkin
 
 ### Links
 
-- **GitHub:** [github.com/snchande/Venus](https://github.com/snchande/Venus)
+- **GitHub:** [github.com/snchande/arima-notebooks](https://github.com/snchande/arima-notebooks)
 - **MCP setup:** `docs/MCP.md` in the repo
 - **Tutorials:** 28 built-in across all 7 languages
 - **License:** MIT

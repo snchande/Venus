@@ -495,8 +495,8 @@ The Settings tab → Server Status shows which AI providers are detected.
 ### Step 1 — Get the code
 
 \`\`\`bash
-git clone https://github.com/snchande/Venus.git
-cd Arima
+git clone https://github.com/snchande/arima-notebooks.git
+cd arima-notebooks
 \`\`\`
 
 ### Step 2 — Build
